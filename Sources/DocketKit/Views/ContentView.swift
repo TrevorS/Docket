@@ -1,12 +1,12 @@
 // ABOUTME: Main content view for the Docket application
 // ABOUTME: Displays the primary interface for managing Zoom meetings
 
-import SwiftUI
 import Foundation
+import SwiftUI
 
 public struct ContentView: View {
   @State private var appModel = AppModel()
-  
+
   public init() {}
 
   public var body: some View {
@@ -15,27 +15,27 @@ public struct ContentView: View {
         .imageScale(.large)
         .foregroundStyle(.blue)
         .font(.system(size: 48))
-      
+
       Text("🎉 Docket - Zoom Meetings Widget")
         .font(.title)
         .bold()
         .foregroundColor(.primary)
-      
+
       Text("App is running successfully!")
         .font(.title3)
         .foregroundColor(.green)
         .bold()
-      
+
       VStack(alignment: .leading, spacing: 10) {
         Text("Task 2: Core Data Models ✅")
           .font(.headline)
-        
+
         Text("✅ ZoomMeeting model with time-based states")
-        Text("✅ ZoomURLPattern enum with regex matching") 
+        Text("✅ ZoomURLPattern enum with regex matching")
         Text("✅ AppModel @Observable class")
         Text("✅ CalendarAuthState authorization handling")
         Text("✅ \(testModels()) comprehensive tests passing")
-        
+
         if let meeting = createSampleMeeting() {
           Divider()
           Text("Sample Meeting Integration:")
@@ -43,7 +43,9 @@ public struct ContentView: View {
             .bold()
           Text("Title: \(meeting.title)")
           Text("URL Pattern Tests: \(testURLPatterns()) patterns verified")
-          Text("Meeting State: \(meeting.hasStarted ? "Started" : meeting.isUpcoming ? "Upcoming" : "Future")")
+          Text(
+            "Meeting State: \(meeting.hasStarted ? "Started" : meeting.isUpcoming ? "Upcoming" : "Future")"
+          )
         }
       }
       .padding()
@@ -53,7 +55,7 @@ public struct ContentView: View {
         RoundedRectangle(cornerRadius: 12)
           .stroke(Color.blue.opacity(0.3), lineWidth: 1)
       )
-      
+
       Text("✨ Ready for Task 3: URL Extraction Utility!")
         .font(.caption)
         .foregroundColor(.secondary)
@@ -61,13 +63,13 @@ public struct ContentView: View {
     .padding(30)
     .background(Color(NSColor.windowBackgroundColor))
   }
-  
+
   // MARK: - Model Integration Tests
-  
+
   private func createSampleMeeting() -> ZoomMeeting? {
-    let startTime = Date().addingTimeInterval(300) // 5 minutes from now
-    let endTime = startTime.addingTimeInterval(1800) // 30 minute duration
-    
+    let startTime = Date().addingTimeInterval(300)  // 5 minutes from now
+    let endTime = startTime.addingTimeInterval(1800)  // 30 minute duration
+
     return ZoomMeeting(
       id: UUID(),
       title: "Daily Standup",
@@ -81,20 +83,20 @@ public struct ContentView: View {
       eventIdentifier: "test-meeting"
     )
   }
-  
+
   private func testModels() -> String {
     // Verify that our models work correctly
     let authState: CalendarAuthState = .authorized
     let hasValidAuth = authState == .authorized
-    
+
     return hasValidAuth ? "49" : "Failed"
   }
-  
+
   private func testURLPatterns() -> String {
     // Verify URL pattern matching works
     let patterns = ZoomURLPattern.allCases
     let validPatterns = patterns.compactMap { $0.regex }.count
-    
+
     return "\(validPatterns)"
   }
 }

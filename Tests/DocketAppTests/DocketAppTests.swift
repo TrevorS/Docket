@@ -15,7 +15,7 @@ struct DocketAppTests {
     #expect(Bool(true))
   }
 
-  @Test("ContentView can be created") 
+  @Test("ContentView can be created")
   @MainActor
   func contentViewCreation() async throws {
     _ = ContentView()
