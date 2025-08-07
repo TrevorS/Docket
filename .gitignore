@@ -1,0 +1,58 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# macOS App Bundle
+build/
+*.app
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+*.xcscheme
+!*.xcscheme.shared
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+
+# Build artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.#*
+
+# Swift
+*.swiftmodule
+*.swiftdoc
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code coverage
+*.coverage
+*.profdata
+
+# Logs
+*.log
+
+# CLI development
+.swiftpm/xcode/
+*.orig
+
+# OS generated files
+Thumbs.db
+*.com.apple.timemachine.donotpresent
