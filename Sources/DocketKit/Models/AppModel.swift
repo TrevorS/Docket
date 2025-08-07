@@ -10,6 +10,8 @@ import Observation
 public enum CalendarAuthState: Equatable, Sendable {
   case notDetermined
   case authorized
+  case fullAccess
+  case writeOnly
   case denied
   case restricted
   case error(String)
@@ -18,6 +20,8 @@ public enum CalendarAuthState: Equatable, Sendable {
     switch (lhs, rhs) {
     case (.notDetermined, .notDetermined),
       (.authorized, .authorized),
+      (.fullAccess, .fullAccess),
+      (.writeOnly, .writeOnly),
       (.denied, .denied),
       (.restricted, .restricted):
       return true

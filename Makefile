@@ -50,9 +50,16 @@ lint: ## Lint code using Swift compiler warnings
 	@swift build -Xswiftc -warnings-as-errors -Xswiftc -strict-concurrency=complete
 
 # Development tools
-xcode: ## Generate Xcode project for GUI development
-	swift package generate-xcodeproj
-	@echo "✅ Generated Docket.xcodeproj"
+xcode: ## Open project in Xcode for GUI development  
+	@echo "🔧 Attempting to open project in Xcode..."
+	@if command -v xed >/dev/null 2>&1; then \
+		xed .; \
+		echo "✅ Opened in Xcode"; \
+	else \
+		echo "⚠️  Xcode not installed. Install Xcode from App Store for SwiftUI previews"; \
+		echo "💡 Current setup supports CLI development with 'swift build' and 'swift run'"; \
+		echo "💡 All UI testing can be done with 'make run' and 'make app'"; \
+	fi
 
 # Help
 help: ## Show this help message

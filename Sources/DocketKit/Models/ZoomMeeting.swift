@@ -4,7 +4,7 @@
 import Foundation
 
 /// Core data model representing a Zoom meeting extracted from calendar events
-public struct ZoomMeeting: Identifiable, Sendable, Equatable {
+public struct ZoomMeeting: Identifiable, Sendable, Equatable, Hashable {
   public let id: UUID
   public let title: String
   public let startTime: Date

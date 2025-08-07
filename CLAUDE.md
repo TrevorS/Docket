@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Docket** is a native macOS application for managing Zoom meetings. This is a Swift project implementing a Zoom meetings widget that displays today's meetings in a floating window, enabling one-click access to join calls.
 
-- **Platform**: macOS 15.5+ exclusively  
-- **Language**: Swift 6 (currently configured as Swift 5.0 but targeting Swift 6)
+- **Platform**: macOS 15.0+ exclusively  
+- **Language**: Swift 6 with strict concurrency enabled
 - **Framework**: SwiftUI with EventKit integration
-- **Architecture**: MVVM with Observation framework (@Observable pattern)
-- **Test Framework**: Swift Testing (new Testing framework) for unit tests, XCTest for UI tests
+- **Architecture**: MVVM with @Observable pattern (modern SwiftUI)
+- **Test Framework**: Swift Testing (new Apple framework) for all tests
+- **Development Status**: Foundation complete (Tasks 1-4), UI layer ready for implementation
 
 ## Development Commands
 
@@ -19,22 +20,19 @@ This project is now **CLI-driven using Swift Package Manager**. All development 
 ### Core Commands
 - **Build**: `swift build` or `make build`
 - **Run**: `swift run Docket` or `make run`
-- **Test**: `swift test` or `make test`
+- **Test**: `swift test` or `make test` (73 comprehensive tests)
 - **Clean**: `swift package clean` or `make clean`
 
-### App Distribution
-- **Create .app bundle**: `make app` (builds app in `build/` directory)
+### App Distribution  
+- **Create .app bundle**: `make app` (builds release version to `build/` directory)
 - **Install to /Applications**: `make install`
 
-### Development Tools
+### Code Quality
 - **Format code**: `make format` (requires swift-format)
-- **Lint code**: `make lint` (requires swiftlint)  
-- **Generate Xcode project**: `make xcode` or `swift package generate-xcodeproj`
-- **Update dependencies**: `make deps` or `swift package update`
-- **Development mode**: `make dev` (auto-restart on file changes)
+- **Lint code**: `make lint` (Swift compiler warnings with strict concurrency)
 
-### Project Information
-- **Show package info**: `make info` or `swift package describe`
+### Development Tools
+- **Open in Xcode**: `make xcode` or `xed .` (for SwiftUI previews and visual debugging)
 - **Help**: `make help`
 
 ### Key Build Settings
@@ -46,42 +44,58 @@ This project is now **CLI-driven using Swift Package Manager**. All development 
 
 ## Architecture and Code Structure
 
-### Current State  
-This is a **SwiftPM-based project** with a clean CLI-driven structure:
+### Multi-Target SwiftPM Architecture
+This project uses a **library + executable** pattern for clean separation:
 
-**SwiftPM Structure:**
+**Current Implementation (Tasks 1-4 Complete):**
 ```
 Sources/
-├── DocketApp/
-│   ├── main.swift              # Executable entry point
-│   └── Resources/              # App resources (Info.plist, assets, entitlements)
-├── DocketKit/                  # Core business logic library
-│   ├── DocketApp.swift         # SwiftUI App definition  
-│   └── Views/
-│       └── ContentView.swift   # Main UI view
+├── DocketApp/                  # Minimal executable target
+│   ├── main.swift              # Entry point (calls DocketApp.main())
+│   └── Resources/              # App metadata (Info.plist, entitlements, assets)
+└── DocketKit/                  # Core business logic library
+    ├── DocketApp.swift         # SwiftUI App definition
+    ├── Models/                 # Data models
+    │   ├── ZoomMeeting.swift   # Meeting data with time-based states  
+    │   ├── AppModel.swift      # Global app state (@Observable)
+    │   └── ZoomURLPattern.swift # Regex patterns for Zoom URL matching
+    ├── Managers/               # Business logic
+    │   └── CalendarManager.swift # EventKit integration (@Observable)
+    ├── Utilities/              # Pure functions
+    │   └── ZoomURLExtractor.swift # URL extraction from calendar events
+    ├── Extensions/             # Protocol adapters
+    │   └── EKEvent+CalendarEventLike.swift # EventKit → protocol bridge
+    └── Views/
+        └── ContentView.swift   # Main UI (currently displays Task 4 status)
+
 Tests/
-├── DocketKitTests/             # Unit tests using Swift Testing
+├── DocketKitTests/             # 73 comprehensive unit tests (Swift Testing)
 └── DocketAppTests/             # Integration tests
 ```
 
-**Key Files:**
-- **main.swift**: Simple executable that calls `DocketApp.main()`  
-- **DocketApp.swift**: SwiftUI `App` struct with window configuration
-- **ContentView.swift**: Main UI view (currently Hello World placeholder)
-- **Package.swift**: SwiftPM configuration with Swift 6.0 and strict concurrency
-
-### Target Architecture (from plan.md)
-The project is designed to implement:
+### MVVM Data Flow Architecture
+**Implemented** (Tasks 1-4) and ready for UI layer:
 
 ```
 ┌─────────────────────────────────────────┐
 │              SwiftUI Views              │
-│  (MeetingsListView, MeetingDetailView)  │
+│           (Tasks 5-7: TODO)             │
 └────────────────────┬────────────────────┘
                      │ @Observable
 ┌────────────────────▼────────────────────┐
-│           CalendarManager               │
-│     (Business Logic & State)            │
+│        CalendarManager ✅                │
+│   (EventKit → ZoomMeeting pipeline)     │
+│   • Calendar permission handling        │
+│   • Event fetching & filtering          │
+│   • Async refresh with error handling   │  
+└────────────────────┬────────────────────┘
+                     │
+┌────────────────────▼────────────────────┐
+│          ZoomURLExtractor ✅             │
+│     (URL extraction from events)        │
+│   • Priority-based field searching      │
+│   • Multi-pattern regex matching        │
+│   • URL sanitization                    │
 └────────────────────┬────────────────────┘
                      │
 ┌────────────────────▼────────────────────┐
@@ -90,122 +104,96 @@ The project is designed to implement:
 └─────────────────────────────────────────┘
 ```
 
-### Planned Implementation Structure (SwiftPM)
-```
-Sources/DocketKit/          # All business logic goes here
-├── DocketApp.swift         # SwiftUI App (already implemented)
-├── Models/
-│   ├── ZoomMeeting.swift   # Meeting data model
-│   └── AppModel.swift      # Global app state
-├── Managers/
-│   └── CalendarManager.swift # EventKit integration
-├── Views/
-│   ├── ContentView.swift   # Main view (placeholder implemented)
-│   ├── MeetingsListView.swift
-│   ├── MeetingDetailView.swift
-│   └── Components/
-├── Utilities/
-│   └── ZoomURLExtractor.swift
-```
+## Key Implementation Details
 
-## Key Technical Requirements
-
-### Dependencies and Frameworks
-- **EventKit**: For calendar access and meeting extraction
-- **SwiftUI**: For UI implementation
-- **Observation**: Modern state management (@Observable instead of @ObservableObject)
-- **AppKit**: For window management (floating window behavior)
-
-### Permission Requirements
-The app requires calendar access permissions:
-```xml
-<key>NSCalendarsFullAccessUsageDescription</key>
-<string>Zoom Meetings Widget needs access to your calendar to display today's Zoom meetings and allow you to join them directly.</string>
-```
-
-### Core Features to Implement
-- Extract Zoom URLs from calendar events (location, notes, URL fields)
-- Display today's meetings in floating window
-- Visual indicators for meeting status (upcoming, in progress, ended)
-- One-click join meeting functionality
-- Auto-refresh every 60 seconds
-- NavigationSplitView layout (sidebar + detail)
-
-## Development Guidelines
-
-### Swift and SwiftUI Patterns
-- Use `@Observable` pattern for state management (modern SwiftUI)
-- Prefer Swift 6 strict concurrency patterns
-- Use `async/await` for calendar operations
-- Follow MVVM architecture with clear separation
-- Use `ContentUnavailableView` for empty states
-
-### Calendar Integration Strategy
-**Important**: Use EventKit instead of Zoom API because:
+### EventKit Integration Strategy ✅ IMPLEMENTED
+**Critical architectural decision**: Use EventKit instead of Zoom API because:
 - Zoom API only returns meetings where you are the host
-- EventKit provides access to ALL calendar events including invitations
+- EventKit provides access to ALL calendar events including invitations  
 - Works with Google Calendar, Outlook, Apple Calendar, etc.
-- Can extract meeting URLs from multiple fields (virtualConference, location, notes)
+- Can extract meeting URLs from multiple fields
 
-### URL Extraction Priority Order
+### URL Extraction Pipeline ✅ IMPLEMENTED
+Priority-based field searching in `ZoomURLExtractor`:
 1. `virtualConference.url` (modern, preferred)
 2. `url` field (direct link)  
 3. `location` field (common)
 4. `notes` field (fallback)
 
-### Testing Strategy
-- **Unit Tests**: Use Swift Testing framework (modern, new Apple framework) for DocketKit business logic
-- **Integration Tests**: Test app integration in DocketAppTests using Swift Testing
-- **UI Tests**: Can add XCTest-based UI tests if needed (not currently configured)
-- **CLI Testing**: All tests run via `swift test` or `make test`
-- **Test-Driven Development**: Write tests before implementation
+Supports all Zoom URL patterns: standard, government, protocol, vanity domains.
 
-**Note**: SwiftUI Previews are not available in SwiftPM CLI development. Use `make xcode` to generate an Xcode project when you need visual UI development.
+### Calendar Manager Features ✅ IMPLEMENTED
+- **@Observable CalendarManager**: Single source of truth for meeting data
+- **Permission handling**: Complete authorization flow with CalendarAuthState enum
+- **Event processing**: EKEvent → ZoomMeeting conversion with filtering
+- **Async operations**: Modern concurrency with error handling
+- **Meeting sorting**: Chronological ordering by start time
 
-## Window Management
-The app should implement:
-- Floating window (stays on top)
-- Initial size: 800x600, minimum: 400x300
-- Material background for transparency
-- Remember position between launches
+## Development Guidelines
 
-## Performance Targets
-- Launch time: < 1 second
-- Memory usage: < 50MB
-- Refresh time: < 500ms
-- 60 FPS UI performance
+### Modern Swift Patterns (Enforced)
+- **@Observable pattern**: Used throughout for SwiftUI state management (not @ObservableObject)
+- **Swift 6 strict concurrency**: Enabled in all targets with @preconcurrency imports where needed
+- **Async/await**: All EventKit operations use modern concurrency
+- **Protocol-based design**: CalendarEventLike enables clean testing and EventKit integration
+- **TDD approach**: All business logic implemented with tests first (73 tests passing)
 
-## Implementation Sequence
-Based on tasks.md, development follows this order:
-1. **Foundation**: Core data models, calendar manager, URL extraction
-2. **UI Layer**: Meeting list, detail views, join functionality  
-3. **Enhancement**: Visual states, floating window, auto-refresh
-4. **Quality**: Error handling, comprehensive testing
+### Testing Strategy (Swift Testing Framework)
+- **Unit tests**: DocketKitTests covers all business logic (models, managers, utilities)
+- **Integration tests**: DocketAppTests for app-level integration
+- **CLI-driven**: All tests run via `swift test` or `make test`
+- **Mock objects**: Protocol-based mocking enables testing without EventKit dependencies
+- **Test naming**: Uses descriptive test names with @Test("description") syntax
 
-## CLI Development Workflow
+### SwiftUI Development Notes
+- **CLI-first**: Primary development happens via command line
+- **SwiftUI Previews**: Only available via `make xcode` (generates Xcode project)
+- **Window configuration**: Set in DocketApp.swift (currently 700x650 to display Task 4 info)
 
-### Daily Development
-1. **Code**: Edit files in `Sources/DocketKit/` using any editor
-2. **Test**: `make test` to run unit and integration tests
-3. **Build**: `make build` to verify compilation
-4. **Run**: `make run` to test the app
-5. **Package**: `make app` to create distributable .app bundle
+## Implementation Status & Next Steps
 
-### GUI Development (when needed)
-1. **Generate Xcode project**: `make xcode`
-2. **Use Xcode for**: SwiftUI Previews, visual debugging, asset management
-3. **Return to CLI**: Continue development with `swift build` etc.
+### Completed Foundation (Tasks 1-4) ✅
+1. **Project Setup**: SwiftPM structure, Swift 6, calendar permissions
+2. **Data Models**: ZoomMeeting, AppModel, ZoomURLPattern with comprehensive tests
+3. **URL Extraction**: ZoomURLExtractor with priority-based field searching  
+4. **Calendar Integration**: CalendarManager with complete EventKit pipeline
 
-### Distribution
-1. **Build release**: `make app` (automatically builds with `--configuration release`)
-2. **Install locally**: `make install` 
-3. **Manual distribution**: Copy `build/Docket.app` to share
+### Ready for Implementation (Tasks 5-7)
+**Next immediate tasks for UI layer:**
+- Task 5: MeetingsListView using CalendarManager as data source
+- Task 6: MeetingDetailView for selected meeting display  
+- Task 7: Join meeting functionality (NSWorkspace.open)
 
-## Important Notes
-- **CLI-First Development**: This project is optimized for command-line development using SwiftPM
-- **SwiftUI Previews**: Only available via Xcode project generation (`make xcode`)
-- **Modern Swift**: Uses Swift 6.0 with strict concurrency and latest SwiftUI patterns (@Observable)
-- **Testing**: Uses new Swift Testing framework, not XCTest, for unit tests
-- **Pure Swift**: No external dependencies planned for MVP - pure Swift/SwiftUI solution
-- **EventKit Integration**: Critical for comprehensive meeting coverage (better than Zoom API)
-- **macOS-Only**: Focused on macOS 15.0+ with app sandbox enabled
+### Future Enhancement Tasks (8-13)
+- Visual meeting states, floating window, auto-refresh, error handling, testing completion
+
+## Critical Architecture Insights
+
+### Why Multi-Target SwiftPM Structure?
+- **DocketKit (library)**: All business logic, testable in isolation, reusable
+- **DocketApp (executable)**: Minimal app wrapper, just `main.swift` + resources  
+- **Benefits**: Faster builds, better testing, clear separation of concerns
+
+### Why EventKit Over Zoom API?
+**This is a critical architectural decision**: Zoom API only returns meetings where you are the host. EventKit provides access to ALL calendar events including invitations, making the app actually useful.
+
+### Testing Pattern
+Uses new Swift Testing framework (not XCTest) with protocol-based mocking:
+- `CalendarEventLike` protocol enables testing without EventKit  
+- `MockCalendarEvent` for comprehensive URL extraction testing
+- All business logic has corresponding tests (73 tests passing)
+
+### Branch Strategy
+- `feature/task-4-calendar-manager`: Current branch with foundation complete
+- Foundation phase (Tasks 1-4) ready for integration to main
+- Next development: UI layer implementation (Tasks 5-7)
+
+## Key Development Commands
+```bash
+# Comprehensive development cycle
+swift test        # Run all 73 tests
+swift build       # Verify compilation  
+swift run Docket  # Test the app
+make app          # Create .app bundle
+make xcode        # Generate Xcode project for SwiftUI previews
+```
