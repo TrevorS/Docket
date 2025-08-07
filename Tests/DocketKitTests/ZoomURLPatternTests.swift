@@ -270,15 +270,15 @@ struct ZoomURLPatternTests {
     }
     
     @Test func testEdgeCaseURLs() {
-        let edgeCases = [
-            "https://zoom.us/", // Just domain
-            "zoommtg://", // Just protocol
-            "https://subdomain-with-dashes.zoom.us/j/123",
-            "http://zoom.us/j/123?pwd=", // Empty password
-            "https://zoom.us/j/123456789#section" // With fragment
+        let edgeCases: [(url: String, shouldMatch: Bool, description: String)] = [
+            ("https://zoom.us/", false, "Just domain without path"),
+            ("zoommtg://", false, "Just protocol without parameters"),
+            ("https://subdomain-with-dashes.zoom.us/j/123", true, "Subdomain with dashes"),
+            ("http://zoom.us/j/123?pwd=", true, "Empty password parameter"),
+            ("https://zoom.us/j/123456789#section", true, "URL with fragment")
         ]
         
-        for url in edgeCases {
+        for (url, shouldMatch, description) in edgeCases {
             var foundMatch = false
             
             for pattern in ZoomURLPattern.allCases {
@@ -292,8 +292,7 @@ struct ZoomURLPatternTests {
                 }
             }
             
-            // Some edge cases might not match, and that's expected
-            // This test documents the behavior rather than asserting specific outcomes
+            #expect(foundMatch == shouldMatch, "Edge case '\(description)': \(url) should \(shouldMatch ? "match" : "not match")")
         }
     }
 }
