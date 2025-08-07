@@ -291,6 +291,6 @@ struct ZoomMeetingTests {
     }
 
     // If this compiles, Sendable conformance is working
-    #expect(true)
+    #expect(Bool(true))
   }
 }

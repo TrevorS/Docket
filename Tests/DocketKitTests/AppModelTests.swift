@@ -71,7 +71,7 @@ struct AppModelTests {
       // If this compiles, @Observable conformance is working
     }
 
-    #expect(true, "@Observable conformance should work")
+    #expect(Bool(true), "@Observable conformance should work")
   }
 
   // MARK: - User Preferences Tests
