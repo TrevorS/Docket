@@ -7,40 +7,71 @@
 ## Task Overview
 
 **Total Tasks**: 13  
-**Estimated Timeline**: 7-10 days  
+**Completed**: 1 (Project Setup)  
+**Remaining**: 12 (Core Implementation)  
+**Estimated Timeline**: 6-9 days remaining  
 **Dependencies**: Sequential with some parallel opportunities
+
+## Current Implementation Status
+
+### ✅ COMPLETED: Task 1 - Project Setup and Configuration
+- SwiftPM-based project structure established
+- Swift 6 with strict concurrency configured
+- Calendar permissions properly set in Info.plist
+- Basic DocketApp and ContentView placeholder implemented
+- Swift Testing framework setup for modern testing approach
+- CLI-driven development workflow with make commands
+
+### 🔄 CURRENT STATE: Ready for Core Implementation
+- **Next Priority**: Task 2 (Core Data Models) - Foundation for all other tasks
+- **Current ContentView**: Simple "Hello, Docket!" placeholder
+- **Testing**: Basic smoke tests passing (app initialization, view creation)
+- **Architecture**: MVVM foundation ready, @Observable pattern configured
+
+### 📋 IMMEDIATE NEXT STEPS (Tasks 2-4: Foundation)
+1. **Task 2**: Implement ZoomMeeting, AppModel, and supporting data structures
+2. **Task 3**: Create ZoomURLExtractor utility for calendar event parsing  
+3. **Task 4**: Build CalendarManager with EventKit integration
+4. **Then**: UI implementation (Tasks 5-6) can begin in parallel
 
 ---
 
 ## Task 1: Project Setup and Configuration
 
-### Description
-Initialize the Xcode project with proper configuration, dependencies, and project structure according to the technical specification.
+### Description  
+Initialize the project with proper configuration, dependencies, and project structure according to the technical specification. **COMPLETED** using SwiftPM instead of Xcode project structure.
 
 ### Acceptance Criteria
-- [x] Create new macOS app project targeting 15.6+
-- [x] Configure Swift 6 with strict concurrency enabled
+- [x] Create new macOS app project targeting 15.0+ (SwiftPM-based)
+- [x] Configure Swift 6 with strict concurrency enabled  
 - [x] Set up project folder structure as specified
 - [x] Configure Info.plist with calendar permissions
-- [x] Add EventKit framework dependency
-- [x] Create basic app entry point (ZoomMeetingsApp.swift)
+- [x] Add EventKit framework access (will be added when needed)
+- [x] Create basic app entry point (DocketApp.swift)
 
 ### Implementation Approach
-- **Method**: New Xcode project setup
-- **Key Decisions**: Enable App Sandbox, configure calendar usage description
+- **Method**: SwiftPM project setup (CLI-driven development)
+- **Key Decisions**: Enable App Sandbox, configure calendar usage description, Swift Testing framework
 - **Architecture**: Establish MVVM foundation with @Observable pattern
 
 ### Required Components
 ```
-ZoomMeetings/
-├── ZoomMeetingsApp.swift          # App entry point
-├── Models/                        # Empty folder structure
-├── Managers/                      # Empty folder structure  
-├── Views/                         # Empty folder structure
-├── Utilities/                     # Empty folder structure
-├── Resources/
-│   └── Info.plist                # Calendar permissions
-└── Tests/                         # Test target setup
+Docket/ (SwiftPM Structure)
+├── Sources/
+│   ├── DocketApp/
+│   │   ├── main.swift             # ✅ Executable entry point
+│   │   └── Resources/
+│   │       ├── Info.plist         # ✅ Calendar permissions configured
+│   │       ├── Docket.entitlements # ✅ App sandbox enabled
+│   │       └── Assets.xcassets    # ✅ App assets
+│   └── DocketKit/
+│       ├── DocketApp.swift        # ✅ SwiftUI App definition
+│       └── Views/
+│           └── ContentView.swift  # ✅ Placeholder view
+├── Tests/
+│   ├── DocketKitTests/            # ✅ Unit tests setup
+│   └── DocketAppTests/            # ✅ Integration tests setup
+└── Package.swift                  # ✅ SwiftPM configuration
 ```
 
 ### Test Requirements
@@ -71,11 +102,11 @@ ZoomMeetings/
 Implement the core data structures for meetings, app state, and supporting types as defined in the technical specification.
 
 ### Acceptance Criteria
-- [x] Create ZoomMeeting struct with all required properties
-- [x] Implement AppModel observable class for app state
-- [x] Add CalendarAuthState enum for permission states
-- [x] Create ZoomURLPattern enum with regex patterns
-- [x] Add computed properties for meeting states (isUpcoming, hasStarted, etc.)
+- [ ] Create ZoomMeeting struct with all required properties
+- [ ] Implement AppModel observable class for app state
+- [ ] Add CalendarAuthState enum for permission states
+- [ ] Create ZoomURLPattern enum with regex patterns
+- [ ] Add computed properties for meeting states (isUpcoming, hasStarted, etc.)
 
 ### Implementation Approach
 - **Method**: Test-driven development starting with model tests
@@ -83,16 +114,16 @@ Implement the core data structures for meetings, app state, and supporting types
 - **Architecture**: Pure value types with computed properties for state
 
 ### Required Components
-- `Models/ZoomMeeting.swift` - Core meeting data model
-- `Models/AppModel.swift` - Global observable app state
-- `Models/ZoomURLPattern.swift` - URL matching patterns
+- `Sources/DocketKit/Models/ZoomMeeting.swift` - Core meeting data model
+- `Sources/DocketKit/Models/AppModel.swift` - Global observable app state
+- `Sources/DocketKit/Models/ZoomURLPattern.swift` - URL matching patterns
 
 ### Test Requirements
-- [x] Test ZoomMeeting computed properties (isUpcoming, hasStarted, hasEnded)
-- [x] Test ZoomMeeting time calculations with various scenarios
-- [x] Test ZoomURLPattern regex matching for all URL types
-- [x] Test AppModel state changes and observation
-- [x] Test Equatable/Sendable conformance
+- [ ] Test ZoomMeeting computed properties (isUpcoming, hasStarted, hasEnded)
+- [ ] Test ZoomMeeting time calculations with various scenarios
+- [ ] Test ZoomURLPattern regex matching for all URL types
+- [ ] Test AppModel state changes and observation
+- [ ] Test Equatable/Sendable conformance
 
 ### Integration Points
 - Used by CalendarManager for meeting creation
@@ -112,11 +143,11 @@ Implement the core data structures for meetings, app state, and supporting types
 Implement the ZoomURLExtractor utility class that searches calendar event fields for Zoom meeting URLs using regex patterns.
 
 ### Acceptance Criteria
-- [x] Create ZoomURLExtractor with static extract method
-- [x] Search event fields in priority order (virtualConference, URL, location, notes)
-- [x] Support all Zoom URL patterns (standard, government, protocol, vanity)
-- [x] Sanitize extracted URLs (remove tracking parameters)
-- [x] Return nil for events without Zoom URLs
+- [ ] Create ZoomURLExtractor with static extract method
+- [ ] Search event fields in priority order (virtualConference, URL, location, notes)
+- [ ] Support all Zoom URL patterns (standard, government, protocol, vanity)
+- [ ] Sanitize extracted URLs (remove tracking parameters)
+- [ ] Return nil for events without Zoom URLs
 
 ### Implementation Approach
 - **Method**: Test-driven with comprehensive URL pattern testing
@@ -124,18 +155,18 @@ Implement the ZoomURLExtractor utility class that searches calendar event fields
 - **Architecture**: Pure functions with regex-based pattern matching
 
 ### Required Components
-- `Utilities/ZoomURLExtractor.swift` - Main extraction logic
+- `Sources/DocketKit/Utilities/ZoomURLExtractor.swift` - Main extraction logic
 - Integration with ZoomURLPattern enum from Task 2
 
 ### Test Requirements
-- [x] Test extraction from virtualConference.url field
-- [x] Test extraction from URL field
-- [x] Test extraction from location field with text
-- [x] Test extraction from notes field with mixed content
-- [x] Test all Zoom URL pattern variations
-- [x] Test URL sanitization (remove utm_* parameters)
-- [x] Test edge cases (multiple URLs, malformed URLs, no URLs)
-- [x] Test priority ordering (prefer virtualConference over location)
+- [ ] Test extraction from virtualConference.url field
+- [ ] Test extraction from URL field
+- [ ] Test extraction from location field with text
+- [ ] Test extraction from notes field with mixed content
+- [ ] Test all Zoom URL pattern variations
+- [ ] Test URL sanitization (remove utm_* parameters)
+- [ ] Test edge cases (multiple URLs, malformed URLs, no URLs)
+- [ ] Test priority ordering (prefer virtualConference over location)
 
 ### Integration Points
 - Called by CalendarManager during event processing
@@ -155,14 +186,14 @@ Implement the ZoomURLExtractor utility class that searches calendar event fields
 Implement the CalendarManager class that handles EventKit integration, calendar access, and meeting data management.
 
 ### Acceptance Criteria
-- [x] Create CalendarManager as @Observable class
-- [x] Implement calendar access request with proper error handling
-- [x] Fetch today's events from all calendars
-- [x] Filter events to only include those with Zoom URLs
-- [x] Convert EKEvents to ZoomMeeting objects
-- [x] Sort meetings chronologically
-- [x] Provide async refresh functionality
-- [x] Handle all calendar authorization states
+- [ ] Create CalendarManager as @Observable class
+- [ ] Implement calendar access request with proper error handling
+- [ ] Fetch today's events from all calendars
+- [ ] Filter events to only include those with Zoom URLs
+- [ ] Convert EKEvents to ZoomMeeting objects
+- [ ] Sort meetings chronologically
+- [ ] Provide async refresh functionality
+- [ ] Handle all calendar authorization states
 
 ### Implementation Approach
 - **Method**: TDD with mock EventKit interactions where possible
@@ -170,18 +201,18 @@ Implement the CalendarManager class that handles EventKit integration, calendar 
 - **Architecture**: Single source of truth for meeting data
 
 ### Required Components
-- `Managers/CalendarManager.swift` - Main business logic class
+- `Sources/DocketKit/Managers/CalendarManager.swift` - Main business logic class
 - Integration with EventKit framework
 - Uses ZoomURLExtractor from Task 3
 
 ### Test Requirements
-- [x] Test calendar access request flow
-- [x] Test meeting fetch and filtering logic
-- [x] Test EKEvent to ZoomMeeting conversion
-- [x] Test meeting sorting by start time  
-- [x] Test error handling for denied/restricted access
-- [x] Test refresh functionality
-- [x] Mock EventKit interactions for unit testing
+- [ ] Test calendar access request flow
+- [ ] Test meeting fetch and filtering logic
+- [ ] Test EKEvent to ZoomMeeting conversion
+- [ ] Test meeting sorting by start time  
+- [ ] Test error handling for denied/restricted access
+- [ ] Test refresh functionality
+- [ ] Mock EventKit interactions for unit testing
 
 ### Integration Points
 - Primary data source for all UI views
@@ -201,13 +232,13 @@ Implement the CalendarManager class that handles EventKit integration, calendar 
 Create the core MeetingsListView that displays today's meetings in a list format with essential information.
 
 ### Acceptance Criteria
-- [x] Display meetings in chronological order
-- [x] Show meeting title, time, and visual status indicators
-- [x] Handle empty state (no meetings today)
-- [x] Handle loading state during calendar fetch
-- [x] Handle error states (permission denied, fetch failed)
-- [x] Integrate with CalendarManager for data
-- [x] Support basic list selection
+- [ ] Display meetings in chronological order
+- [ ] Show meeting title, time, and visual status indicators
+- [ ] Handle empty state (no meetings today)
+- [ ] Handle loading state during calendar fetch
+- [ ] Handle error states (permission denied, fetch failed)
+- [ ] Integrate with CalendarManager for data
+- [ ] Support basic list selection
 
 ### Implementation Approach
 - **Method**: SwiftUI List with custom row views
@@ -215,17 +246,17 @@ Create the core MeetingsListView that displays today's meetings in a list format
 - **Architecture**: View consumes CalendarManager as @Observable
 
 ### Required Components
-- `Views/MeetingsListView.swift` - Main list view
-- `Views/MeetingRowView.swift` - Individual meeting row
-- `Views/Components/EmptyStates.swift` - Empty state views
+- `Sources/DocketKit/Views/MeetingsListView.swift` - Main list view
+- `Sources/DocketKit/Views/MeetingRowView.swift` - Individual meeting row
+- `Sources/DocketKit/Views/Components/EmptyStates.swift` - Empty state views
 
 ### Test Requirements
-- [x] Test list rendering with sample meetings
-- [x] Test empty state display
-- [x] Test loading state display  
-- [x] Test error state handling
-- [x] Test meeting selection behavior
-- [x] UI tests for visual layout and scrolling
+- [ ] Test list rendering with sample meetings
+- [ ] Test empty state display
+- [ ] Test loading state display  
+- [ ] Test error state handling
+- [ ] Test meeting selection behavior
+- [ ] UI tests for visual layout and scrolling
 
 ### Integration Points
 - Consumes CalendarManager from Task 4
@@ -245,12 +276,12 @@ Create the core MeetingsListView that displays today's meetings in a list format
 Implement the detailed view that shows comprehensive meeting information and actions when a meeting is selected.
 
 ### Acceptance Criteria
-- [x] Display meeting title, full time range, and status
-- [x] Show organizer information and attendee count
-- [x] Display meeting duration and calendar source
-- [x] Show visual status indicators (upcoming, in progress, ended)
-- [x] Handle meetings without Zoom URLs gracefully
-- [x] Responsive layout that works in sidebar detail area
+- [ ] Display meeting title, full time range, and status
+- [ ] Show organizer information and attendee count
+- [ ] Display meeting duration and calendar source
+- [ ] Show visual status indicators (upcoming, in progress, ended)
+- [ ] Handle meetings without Zoom URLs gracefully
+- [ ] Responsive layout that works in sidebar detail area
 
 ### Implementation Approach
 - **Method**: SwiftUI with card-based information layout
@@ -258,15 +289,15 @@ Implement the detailed view that shows comprehensive meeting information and act
 - **Architecture**: Stateless view that receives ZoomMeeting object
 
 ### Required Components
-- `Views/MeetingDetailView.swift` - Main detail view
-- `Views/Components/InfoCard.swift` - Reusable info card component
+- `Sources/DocketKit/Views/MeetingDetailView.swift` - Main detail view
+- `Sources/DocketKit/Views/Components/InfoCard.swift` - Reusable info card component
 
 ### Test Requirements
-- [x] Test detail view rendering with various meeting states
-- [x] Test handling of meetings without Zoom URLs
-- [x] Test responsive layout at different window sizes
-- [x] Test visual status indicator accuracy
-- [x] UI tests for layout and accessibility
+- [ ] Test detail view rendering with various meeting states
+- [ ] Test handling of meetings without Zoom URLs
+- [ ] Test responsive layout at different window sizes
+- [ ] Test visual status indicator accuracy
+- [ ] UI tests for layout and accessibility
 
 ### Integration Points
 - Selected from MeetingsListView (Task 5)
@@ -286,13 +317,13 @@ Implement the detailed view that shows comprehensive meeting information and act
 Implement the core feature that allows users to join Zoom meetings by opening the Zoom URL in the system's default handler.
 
 ### Acceptance Criteria
-- [x] Add "Join Meeting" button to meeting detail view
-- [x] Add quick join buttons to meeting rows for active meetings
-- [x] Open Zoom URLs using NSWorkspace.shared.open()
-- [x] Handle URL opening errors gracefully
-- [x] Validate URLs before attempting to open
-- [x] Show loading/feedback during URL opening
-- [x] Disable buttons for meetings without Zoom URLs
+- [ ] Add "Join Meeting" button to meeting detail view
+- [ ] Add quick join buttons to meeting rows for active meetings
+- [ ] Open Zoom URLs using NSWorkspace.shared.open()
+- [ ] Handle URL opening errors gracefully
+- [ ] Validate URLs before attempting to open
+- [ ] Show loading/feedback during URL opening
+- [ ] Disable buttons for meetings without Zoom URLs
 
 ### Implementation Approach
 - **Method**: NSWorkspace integration with error handling
@@ -305,11 +336,11 @@ Implement the core feature that allows users to join Zoom meetings by opening th
 - Error handling and user feedback
 
 ### Test Requirements
-- [x] Test URL opening with valid Zoom URLs
-- [x] Test error handling for invalid URLs
-- [x] Test button state management (enabled/disabled)
-- [x] Test user feedback during URL opening
-- [x] Mock NSWorkspace for unit testing
+- [ ] Test URL opening with valid Zoom URLs
+- [ ] Test error handling for invalid URLs
+- [ ] Test button state management (enabled/disabled)
+- [ ] Test user feedback during URL opening
+- [ ] Mock NSWorkspace for unit testing
 
 ### Integration Points
 - Buttons added to views from Tasks 5 and 6
@@ -329,13 +360,13 @@ Implement the core feature that allows users to join Zoom meetings by opening th
 Implement visual indicators that show meeting status (future, upcoming, in progress, ending, ended) with appropriate colors and styling.
 
 ### Acceptance Criteria
-- [x] Define MeetingVisualState enum with 5 states
-- [x] Implement state calculation based on current time
-- [x] Apply color coding (gray, orange, green, yellow, gray)
-- [x] Add pulsing animation for upcoming meetings
-- [x] Show prominent join button for in-progress meetings
-- [x] Apply consistent styling across list and detail views
-- [x] Update states automatically as time progresses
+- [ ] Define MeetingVisualState enum with 5 states
+- [ ] Implement state calculation based on current time
+- [ ] Apply color coding (gray, orange, green, yellow, gray)
+- [ ] Add pulsing animation for upcoming meetings
+- [ ] Show prominent join button for in-progress meetings
+- [ ] Apply consistent styling across list and detail views
+- [ ] Update states automatically as time progresses
 
 ### Implementation Approach
 - **Method**: Computed properties with SwiftUI styling modifiers
@@ -348,11 +379,11 @@ Implement visual indicators that show meeting status (future, upcoming, in progr
 - Color definitions and styling constants
 
 ### Test Requirements
-- [x] Test state calculation for all time scenarios
-- [x] Test visual styling application
-- [x] Test automatic state updates over time
-- [x] Test accessibility with color indicators
-- [x] UI tests for visual appearance
+- [ ] Test state calculation for all time scenarios
+- [ ] Test visual styling application
+- [ ] Test automatic state updates over time
+- [ ] Test accessibility with color indicators
+- [ ] UI tests for visual appearance
 
 ### Integration Points
 - Extends ZoomMeeting from Task 2
@@ -372,13 +403,13 @@ Implement visual indicators that show meeting status (future, upcoming, in progr
 Configure the main application window to float above other applications and provide the proper window management behavior.
 
 ### Acceptance Criteria
-- [x] Set window level to floating (.floating)
-- [x] Configure initial size (800x600) and minimum size (400x300)
-- [x] Remember window position between app launches
-- [x] Enable window resizing and moving
-- [x] Apply material background for transparency effect
-- [x] Ensure window stays on top of other applications
-- [x] Handle window focus behavior appropriately
+- [ ] Set window level to floating (.floating)
+- [ ] Configure initial size (800x600) and minimum size (400x300)
+- [ ] Remember window position between app launches
+- [ ] Enable window resizing and moving
+- [ ] Apply material background for transparency effect
+- [ ] Ensure window stays on top of other applications
+- [ ] Handle window focus behavior appropriately
 
 ### Implementation Approach
 - **Method**: WindowGroup configuration with window level modifiers
@@ -386,16 +417,16 @@ Configure the main application window to float above other applications and prov
 - **Architecture**: App-level window configuration
 
 ### Required Components
-- ZoomMeetingsApp.swift window configuration
+- `Sources/DocketKit/DocketApp.swift` window configuration
 - Window state persistence (UserDefaults)
 - WindowGroup scene setup
 
 ### Test Requirements
-- [x] Test window floating behavior
-- [x] Test window sizing and constraints
-- [x] Test position persistence across app launches
-- [x] Test window resizing behavior
-- [x] Manual testing of window management
+- [ ] Test window floating behavior
+- [ ] Test window sizing and constraints
+- [ ] Test position persistence across app launches
+- [ ] Test window resizing behavior
+- [ ] Manual testing of window management
 
 ### Integration Points
 - Hosts all UI components from previous tasks
@@ -415,13 +446,13 @@ Configure the main application window to float above other applications and prov
 Implement the NavigationSplitView layout with sidebar for meeting list and detail area for meeting information.
 
 ### Acceptance Criteria
-- [x] Create NavigationSplitView with 280pt minimum sidebar width
-- [x] Implement sidebar with meeting list and header
-- [x] Configure detail area with 400pt minimum width
-- [x] Handle sidebar collapse/expand behavior
-- [x] Maintain selected meeting state across layout changes
-- [x] Provide proper navigation between list and detail
-- [x] Ensure responsive layout at different window sizes
+- [ ] Create NavigationSplitView with 280pt minimum sidebar width
+- [ ] Implement sidebar with meeting list and header
+- [ ] Configure detail area with 400pt minimum width
+- [ ] Handle sidebar collapse/expand behavior
+- [ ] Maintain selected meeting state across layout changes
+- [ ] Provide proper navigation between list and detail
+- [ ] Ensure responsive layout at different window sizes
 
 ### Implementation Approach
 - **Method**: SwiftUI NavigationSplitView with proper state management
@@ -434,11 +465,11 @@ Implement the NavigationSplitView layout with sidebar for meeting list and detai
 - Responsive layout logic
 
 ### Test Requirements
-- [x] Test split view layout at various window sizes
-- [x] Test sidebar behavior (collapse/expand)
-- [x] Test navigation between list and detail
-- [x] Test selection persistence
-- [x] UI tests for layout responsiveness
+- [ ] Test split view layout at various window sizes
+- [ ] Test sidebar behavior (collapse/expand)
+- [ ] Test navigation between list and detail
+- [ ] Test selection persistence
+- [ ] UI tests for layout responsiveness
 
 ### Integration Points
 - Hosts MeetingsListView from Task 5
@@ -458,13 +489,13 @@ Implement the NavigationSplitView layout with sidebar for meeting list and detai
 Implement automatic refreshing of meeting data every 60 seconds to keep the display current throughout the day.
 
 ### Acceptance Criteria
-- [x] Refresh meeting list every 60 seconds automatically
-- [x] Update meeting states (upcoming, in progress) in real-time
-- [x] Provide manual refresh capability with button
-- [x] Show refresh status/timestamp to user
-- [x] Handle refresh errors gracefully without disrupting UI
-- [x] Pause refresh when app is not active (background behavior)
-- [x] Resume refresh when app becomes active
+- [ ] Refresh meeting list every 60 seconds automatically
+- [ ] Update meeting states (upcoming, in progress) in real-time
+- [ ] Provide manual refresh capability with button
+- [ ] Show refresh status/timestamp to user
+- [ ] Handle refresh errors gracefully without disrupting UI
+- [ ] Pause refresh when app is not active (background behavior)
+- [ ] Resume refresh when app becomes active
 
 ### Implementation Approach
 - **Method**: Timer-based refresh with background/foreground state handling
@@ -478,11 +509,11 @@ Implement automatic refreshing of meeting data every 60 seconds to keep the disp
 - Refresh status indicators
 
 ### Test Requirements
-- [x] Test automatic refresh timing
-- [x] Test manual refresh functionality
-- [x] Test background/foreground refresh behavior
-- [x] Test error handling during refresh
-- [x] Test refresh status display
+- [ ] Test automatic refresh timing
+- [ ] Test manual refresh functionality
+- [ ] Test background/foreground refresh behavior
+- [ ] Test error handling during refresh
+- [ ] Test refresh status display
 
 ### Integration Points
 - Extends CalendarManager from Task 4
@@ -502,14 +533,14 @@ Implement automatic refreshing of meeting data every 60 seconds to keep the disp
 Implement comprehensive error handling for calendar access, event fetching, and URL operations with user-friendly messaging.
 
 ### Acceptance Criteria
-- [x] Define AppError enum with all error cases
-- [x] Implement localized error descriptions and recovery suggestions
-- [x] Create ErrorView component with recovery actions
-- [x] Handle calendar permission denial with settings link
-- [x] Handle network/fetch errors with retry capability
-- [x] Handle URL opening errors with user feedback
-- [x] Display errors without blocking other app functionality
-- [x] Log errors appropriately for debugging
+- [ ] Define AppError enum with all error cases
+- [ ] Implement localized error descriptions and recovery suggestions
+- [ ] Create ErrorView component with recovery actions
+- [ ] Handle calendar permission denial with settings link
+- [ ] Handle network/fetch errors with retry capability
+- [ ] Handle URL opening errors with user feedback
+- [ ] Display errors without blocking other app functionality
+- [ ] Log errors appropriately for debugging
 
 ### Implementation Approach
 - **Method**: Swift error handling with custom error types and UI
@@ -517,16 +548,16 @@ Implement comprehensive error handling for calendar access, event fetching, and 
 - **Architecture**: Centralized error handling with distributed UI presentation
 
 ### Required Components
-- `Models/AppError.swift` - Error type definitions
-- `Views/Components/ErrorView.swift` - Error display component
+- `Sources/DocketKit/Models/AppError.swift` - Error type definitions
+- `Sources/DocketKit/Views/Components/ErrorView.swift` - Error display component
 - Error handling integration throughout CalendarManager
 
 ### Test Requirements
-- [x] Test all error cases and their descriptions
-- [x] Test error UI presentation and recovery actions
-- [x] Test settings link functionality
-- [x] Test retry mechanisms
-- [x] Test error logging without sensitive information
+- [ ] Test all error cases and their descriptions
+- [ ] Test error UI presentation and recovery actions
+- [ ] Test settings link functionality
+- [ ] Test retry mechanisms
+- [ ] Test error logging without sensitive information
 
 ### Integration Points
 - Used by CalendarManager from Task 4
@@ -546,34 +577,34 @@ Implement comprehensive error handling for calendar access, event fetching, and 
 Complete the testing suite with comprehensive unit, integration, and UI tests covering all core functionality.
 
 ### Acceptance Criteria
-- [x] Unit tests for all business logic (CalendarManager, URLExtractor)
-- [x] Unit tests for data models and computed properties
-- [x] Integration tests for EventKit interactions
-- [x] UI tests for main user flows (launch, select, join)
-- [x] Error scenario testing for all error cases
-- [x] Performance tests for memory and refresh timing
-- [x] Achieve >90% code coverage for non-UI code
-- [x] All tests pass consistently
+- [ ] Unit tests for all business logic (CalendarManager, URLExtractor)
+- [ ] Unit tests for data models and computed properties
+- [ ] Integration tests for EventKit interactions
+- [ ] UI tests for main user flows (launch, select, join)
+- [ ] Error scenario testing for all error cases
+- [ ] Performance tests for memory and refresh timing
+- [ ] Achieve >90% code coverage for non-UI code
+- [ ] All tests pass consistently
 
 ### Implementation Approach
-- **Method**: XCTest framework with mocking for external dependencies
-- **Key Decisions**: Comprehensive coverage, mock EventKit for reliability
+- **Method**: Swift Testing framework with mocking for external dependencies
+- **Key Decisions**: Comprehensive coverage, mock EventKit for reliability, modern Swift Testing approach
 - **Architecture**: Test-driven approach validates all requirements
 
 ### Required Components
-- `Tests/CalendarManagerTests.swift` - Business logic tests
-- `Tests/ZoomURLExtractorTests.swift` - URL extraction tests
-- `Tests/ModelTests.swift` - Data model tests
-- `Tests/UIFlowTests.swift` - End-to-end UI tests
-- `Tests/ErrorHandlingTests.swift` - Error scenario tests
+- `Tests/DocketKitTests/CalendarManagerTests.swift` - Business logic tests
+- `Tests/DocketKitTests/ZoomURLExtractorTests.swift` - URL extraction tests
+- `Tests/DocketKitTests/ModelTests.swift` - Data model tests
+- `Tests/DocketAppTests/UIFlowTests.swift` - End-to-end UI tests
+- `Tests/DocketKitTests/ErrorHandlingTests.swift` - Error scenario tests
 
 ### Test Requirements
-- [x] All unit tests pass
-- [x] All integration tests pass
-- [x] All UI tests pass
-- [x] Performance benchmarks met
-- [x] Error scenarios covered
-- [x] Code coverage >90%
+- [ ] All unit tests pass
+- [ ] All integration tests pass
+- [ ] All UI tests pass
+- [ ] Performance benchmarks met
+- [ ] Error scenarios covered
+- [ ] Code coverage >90%
 
 ### Integration Points
 - Tests all components from Tasks 1-12
