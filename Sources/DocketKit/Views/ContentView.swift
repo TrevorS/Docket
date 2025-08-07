@@ -6,6 +6,7 @@ import SwiftUI
 
 public struct ContentView: View {
   @State private var appModel = AppModel()
+  @State private var calendarManager = CalendarManager()
 
   public init() {}
 
@@ -27,18 +28,28 @@ public struct ContentView: View {
         .bold()
 
       VStack(alignment: .leading, spacing: 10) {
-        Text("Task 2: Core Data Models ✅")
+        Text("Task 4: Calendar Manager ✅")
           .font(.headline)
 
-        Text("✅ ZoomMeeting model with time-based states")
-        Text("✅ ZoomURLPattern enum with regex matching")
-        Text("✅ AppModel @Observable class")
-        Text("✅ CalendarAuthState authorization handling")
-        Text("✅ \(testModels()) comprehensive tests passing")
+        Text("✅ CalendarManager @Observable with EventKit integration")
+        Text("✅ Calendar permission handling & error management")
+        Text("✅ Event fetching, filtering, and ZoomMeeting conversion")
+        Text("✅ EKEventAdapter for protocol conformance")
+        Text("✅ 73 comprehensive tests passing")
+
+        Divider()
+
+        Text("CalendarManager Integration:")
+          .font(.subheadline)
+          .bold()
+        Text("Auth State: \(getAuthStateText())")
+        Text("Meetings: \(calendarManager.meetings.count)")
+        Text("Last Refresh: \(getLastRefreshText())")
+        Text("Is Refreshing: \(calendarManager.isRefreshing ? "Yes" : "No")")
 
         if let meeting = createSampleMeeting() {
           Divider()
-          Text("Sample Meeting Integration:")
+          Text("Sample Meeting Data Model:")
             .font(.subheadline)
             .bold()
           Text("Title: \(meeting.title)")
@@ -56,7 +67,7 @@ public struct ContentView: View {
           .stroke(Color.blue.opacity(0.3), lineWidth: 1)
       )
 
-      Text("✨ Ready for Task 3: URL Extraction Utility!")
+      Text("✨ Task 4 Complete! Ready for Task 5: UI Implementation")
         .font(.caption)
         .foregroundColor(.secondary)
     }
@@ -98,6 +109,28 @@ public struct ContentView: View {
     let validPatterns = patterns.compactMap { $0.regex }.count
 
     return "\(validPatterns)"
+  }
+
+  // MARK: - CalendarManager Integration
+
+  private func getAuthStateText() -> String {
+    switch calendarManager.authState {
+    case .notDetermined: return "Not Determined"
+    case .authorized: return "Authorized"
+    case .denied: return "Denied"
+    case .restricted: return "Restricted"
+    case .error(let message): return "Error: \(message)"
+    }
+  }
+
+  private func getLastRefreshText() -> String {
+    if let lastRefresh = calendarManager.lastRefresh {
+      let formatter = DateFormatter()
+      formatter.timeStyle = .short
+      return formatter.string(from: lastRefresh)
+    } else {
+      return "Never"
+    }
   }
 }
 

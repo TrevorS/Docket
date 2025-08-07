@@ -16,7 +16,7 @@ struct ZoomURLExtractorTests {
     let locationURL = "https://zoom.us/j/987654321"
     let notesURL = "https://zoom.us/j/555666777"
 
-    let testEvent = MockCalendarEvent(
+    let testEvent = SimpleCalendarEvent(
       virtualConferenceURL: virtualConferenceURL,
       url: nil,
       location: locationURL,
@@ -33,7 +33,7 @@ struct ZoomURLExtractorTests {
     let locationURL = "https://zoom.us/j/987654321"
     let notesURL = "https://zoom.us/j/555666777"
 
-    let testEvent = MockCalendarEvent(
+    let testEvent = SimpleCalendarEvent(
       virtualConferenceURL: nil,
       url: urlField,
       location: locationURL,
@@ -49,7 +49,7 @@ struct ZoomURLExtractorTests {
     let location = "Meeting Room A - https://zoom.us/j/123456789"
     let notes = "Please join us: https://zoom.us/j/555666777"
 
-    let testEvent = MockCalendarEvent(
+    let testEvent = SimpleCalendarEvent(
       virtualConferenceURL: nil,
       url: nil,
       location: location,
@@ -64,7 +64,7 @@ struct ZoomURLExtractorTests {
   func testExtractFromNotesField() {
     let notes = "Important meeting! Join here: https://zoom.us/j/123456789 - Don't be late!"
 
-    let testEvent = MockCalendarEvent(
+    let testEvent = SimpleCalendarEvent(
       virtualConferenceURL: nil,
       url: nil,
       location: nil,
@@ -89,7 +89,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for url in testCases {
-      let event = MockCalendarEvent(notes: "Join: \(url)")
+      let event = SimpleCalendarEvent(notes: "Join: \(url)")
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract standard Zoom URL: \(url)")
     }
@@ -103,7 +103,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for url in testCases {
-      let event = MockCalendarEvent(location: url)
+      let event = SimpleCalendarEvent(location: url)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract government Zoom URL: \(url)")
     }
@@ -117,7 +117,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for url in testCases {
-      let event = MockCalendarEvent(virtualConferenceURL: url)
+      let event = SimpleCalendarEvent(virtualConferenceURL: url)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract protocol URL: \(url)")
     }
@@ -131,7 +131,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for url in testCases {
-      let event = MockCalendarEvent(url: url)
+      let event = SimpleCalendarEvent(url: url)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract vanity URL: \(url)")
     }
@@ -158,7 +158,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for (input, expected) in testCases {
-      let event = MockCalendarEvent(notes: input)
+      let event = SimpleCalendarEvent(notes: input)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == expected, "Should sanitize URL: \(input) -> \(expected)")
     }
@@ -169,7 +169,7 @@ struct ZoomURLExtractorTests {
   @Test("Handle multiple URLs in same field")
   func testMultipleURLsInSameField() {
     let notes = "First meeting: https://zoom.us/j/111111111 and backup: https://zoom.us/j/222222222"
-    let event = MockCalendarEvent(notes: notes)
+    let event = SimpleCalendarEvent(notes: notes)
     let extracted = ZoomURLExtractor.extract(from: event)
     #expect(extracted == "https://zoom.us/j/111111111", "Should return first valid URL found")
   }
@@ -177,10 +177,10 @@ struct ZoomURLExtractorTests {
   @Test("Handle no Zoom URLs found")
   func testNoZoomURLsFound() {
     let testCases = [
-      MockCalendarEvent(notes: "Teams meeting: https://teams.microsoft.com/l/meetup/join"),
-      MockCalendarEvent(location: "Conference Room B"),
-      MockCalendarEvent(url: "https://google.com/meet"),
-      MockCalendarEvent(),  // All fields nil
+      SimpleCalendarEvent(notes: "Teams meeting: https://teams.microsoft.com/l/meetup/join"),
+      SimpleCalendarEvent(location: "Conference Room B"),
+      SimpleCalendarEvent(url: "https://google.com/meet"),
+      SimpleCalendarEvent(),  // All fields nil
     ]
 
     for event in testCases {
@@ -199,7 +199,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for malformedURL in testCases {
-      let event = MockCalendarEvent(notes: malformedURL)
+      let event = SimpleCalendarEvent(notes: malformedURL)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(extracted == nil, "Should handle malformed URL gracefully: \(malformedURL)")
     }
@@ -208,10 +208,10 @@ struct ZoomURLExtractorTests {
   @Test("Handle empty and whitespace-only fields")
   func testEmptyAndWhitespaceFields() {
     let testCases = [
-      MockCalendarEvent(notes: ""),
-      MockCalendarEvent(location: "   "),
-      MockCalendarEvent(url: "\n\t"),
-      MockCalendarEvent(virtualConferenceURL: ""),
+      SimpleCalendarEvent(notes: ""),
+      SimpleCalendarEvent(location: "   "),
+      SimpleCalendarEvent(url: "\n\t"),
+      SimpleCalendarEvent(virtualConferenceURL: ""),
     ]
 
     for event in testCases {
@@ -238,7 +238,7 @@ struct ZoomURLExtractorTests {
       See you there!
       """
 
-    let event = MockCalendarEvent(notes: complexNote)
+    let event = SimpleCalendarEvent(notes: complexNote)
     let extracted = ZoomURLExtractor.extract(from: event)
     #expect(
       extracted == "https://zoom.us/j/123456789?pwd=secret123",
@@ -269,7 +269,7 @@ struct ZoomURLExtractorTests {
       #expect(hasMatchingPattern, "URL should match at least one ZoomURLPattern: \(url)")
 
       // Then test extraction
-      let event = MockCalendarEvent(notes: url)
+      let event = SimpleCalendarEvent(notes: url)
       let extracted = ZoomURLExtractor.extract(from: event)
       #expect(
         extracted == url, "ZoomURLExtractor should extract URL that matches ZoomURLPattern: \(url)")
@@ -279,8 +279,8 @@ struct ZoomURLExtractorTests {
 
 // MARK: - Mock Calendar Event
 
-/// Mock implementation of calendar event for testing
-private struct MockCalendarEvent: CalendarEventLike {
+/// Simple mock implementation of calendar event for testing URL extraction only
+private struct SimpleCalendarEvent: CalendarEventLike {
   let virtualConferenceURL: String?
   let url: String?
   let location: String?

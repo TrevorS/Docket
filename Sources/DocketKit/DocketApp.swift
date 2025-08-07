@@ -12,7 +12,7 @@ public struct DocketApp: App {
   public var body: some Scene {
     WindowGroup("Docket - Zoom Meetings") {
       ContentView()
-        .frame(minWidth: 400, minHeight: 300)
+        .frame(minWidth: 500, minHeight: 400)
         .onAppear {
           print("🎯 ContentView appeared!")
           // Activate the app and bring window to front
@@ -21,7 +21,7 @@ public struct DocketApp: App {
     }
     .windowStyle(.automatic)
     .windowResizability(.contentMinSize)
-    .defaultSize(width: 600, height: 500)
+    .defaultSize(width: 700, height: 650)
     .commands {
       CommandGroup(replacing: .newItem) {}
     }
