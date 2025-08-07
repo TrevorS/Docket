@@ -5,7 +5,7 @@ import AppKit
 import SwiftUI
 
 public struct DocketApp: App {
-  @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate 
+  @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
   public init() {}
 
@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     print("🚀 App finished launching!")
 
-    // Delay to ensure windows are created in Xcode debugging environment  
+    // Delay to ensure windows are created in Xcode debugging environment
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
       // Ensure the app activates and shows window
       NSApp.activate(ignoringOtherApps: true)
@@ -44,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("✅ Found \(NSApp.windows.count) windows")
         for window in NSApp.windows {
           window.makeKeyAndOrderFront(nil)
-          window.orderFrontRegardless() // Force window to front
+          window.orderFrontRegardless()  // Force window to front
         }
       }
     }
