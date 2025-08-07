@@ -9,8 +9,10 @@ public struct DocketApp: App {
   public var body: some Scene {
     WindowGroup {
       ContentView()
+        .frame(minWidth: 400, minHeight: 300)
     }
     .windowStyle(.automatic)
-    .windowResizability(.contentSize)
+    .windowResizability(.contentMinSize)
+    .defaultSize(width: 500, height: 400)
   }
 }

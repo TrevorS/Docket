@@ -13,10 +13,17 @@ public struct ContentView: View {
     VStack(spacing: 20) {
       Image(systemName: "video.fill")
         .imageScale(.large)
-        .foregroundStyle(.tint)
+        .foregroundStyle(.blue)
+        .font(.system(size: 48))
       
-      Text("Docket - Zoom Meetings Widget")
-        .font(.title2)
+      Text("🎉 Docket - Zoom Meetings Widget")
+        .font(.title)
+        .bold()
+        .foregroundColor(.primary)
+      
+      Text("App is running successfully!")
+        .font(.title3)
+        .foregroundColor(.green)
         .bold()
       
       VStack(alignment: .leading, spacing: 10) {
@@ -40,10 +47,19 @@ public struct ContentView: View {
         }
       }
       .padding()
-      .background(Color.secondary.opacity(0.1))
-      .cornerRadius(8)
+      .background(Color.blue.opacity(0.1))
+      .cornerRadius(12)
+      .overlay(
+        RoundedRectangle(cornerRadius: 12)
+          .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+      )
+      
+      Text("✨ Ready for Task 3: URL Extraction Utility!")
+        .font(.caption)
+        .foregroundColor(.secondary)
     }
-    .padding()
+    .padding(30)
+    .background(Color(NSColor.windowBackgroundColor))
   }
   
   // MARK: - Model Integration Tests
