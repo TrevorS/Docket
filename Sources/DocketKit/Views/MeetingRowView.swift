@@ -211,7 +211,7 @@ struct MeetingRowView: View {
       }
 
       guard let url = URL(string: joinUrl) else {
-        print("❌ Invalid URL: \(joinUrl)")
+        print("❌ Invalid meeting URL: \(joinUrl)")
         return
       }
 
@@ -220,27 +220,48 @@ struct MeetingRowView: View {
       }
 
       if !success {
-        print("❌ Failed to open URL: \(joinUrl)")
+        print("❌ Failed to open meeting URL: \(joinUrl)")
       }
     }
   }
 }
 
-#Preview {
-  let sampleMeeting = ZoomMeeting(
-    id: UUID(),
-    title: "Team Standup",
-    startTime: Date().addingTimeInterval(-1800),  // Started 30 minutes ago
-    endTime: Date().addingTimeInterval(1800),  // Ends in 30 minutes
-    joinUrl: "https://zoom.us/j/123456789",
-    organizerName: "John Doe",
-    organizerEmail: "john@example.com",
-    attendeeCount: 5,
-    calendarName: "Work Calendar",
-    eventIdentifier: "preview-event"
-  )
-
+#Preview("Active Meeting") {
   List {
-    MeetingRowView(meeting: sampleMeeting)
+    MeetingRowView(meeting: PreviewData.activeMeeting)
+  }
+}
+
+#Preview("Upcoming Meeting") {
+  List {
+    MeetingRowView(meeting: PreviewData.upcomingMeeting)
+  }
+}
+
+#Preview("Ended Meeting") {
+  List {
+    MeetingRowView(meeting: PreviewData.endedMeeting)
+  }
+}
+
+#Preview("Meeting Without URL") {
+  List {
+    MeetingRowView(meeting: PreviewData.meetingWithoutUrl)
+  }
+}
+
+#Preview("Long Title Meeting") {
+  List {
+    MeetingRowView(meeting: PreviewData.longTitleMeeting)
+  }
+}
+
+#Preview("Multiple States") {
+  List {
+    MeetingRowView(meeting: PreviewData.upcomingMeeting)
+    MeetingRowView(meeting: PreviewData.activeMeeting)
+    MeetingRowView(meeting: PreviewData.endedMeeting)
+    MeetingRowView(meeting: PreviewData.longTitleMeeting)
+    MeetingRowView(meeting: PreviewData.minimalMeeting)
   }
 }

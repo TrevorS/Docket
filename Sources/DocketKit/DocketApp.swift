@@ -14,7 +14,6 @@ public struct DocketApp: App {
       ContentView()
         .frame(minWidth: 500, minHeight: 400)
         .onAppear {
-          print("🎯 ContentView appeared!")
           // Activate the app and bring window to front
           NSApp.activate(ignoringOtherApps: true)
         }
@@ -30,18 +29,13 @@ public struct DocketApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
-    print("🚀 App finished launching!")
-
     // Delay to ensure windows are created in Xcode debugging environment
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
       // Ensure the app activates and shows window
       NSApp.activate(ignoringOtherApps: true)
 
       // Make sure we have at least one window
-      if NSApp.windows.isEmpty {
-        print("⚠️ No windows found!")
-      } else {
-        print("✅ Found \(NSApp.windows.count) windows")
+      if !NSApp.windows.isEmpty {
         for window in NSApp.windows {
           window.makeKeyAndOrderFront(nil)
           window.orderFrontRegardless()  // Force window to front

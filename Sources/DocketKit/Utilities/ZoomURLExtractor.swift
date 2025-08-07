@@ -22,7 +22,7 @@ public enum ZoomURLExtractor {
   /// - Parameter event: Calendar event to search for Zoom URLs
   /// - Returns: Sanitized Zoom URL if found, nil otherwise
   public static func extract<T: CalendarEventLike>(from event: T) -> String? {
-    // Search fields in priority order with MAXIMUM debugging
+    // Search fields in priority order
     let searchData = [
       ("virtualConference", event.virtualConferenceURL),
       ("url", event.url),
@@ -30,31 +30,17 @@ public enum ZoomURLExtractor {
       ("notes", event.notes),
     ]
 
-    print("🔍 ZoomURLExtractor: Starting URL extraction")
-    print("🔍 Event fields to search:")
-
-    for (fieldName, fieldValue) in searchData {
-      let displayValue = fieldValue?.isEmpty == true ? "(empty)" : (fieldValue ?? "nil")
-      print("   \(fieldName): '\(displayValue)'")
-
+    for (_, fieldValue) in searchData {
       guard let field = fieldValue, !field.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
       else {
-        print("   \(fieldName): Skipping empty/nil field")
         continue
       }
 
-      print("   \(fieldName): Searching for Zoom URL patterns...")
       if let url = findZoomURL(in: field) {
-        print("   \(fieldName): 🆗 Found raw URL: \(url)")
-        let sanitizedURL = sanitizeURL(url)
-        print("   \(fieldName): ✅ Sanitized URL: \(sanitizedURL)")
-        return sanitizedURL
-      } else {
-        print("   \(fieldName): ❌ No Zoom URL pattern found")
+        return sanitizeURL(url)
       }
     }
 
-    print("🔍 ❌ ZoomURLExtractor: No Zoom URL found in any field")
     return nil
   }
 
@@ -64,39 +50,26 @@ public enum ZoomURLExtractor {
   private static func findZoomURL(in text: String) -> String? {
     // Skip empty or whitespace-only text
     guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      print("        🚫 Empty text, skipping pattern search")
       return nil
     }
 
-    let truncatedText = text.count > 100 ? String(text.prefix(100)) + "..." : text
-    print("        🔎 Searching text: '\(truncatedText)'")
-    print("        🔎 Testing \(ZoomURLPattern.allCases.count) URL patterns...")
-
     // Search using all available Zoom URL patterns
-    for (index, pattern) in ZoomURLPattern.allCases.enumerated() {
-      print("        Pattern \(index + 1): \(pattern)")
-      if let regex = pattern.regex {
-        let range = NSRange(location: 0, length: text.utf16.count)
-        if let match = regex.firstMatch(in: text, options: [], range: range) {
-          let url = String(text[Range(match.range, in: text)!])
-          print("        🆗 Pattern match found: \(url)")
+    for pattern in ZoomURLPattern.allCases {
+      guard let regex = pattern.regex else {
+        continue
+      }
 
-          // Additional validation for meaningful URLs
-          if isValidZoomURL(url) {
-            print("        ✅ URL validation passed")
-            return url
-          } else {
-            print("        ❌ URL validation failed (invalid ending)")
-          }
-        } else {
-          print("        ❌ No match for this pattern")
+      let range = NSRange(location: 0, length: text.utf16.count)
+      if let match = regex.firstMatch(in: text, options: [], range: range) {
+        let url = String(text[Range(match.range, in: text)!])
+
+        // Additional validation for meaningful URLs
+        if isValidZoomURL(url) {
+          return url
         }
-      } else {
-        print("        ⚠️ Pattern has no regex (compilation failed?)")
       }
     }
 
-    print("        😢 No valid Zoom URL found in text")
     return nil
   }
 
