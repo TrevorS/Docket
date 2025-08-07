@@ -3,7 +3,6 @@
 
 import Testing
 
-@testable import DocketApp
 @testable import DocketKit
 
 struct DocketAppTests {
@@ -12,7 +11,15 @@ struct DocketAppTests {
   @MainActor
   func appInitialization() async throws {
     _ = DocketApp()
-    // DocketApp is a value type, so this test just verifies it compiles
+    // DocketApp struct from DocketKit can be initialized
+    #expect(Bool(true))
+  }
+
+  @Test("ContentView can be created") 
+  @MainActor
+  func contentViewCreation() async throws {
+    _ = ContentView()
+    // ContentView can be initialized without errors
     #expect(Bool(true))
   }
 

@@ -57,7 +57,7 @@ let package = Package(
         // Integration tests for the app
         .testTarget(
             name: "DocketAppTests", 
-            dependencies: ["DocketApp", "DocketKit"],
+            dependencies: ["DocketKit"],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency")
             ]
