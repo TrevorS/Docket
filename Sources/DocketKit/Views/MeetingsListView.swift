@@ -23,7 +23,7 @@ struct MeetingsListView: View {
           meetingsList
         }
       }
-      .navigationTitle("Meetings")
+      .navigationTitle("Docket")
       .toolbar {
         ToolbarItem(placement: .primaryAction) {
           Button(action: refreshMeetings) {
@@ -170,7 +170,7 @@ struct MeetingsListView: View {
             isRefreshing: mockCalendarManager.isRefreshing
           )
         }
-        .navigationTitle("Meetings")
+        .navigationTitle("Docket")
       }
     }
   }
@@ -181,7 +181,7 @@ struct MeetingsListView: View {
 #Preview("Loading State") {
   NavigationStack {
     LoadingStateView(message: "Loading Meetings")
-      .navigationTitle("Meetings")
+      .navigationTitle("Docket")
   }
 }
 

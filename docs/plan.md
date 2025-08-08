@@ -3,7 +3,7 @@
 ## 1. Executive Summary
 
 ### 1.1 Project Overview
-A lightweight, native macOS application that displays today's Zoom meetings in a floating window, enabling one-click access to join calls. The app extracts meeting information from the user's calendar system rather than using Zoom's API, ensuring comprehensive meeting coverage.
+A lightweight, native macOS application that displays today's Zoom meetings in a simple, elegant single-view interface. The app extracts meeting information from the user's calendar system and provides one-click access to join calls. Focus on polish, refinement, and an exceptional user experience in a minimal interface.
 
 ### 1.2 Core Value Proposition
 - **Single Purpose**: Display today's Zoom meetings with join links
@@ -21,31 +21,35 @@ A lightweight, native macOS application that displays today's Zoom meetings in a
 
 ### 2.1 Core Features
 
-**P0 - Must Have (MVP)**
-- [ ] Display list of today's Zoom meetings from calendar
-- [ ] Extract Zoom URLs from calendar events (location, notes, URL fields)
-- [ ] One-click join meeting functionality
+**P0 - Core Features (Polish & Refinement)**
+- [x] Display list of today's Zoom meetings from calendar
+- [x] Extract Zoom URLs from calendar events (location, notes, URL fields)
+- [x] One-click join meeting functionality
+- [x] Show meeting time, title, and status indicators
+- [x] Visual indicator for meetings in progress
+- [x] Visual indicator for meetings starting soon (5 min warning)
+- [x] Enhanced meeting rows with comprehensive information display
+- [x] Collapsible day sections with smart auto-collapse logic
+- [x] Typography refinements with monospace time display
+- [x] Copy meeting link functionality with visual confirmation
+- [x] Hover-revealed actions for cleaner interface
 - [ ] Floating window that stays on top
 - [ ] Auto-refresh every 60 seconds
-- [ ] Show meeting time and title
-- [ ] Visual indicator for meetings in progress
-- [ ] Visual indicator for meetings starting soon (5 min warning)
+- [ ] Enhanced error handling and user feedback
 
-**P1 - Should Have (v1.1)**
-- [ ] Search/filter meetings
-- [ ] Show meeting organizer
-- [ ] Copy meeting link functionality
-- [ ] Meeting details view
-- [ ] Refresh on demand
-- [ ] Keyboard shortcuts
+**P1 - Enhancement Features**
+- [x] Show meeting organizer in list rows
+- [x] Copy meeting link functionality
+- [ ] Refresh on demand with visual feedback
+- [ ] Keyboard shortcuts for common actions
+- [x] Improved time formatting and status display
 
-**P2 - Nice to Have (Future)**
+**P2 - Future Enhancements**
 - [ ] Menu bar integration
 - [ ] Meeting notifications
-- [ ] Multiple day view
-- [ ] Calendar selection/filtering
+- [ ] Quick settings overlay (no separate window)
 - [ ] Auto-join capability
-- [ ] Settings/preferences window
+- [ ] Meeting history in single scrollable view
 
 ### 2.2 Non-Functional Requirements
 - **Performance**: Launch in < 1 second, refresh in < 500ms
@@ -79,8 +83,9 @@ External Dependencies:
 ### 3.2 Architecture Pattern
 ```
 ┌─────────────────────────────────────────┐
-│              SwiftUI Views              │
-│  (MeetingsListView, MeetingDetailView)  │
+│         Single SwiftUI View            │
+│     (Enhanced MeetingsListView)         │
+│   All functionality in one interface   │
 └────────────────────┬────────────────────┘
                      │ @Observable
 ┌────────────────────▼────────────────────┐
@@ -94,30 +99,29 @@ External Dependencies:
 └─────────────────────────────────────────┘
 ```
 
-### 3.3 Project Structure
+### 3.3 Project Structure (Single-View Focus)
 ```
-ZoomMeetings/
-├── ZoomMeetingsApp.swift          # App entry point
-├── Models/
-│   ├── ZoomMeeting.swift         # Meeting data model
-│   └── AppModel.swift            # Global app state
-├── Managers/
-│   └── CalendarManager.swift     # EventKit integration
-├── Views/
-│   ├── MeetingsListView.swift    # Main list view
-│   ├── MeetingDetailView.swift   # Detail view
-│   ├── MeetingRowView.swift      # List row component
-│   └── Components/
-│       ├── InfoCard.swift        # Reusable card component
-│       └── EmptyStates.swift     # Empty state views
-├── Utilities/
-│   ├── ZoomURLExtractor.swift    # URL parsing logic
-│   └── DateFormatters.swift      # Date utilities
-├── Resources/
-│   └── Info.plist                # App permissions
-└── Tests/
-    ├── CalendarManagerTests.swift
-    └── ZoomURLExtractorTests.swift
+Docket/
+├── Sources/
+│   ├── DocketApp/
+│   │   ├── main.swift            # App entry point
+│   │   └── Resources/            # App metadata
+│   └── DocketKit/
+│       ├── DocketApp.swift       # SwiftUI App definition
+│       ├── Models/
+│       │   ├── ZoomMeeting.swift # Meeting data model
+│       │   └── AppModel.swift    # Global app state
+│       ├── Managers/
+│       │   └── CalendarManager.swift # EventKit integration
+│       ├── Views/
+│       │   ├── ContentView.swift     # Single main view
+│       │   ├── MeetingsListView.swift # Enhanced list (main UI)
+│       │   └── MeetingRowView.swift   # Row component
+│       ├── Utilities/
+│       │   └── ZoomURLExtractor.swift # URL parsing
+│       └── Extensions/
+│           └── EKEvent+Extensions.swift
+└── Tests/                        # Comprehensive test suite
 ```
 
 ## 4. Data Models
@@ -252,8 +256,8 @@ class ZoomURLExtractor {
 ```swift
 Window Configuration:
   Style: Floating (always on top)
-  Initial Size: 800x600
-  Minimum Size: 400x300
+  Default Size: 720x780 (optimized for meeting capacity)
+  Minimum Size: 550x450
   Position: Center screen on first launch, remember position
   Transparency: User configurable (0.8-1.0)
   Backdrop: Material.regular
@@ -261,49 +265,53 @@ Window Configuration:
   Movable: Yes (by background)
 ```
 
-### 6.2 View Hierarchy
+### 6.2 View Hierarchy (Single-View Design)
 ```
-NavigationSplitView
-├── Sidebar (280pt min width)
-│   ├── Header
-│   │   ├── Title + Meeting Count
-│   │   └── Refresh Button
-│   ├── Search Field
-│   └── Meeting List
-│       └── MeetingRow (per meeting)
-│           ├── Title
-│           ├── Time Status Badge
-│           └── Quick Join Button (if applicable)
-└── Detail View (400pt min width)
-    ├── Meeting Title
-    ├── Time Range
-    ├── Info Grid
-    │   ├── Status Card
-    │   ├── Attendees Card
-    │   ├── Organizer Card
-    │   └── Duration Card
-    └── Actions
-        ├── Join Meeting Button
-        └── Copy Link Button
+NavigationStack (Single View)
+├── Header (Fixed)
+│   ├── Title: "Docket"
+│   └── Refresh Button + Status
+├── Collapsible Day Sections (Scrollable)
+│   ├── Yesterday (Auto-collapsible when completed)
+│   ├── Today (Manual collapse only)
+│   └── Tomorrow (Standard expanded view)
+└── Enhanced MeetingRow (per meeting)
+    ├── Meeting Title (headline font)
+    ├── Time Range (monospace, color-coded) & Duration
+    ├── Organizer + People Count (monospace metadata)
+    └── Action Buttons
+        ├── Join Meeting (always visible when available)
+        └── Copy Link (hover-revealed for cleaner interface)
 ```
 
-### 6.3 Visual States
+### 6.3 Visual States & Color System
 ```swift
 enum MeetingVisualState {
-    case future         // Gray, subdued
-    case upcoming       // Orange, pulsing indicator
-    case inProgress     // Green, prominent join button
-    case ending         // Yellow, ending soon warning
-    case ended          // Gray, strikethrough
+    case future         // Blue with alpha transparency  
+    case upcoming       // Orange with alpha transparency
+    case inProgress     // Green with alpha transparency
+    case ended          // Gray, secondary color
 }
 
 Color Palette:
-  - Primary: System accent color
-  - In Progress: .green
-  - Upcoming: .orange
-  - Ended: .secondary
+  - Future: .blue.opacity(0.8) - Subtle, professional
+  - Upcoming: .orange.opacity(0.8) - Attention without harshness  
+  - In Progress: .green.opacity(0.8) - Active but refined
+  - Ended: .secondary - Standard muted appearance
   - Background: .background
-  - Floating elements: .background.opacity(0.95)
+  - Icons: .secondary for metadata icons
+```
+
+### 6.4 Typography System
+```swift
+Typography Hierarchy:
+  - Meeting Title: .headline (regular font, primary color)
+  - Time Display: .subheadline.monospaced() (color-coded by state)
+  - Duration: .subheadline.monospaced() (matches time color)
+  - Organizer: .caption2.monospaced() (secondary color)  
+  - People Count: .caption2.monospaced() (secondary color)
+  - Day Headers: .headline.weight(.semibold)
+  - Completed Badge: .caption.weight(.medium)
 ```
 
 ## 7. Error Handling Strategy

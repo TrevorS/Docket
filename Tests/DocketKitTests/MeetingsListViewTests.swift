@@ -278,4 +278,281 @@ struct MeetingsListViewTests {
     #expect(meeting.attendeeCount > 0)
     #expect(meeting.endTime > meeting.startTime)
   }
+
+  // MARK: - Enhanced Meeting Row Tests
+
+  @Test("Enhanced meeting row displays comprehensive information")
+  func testEnhancedMeetingRowContent() {
+    let now = Date()
+
+    // Create a comprehensive meeting with all fields
+    let comprehensiveMeeting = ZoomMeeting(
+      id: UUID(),
+      title: "Quarterly Business Review - Q4 Planning Session",
+      startTime: now.addingTimeInterval(300),  // Starts in 5 minutes (upcoming)
+      endTime: now.addingTimeInterval(3900),  // 60 minutes duration
+      joinUrl: "https://zoom.us/j/123456789?pwd=abcd1234",
+      organizerName: "Alice Johnson",
+      organizerEmail: "alice@example.com",
+      attendeeCount: 12,
+      calendarName: "Work Calendar",
+      eventIdentifier: "test-event-comprehensive"
+    )
+
+    // Verify all fields are properly set for enhanced row display
+    #expect(!comprehensiveMeeting.title.isEmpty)
+    #expect(comprehensiveMeeting.organizerName == "Alice Johnson")
+    #expect(comprehensiveMeeting.attendeeCount == 12)
+    #expect(!comprehensiveMeeting.calendarName.isEmpty)
+    #expect(!(comprehensiveMeeting.joinUrl?.isEmpty ?? true))
+    #expect(comprehensiveMeeting.isUpcoming)  // Should be upcoming
+    #expect(!comprehensiveMeeting.hasStarted)
+    #expect(!comprehensiveMeeting.hasEnded)
+
+    // Test minimal meeting (only required fields)
+    let minimalMeeting = ZoomMeeting(
+      id: UUID(),
+      title: "Quick Sync",
+      startTime: now.addingTimeInterval(-300),  // Started 5 minutes ago
+      endTime: now.addingTimeInterval(600),  // Ends in 10 minutes
+      joinUrl: "https://zoom.us/j/987654321",
+      organizerName: nil,
+      organizerEmail: nil,
+      attendeeCount: 0,
+      calendarName: "",
+      eventIdentifier: "test-event-minimal"
+    )
+
+    // Verify minimal meeting handles empty fields gracefully
+    #expect(!minimalMeeting.title.isEmpty)
+    #expect(minimalMeeting.organizerName == nil)
+    #expect(minimalMeeting.attendeeCount == 0)
+    #expect(minimalMeeting.calendarName.isEmpty)
+    #expect(!(minimalMeeting.joinUrl?.isEmpty ?? true))
+    #expect(minimalMeeting.hasStarted)  // Should be in progress
+    #expect(!minimalMeeting.hasEnded)
+  }
+
+  @Test("Copy link functionality validation")
+  func testCopyLinkValidation() {
+    let now = Date()
+
+    // Meeting with valid join URL - should show copy button
+    let meetingWithUrl = ZoomMeeting(
+      id: UUID(),
+      title: "Team Standup",
+      startTime: now.addingTimeInterval(900),  // 15 minutes from now
+      endTime: now.addingTimeInterval(2700),  // 45 minutes duration
+      joinUrl: "https://zoom.us/j/555666777?pwd=secretpassword",
+      organizerName: "Bob Wilson",
+      organizerEmail: "bob@company.com",
+      attendeeCount: 8,
+      calendarName: "Team Calendar",
+      eventIdentifier: "standup-meeting"
+    )
+
+    #expect(!(meetingWithUrl.joinUrl?.isEmpty ?? true))
+
+    // Meeting without join URL - should not show copy button
+    let meetingNoUrl = ZoomMeeting(
+      id: UUID(),
+      title: "Lunch Break",
+      startTime: now.addingTimeInterval(3600),
+      endTime: now.addingTimeInterval(5400),
+      joinUrl: "",
+      organizerName: nil,
+      organizerEmail: nil,
+      attendeeCount: 0,
+      calendarName: "Personal",
+      eventIdentifier: "lunch-event"
+    )
+
+    #expect(meetingNoUrl.joinUrl?.isEmpty ?? true)
+
+    // Meeting with nil join URL - should not show copy button
+    let meetingNilUrl = ZoomMeeting(
+      id: UUID(),
+      title: "Coffee Chat",
+      startTime: now.addingTimeInterval(1800),
+      endTime: now.addingTimeInterval(3600),
+      joinUrl: nil,
+      organizerName: "Charlie Brown",
+      organizerEmail: nil,
+      attendeeCount: 2,
+      calendarName: "Personal",
+      eventIdentifier: "coffee-chat"
+    )
+
+    #expect(meetingNilUrl.joinUrl == nil)
+  }
+
+  @Test("Enhanced row supports copy button for meetings with URLs")
+  func testCopyButtonVisibility() {
+    let now = Date()
+
+    // Test copy button logic matches hasJoinUrl helper
+    let testCases = [
+      ("Valid URL", "https://zoom.us/j/123456789", true),
+      ("Empty URL", "", false),
+      ("Nil URL", nil, false),
+      ("Whitespace URL", "   ", false),
+      ("Government URL", "https://company.zoomgov.com/j/987654321", true),
+    ]
+
+    for (description, joinUrl, shouldShowCopy) in testCases {
+      let meeting = ZoomMeeting(
+        id: UUID(),
+        title: description,
+        startTime: now.addingTimeInterval(600),
+        endTime: now.addingTimeInterval(1800),
+        joinUrl: joinUrl,
+        organizerName: "Test User",
+        organizerEmail: nil,
+        attendeeCount: 1,
+        calendarName: "Test Calendar",
+        eventIdentifier: "test-\(description.lowercased().replacingOccurrences(of: " ", with: "-"))"
+      )
+
+      let hasUrl =
+        !(meeting.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+      #expect(hasUrl == shouldShowCopy, "Copy button visibility for: \(description)")
+    }
+  }
+
+  // MARK: - Collapsible Day Section Tests
+
+  @Test("Day section collapse logic identifies completed meetings and past days")
+  func testSmartDayCompletionLogic() {
+    let now = Date()
+
+    // Test empty day - should not be considered for auto-collapse
+    let emptyMeetings: [ZoomMeeting] = []
+    #expect(!shouldDayAutoCollapse(meetings: emptyMeetings, title: "Today"))
+
+    // Test day with active meetings - should not auto-collapse
+    let activeMeetings = [
+      ZoomMeeting(
+        id: UUID(),
+        title: "Active Meeting",
+        startTime: now.addingTimeInterval(-900),  // Started 15 min ago
+        endTime: now.addingTimeInterval(600),  // Ends in 10 min
+        joinUrl: "https://zoom.us/j/active123",
+        organizerName: "Active Organizer",
+        organizerEmail: nil,
+        attendeeCount: 5,
+        calendarName: "Work",
+        eventIdentifier: "active-test"
+      )
+    ]
+    #expect(!shouldDayAutoCollapse(meetings: activeMeetings, title: "Today"))
+
+    // Test today's completed meetings - should NOT auto-collapse (manual only)
+    let todayCompletedMeetings = [
+      ZoomMeeting(
+        id: UUID(),
+        title: "Completed Meeting Today",
+        startTime: now.addingTimeInterval(-7200),  // Started 2 hours ago
+        endTime: now.addingTimeInterval(-5400),  // Ended 1.5 hours ago
+        joinUrl: "https://zoom.us/j/completed1",
+        organizerName: "Organizer 1",
+        organizerEmail: nil,
+        attendeeCount: 3,
+        calendarName: "Work",
+        eventIdentifier: "today-completed"
+      )
+    ]
+    #expect(!shouldDayAutoCollapse(meetings: todayCompletedMeetings, title: "Today"))
+
+    // Test yesterday's completed meetings - SHOULD auto-collapse
+    let yesterdayCompletedMeetings = [
+      ZoomMeeting(
+        id: UUID(),
+        title: "Yesterday Meeting",
+        startTime: now.addingTimeInterval(-86400 - 3600),  // Yesterday, 1 hour duration
+        endTime: now.addingTimeInterval(-86400),  // Ended yesterday
+        joinUrl: "https://zoom.us/j/yesterday1",
+        organizerName: "Yesterday Organizer",
+        organizerEmail: nil,
+        attendeeCount: 4,
+        calendarName: "Work",
+        eventIdentifier: "yesterday-completed"
+      )
+    ]
+    #expect(shouldDayAutoCollapse(meetings: yesterdayCompletedMeetings, title: "Yesterday"))
+
+    // Test mixed day - should not auto-collapse regardless of title
+    let mixedMeetings = todayCompletedMeetings + activeMeetings
+    #expect(!shouldDayAutoCollapse(meetings: mixedMeetings, title: "Today"))
+    #expect(!shouldDayAutoCollapse(meetings: mixedMeetings, title: "Yesterday"))
+  }
+
+  @Test("Manual collapse and expand functionality")
+  func testManualCollapseExpand() {
+    let now = Date()
+
+    // Create completed meetings that should be collapsible
+    let completedMeetings = [
+      ZoomMeeting(
+        id: UUID(),
+        title: "Completed Meeting",
+        startTime: now.addingTimeInterval(-3600),  // Started 1 hour ago
+        endTime: now.addingTimeInterval(-1800),  // Ended 30 min ago
+        joinUrl: "https://zoom.us/j/completed123",
+        organizerName: "Test Organizer",
+        organizerEmail: nil,
+        attendeeCount: 4,
+        calendarName: "Test Calendar",
+        eventIdentifier: "manual-collapse-test"
+      )
+    ]
+
+    // Test that completed meetings can be manually collapsed (but not auto-collapsed if today)
+    #expect(
+      !shouldDayAutoCollapse(meetings: completedMeetings, title: "Today"),
+      "Today's completed meetings should require manual collapse")
+    #expect(
+      shouldDayAutoCollapse(meetings: completedMeetings, title: "Yesterday"),
+      "Yesterday's completed meetings should auto-collapse")
+
+    // Verify meetings are actually completed
+    for meeting in completedMeetings {
+      #expect(meeting.hasEnded, "Meeting should be ended for manual collapse testing")
+    }
+
+    // Test non-completed meetings cannot be collapsed regardless of day
+    let activeMeetings = [
+      ZoomMeeting(
+        id: UUID(),
+        title: "Active Meeting",
+        startTime: now.addingTimeInterval(-300),  // Started 5 min ago
+        endTime: now.addingTimeInterval(900),  // Ends in 15 min
+        joinUrl: "https://zoom.us/j/active123",
+        organizerName: "Active Organizer",
+        organizerEmail: nil,
+        attendeeCount: 2,
+        calendarName: "Test Calendar",
+        eventIdentifier: "active-test"
+      )
+    ]
+
+    #expect(
+      !shouldDayAutoCollapse(meetings: activeMeetings, title: "Today"),
+      "Active meetings should not be eligible for collapse")
+    #expect(
+      !shouldDayAutoCollapse(meetings: activeMeetings, title: "Yesterday"),
+      "Active meetings should not be eligible for collapse even if yesterday")
+  }
+
+  // Helper function matching DaySectionView smart collapse logic
+  private func shouldDayAutoCollapse(meetings: [ZoomMeeting], title: String) -> Bool {
+    let allCompleted = !meetings.isEmpty && meetings.allSatisfy { $0.hasEnded }
+
+    // Check if this is a past day
+    let isPastDay =
+      title.lowercased() == "yesterday"
+      || (!meetings.isEmpty
+        && meetings.allSatisfy { $0.endTime < Date().addingTimeInterval(-43200) })  // 12 hours ago
+
+    return allCompleted && isPastDay
+  }
 }

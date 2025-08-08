@@ -163,6 +163,46 @@ public enum PreviewData {
     ),
   ]
 
+  /// Completed meetings (for testing collapse functionality)
+  public static let completedMeetings: [ZoomMeeting] = [
+    ZoomMeeting(
+      id: UUID(),
+      title: "Morning Standup",
+      startTime: Date().addingTimeInterval(-14400),  // Started 4 hours ago
+      endTime: Date().addingTimeInterval(-13500),  // Ended 3.75 hours ago
+      joinUrl: "https://zoom.us/j/morning123",
+      organizerName: "Scrum Master",
+      organizerEmail: "scrum@company.com",
+      attendeeCount: 8,
+      calendarName: "Agile Calendar",
+      eventIdentifier: "preview-completed-1"
+    ),
+    ZoomMeeting(
+      id: UUID(),
+      title: "Budget Review",
+      startTime: Date().addingTimeInterval(-10800),  // Started 3 hours ago
+      endTime: Date().addingTimeInterval(-7200),  // Ended 2 hours ago
+      joinUrl: "https://zoom.us/j/budget456",
+      organizerName: "Finance Team",
+      organizerEmail: "finance@company.com",
+      attendeeCount: 6,
+      calendarName: "Finance Calendar",
+      eventIdentifier: "preview-completed-2"
+    ),
+    ZoomMeeting(
+      id: UUID(),
+      title: "Team Lunch Planning",
+      startTime: Date().addingTimeInterval(-5400),  // Started 1.5 hours ago
+      endTime: Date().addingTimeInterval(-3600),  // Ended 1 hour ago
+      joinUrl: "https://zoom.us/j/lunch789",
+      organizerName: "Team Lead",
+      organizerEmail: "team@company.com",
+      attendeeCount: 12,
+      calendarName: "Social Calendar",
+      eventIdentifier: "preview-completed-3"
+    ),
+  ]
+
   /// All sample meetings combined for testing
   public static let allMeetings: [ZoomMeeting] = [
     activeMeeting,

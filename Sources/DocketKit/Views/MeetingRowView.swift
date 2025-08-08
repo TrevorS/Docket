@@ -6,58 +6,30 @@ import SwiftUI
 struct MeetingRowView: View {
   let meeting: ZoomMeeting
   @State private var isJoining = false
+  @State private var showCopyConfirmation = false
+  @State private var isHovered = false
 
   var body: some View {
-    HStack(spacing: 12) {
-      statusIndicator
-
-      VStack(alignment: .leading, spacing: 4) {
-        meetingTitle
-        meetingTime
-        meetingDetails
-      }
-
-      Spacer()
-
-      if shouldShowJoinButton {
-        joinButton
-      }
-    }
-    .padding(.vertical, 8)
-  }
-
-  // MARK: - Status Indicator
-
-  private var statusIndicator: some View {
-    Circle()
-      .fill(statusColor)
-      .frame(width: 12, height: 12)
-      .overlay {
-        if meeting.isUpcoming {
-          Circle()
-            .stroke(statusColor.opacity(0.3), lineWidth: 8)
-            .scaleEffect(isUpcoming ? 1.5 : 1.0)
-            .opacity(isUpcoming ? 0 : 1)
-            .animation(
-              .easeInOut(duration: 1.0).repeatForever(autoreverses: false), value: isUpcoming)
+    VStack(spacing: 0) {
+      HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 6) {
+          meetingTitle
+          meetingTime
+          meetingDetails
         }
+
+        Spacer()
+
+        actionButtons
       }
-  }
+      .padding(.vertical, 16)
+      .padding(.horizontal, 8)
+      .onHover { isHovered = $0 }
 
-  private var statusColor: Color {
-    if meeting.hasEnded {
-      return .secondary
-    } else if meeting.hasStarted {
-      return .green
-    } else if meeting.isUpcoming {
-      return .orange
-    } else {
-      return .secondary
+      if showCopyConfirmation {
+        copyConfirmationBanner
+      }
     }
-  }
-
-  private var isUpcoming: Bool {
-    meeting.isUpcoming
   }
 
   // MARK: - Meeting Information
@@ -73,58 +45,100 @@ struct MeetingRowView: View {
     HStack(spacing: 4) {
       Image(systemName: "clock")
         .font(.caption)
+        .foregroundStyle(.secondary)
 
       Text(timeRangeText)
-        .font(.caption)
+        .font(.subheadline.monospaced())
+        .foregroundStyle(timeColor)
 
       if let duration = durationText {
         Text("•")
           .font(.caption)
+          .foregroundStyle(.secondary)
         Text(duration)
-          .font(.caption)
+          .font(.subheadline.monospaced())
+          .foregroundStyle(timeColor)
       }
     }
-    .foregroundStyle(.secondary)
   }
 
   private var meetingDetails: some View {
-    HStack(spacing: 12) {
-      if !meeting.calendarName.isEmpty {
-        Label {
-          Text(meeting.calendarName)
-        } icon: {
-          Image(systemName: "calendar")
+    VStack(alignment: .leading, spacing: 6) {
+      // First row: Organizer and attendee count
+      HStack(spacing: 12) {
+        if let organizer = meeting.organizerName, !organizer.isEmpty {
+          HStack(spacing: 4) {
+            Image(systemName: "person.crop.circle")
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+            Text(organizer)
+              .font(.caption2.monospaced())
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+          }
         }
-        .font(.caption2)
-        .foregroundStyle(.tertiary)
+
+        if meeting.attendeeCount > 0 {
+          HStack(spacing: 4) {
+            Image(systemName: "person.2")
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+            Text(
+              "\(meeting.attendeeCount) \(meeting.attendeeCount == 1 ? "person" : "people")"
+            )
+            .font(.caption2.monospaced())
+            .foregroundStyle(.secondary)
+          }
+        }
+
+        Spacer()
       }
 
-      if let organizer = meeting.organizerName, !organizer.isEmpty {
-        Label {
-          Text(organizer)
-        } icon: {
-          Image(systemName: "person")
-        }
-        .font(.caption2)
-        .foregroundStyle(.tertiary)
+    }
+  }
+
+  // MARK: - Action Buttons
+
+  private var actionButtons: some View {
+    HStack(spacing: 8) {
+      if hasJoinUrl && isHovered {
+        copyLinkButton
       }
 
-      if meeting.attendeeCount > 0 {
-        Label {
-          Text("\(meeting.attendeeCount)")
-        } icon: {
-          Image(systemName: "person.2")
-        }
-        .font(.caption2)
-        .foregroundStyle(.tertiary)
+      if shouldShowJoinButton {
+        joinButton
       }
     }
   }
 
-  // MARK: - Join Button
-
   private var shouldShowJoinButton: Bool {
-    !meeting.hasEnded && !(meeting.joinUrl?.isEmpty ?? true)
+    !meeting.hasEnded && hasJoinUrl
+  }
+
+  private var hasJoinUrl: Bool {
+    !(meeting.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+  }
+
+  private var timeColor: Color {
+    if meeting.hasEnded {
+      return .secondary
+    } else if meeting.hasStarted {
+      return .green.opacity(0.8)
+    } else if meeting.isUpcoming {
+      return .orange.opacity(0.8)
+    } else {
+      return .blue.opacity(0.8)
+    }
+  }
+
+  private var copyLinkButton: some View {
+    Button(action: copyMeetingLink) {
+      Image(systemName: "doc.on.clipboard")
+        .font(.caption)
+        .foregroundColor(.secondary)
+    }
+    .buttonStyle(.plain)
+    .help("Copy meeting link")
   }
 
   private var joinButton: some View {
@@ -149,13 +163,26 @@ struct MeetingRowView: View {
     .buttonStyle(.plain)
   }
 
+  private var copyConfirmationBanner: some View {
+    HStack {
+      Image(systemName: "checkmark.circle.fill")
+        .foregroundColor(.green)
+      Text("Meeting link copied")
+        .font(.caption)
+        .foregroundColor(.secondary)
+      Spacer()
+    }
+    .padding(.horizontal, 24)
+    .padding(.vertical, 4)
+    .background(Color.green.opacity(0.1))
+    .transition(.opacity.combined(with: .move(edge: .top)))
+  }
+
   private var joinButtonText: String {
     if isJoining {
       return "Joining..."
-    } else if meeting.hasStarted {
-      return "Join"
     } else {
-      return "Preview"
+      return "Join"
     }
   }
 
@@ -197,6 +224,24 @@ struct MeetingRowView: View {
   }
 
   // MARK: - Actions
+
+  private func copyMeetingLink() {
+    guard let joinUrl = meeting.joinUrl, !joinUrl.isEmpty else { return }
+
+    let pasteboard = NSPasteboard.general
+    pasteboard.clearContents()
+    pasteboard.setString(joinUrl, forType: .string)
+
+    withAnimation(.easeInOut(duration: 0.3)) {
+      showCopyConfirmation = true
+    }
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+      withAnimation(.easeInOut(duration: 0.3)) {
+        showCopyConfirmation = false
+      }
+    }
+  }
 
   private func joinMeeting() {
     guard let joinUrl = meeting.joinUrl, !joinUrl.isEmpty else { return }
