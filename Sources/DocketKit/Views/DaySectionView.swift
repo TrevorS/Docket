@@ -7,7 +7,7 @@ import SwiftUI
 /// A reusable section component for displaying a day's meetings
 struct DaySectionView: View {
   let title: String
-  let meetings: [ZoomMeeting]
+  let meetings: [Meeting]
   @State private var isExpanded: Bool = true
 
   private var allMeetingsCompleted: Bool {

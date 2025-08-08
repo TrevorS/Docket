@@ -1,4 +1,4 @@
-// ABOUTME: Comprehensive tests for ZoomURLExtractor utility class
+// ABOUTME: Comprehensive tests for MeetingURLExtractor utility class
 // ABOUTME: Tests URL extraction from calendar event fields with priority ordering and sanitization
 
 import EventKit
@@ -6,7 +6,7 @@ import Testing
 
 @testable import DocketKit
 
-struct ZoomURLExtractorTests {
+struct MeetingURLExtractorTests {
 
   // MARK: - Priority Order Tests
 
@@ -23,7 +23,7 @@ struct ZoomURLExtractorTests {
       notes: notesURL
     )
 
-    let extracted = ZoomURLExtractor.extract(from: testEvent)
+    let extracted = MeetingURLExtractor.extract(from: testEvent)
     #expect(extracted == virtualConferenceURL, "Should prioritize virtualConference.url")
   }
 
@@ -40,7 +40,7 @@ struct ZoomURLExtractorTests {
       notes: notesURL
     )
 
-    let extracted = ZoomURLExtractor.extract(from: testEvent)
+    let extracted = MeetingURLExtractor.extract(from: testEvent)
     #expect(extracted == urlField, "Should use URL field when virtualConference not available")
   }
 
@@ -56,7 +56,7 @@ struct ZoomURLExtractorTests {
       notes: notes
     )
 
-    let extracted = ZoomURLExtractor.extract(from: testEvent)
+    let extracted = MeetingURLExtractor.extract(from: testEvent)
     #expect(extracted == "https://zoom.us/j/123456789", "Should extract from location field")
   }
 
@@ -71,7 +71,7 @@ struct ZoomURLExtractorTests {
       notes: notes
     )
 
-    let extracted = ZoomURLExtractor.extract(from: testEvent)
+    let extracted = MeetingURLExtractor.extract(from: testEvent)
     #expect(
       extracted == "https://zoom.us/j/123456789",
       "Should extract from notes field when other fields empty")
@@ -90,7 +90,7 @@ struct ZoomURLExtractorTests {
 
     for url in testCases {
       let event = SimpleCalendarEvent(notes: "Join: \(url)")
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract standard Zoom URL: \(url)")
     }
   }
@@ -104,7 +104,7 @@ struct ZoomURLExtractorTests {
 
     for url in testCases {
       let event = SimpleCalendarEvent(location: url)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract government Zoom URL: \(url)")
     }
   }
@@ -118,7 +118,7 @@ struct ZoomURLExtractorTests {
 
     for url in testCases {
       let event = SimpleCalendarEvent(virtualConferenceURL: url)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract protocol URL: \(url)")
     }
   }
@@ -132,7 +132,7 @@ struct ZoomURLExtractorTests {
 
     for url in testCases {
       let event = SimpleCalendarEvent(url: url)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == url, "Should extract vanity URL: \(url)")
     }
   }
@@ -159,7 +159,7 @@ struct ZoomURLExtractorTests {
 
     for (input, expected) in testCases {
       let event = SimpleCalendarEvent(notes: input)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == expected, "Should sanitize URL: \(input) -> \(expected)")
     }
   }
@@ -170,7 +170,7 @@ struct ZoomURLExtractorTests {
   func testMultipleURLsInSameField() {
     let notes = "First meeting: https://zoom.us/j/111111111 and backup: https://zoom.us/j/222222222"
     let event = SimpleCalendarEvent(notes: notes)
-    let extracted = ZoomURLExtractor.extract(from: event)
+    let extracted = MeetingURLExtractor.extract(from: event)
     #expect(extracted == "https://zoom.us/j/111111111", "Should return first valid URL found")
   }
 
@@ -184,7 +184,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for event in testCases {
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == nil, "Should return nil when no Zoom URLs found")
     }
   }
@@ -200,7 +200,7 @@ struct ZoomURLExtractorTests {
 
     for malformedURL in testCases {
       let event = SimpleCalendarEvent(notes: malformedURL)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == nil, "Should handle malformed URL gracefully: \(malformedURL)")
     }
   }
@@ -215,7 +215,7 @@ struct ZoomURLExtractorTests {
     ]
 
     for event in testCases {
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(extracted == nil, "Should handle empty/whitespace fields")
     }
   }
@@ -239,15 +239,62 @@ struct ZoomURLExtractorTests {
       """
 
     let event = SimpleCalendarEvent(notes: complexNote)
-    let extracted = ZoomURLExtractor.extract(from: event)
+    let extracted = MeetingURLExtractor.extract(from: event)
     #expect(
       extracted == "https://zoom.us/j/123456789?pwd=secret123",
       "Should extract URL from complex mixed content")
   }
 
-  // MARK: - Integration with ZoomURLPattern Tests
+  // MARK: - Google Meet URL Tests
 
-  @Test("Verify integration with all ZoomURLPattern cases")
+  @Test("Extract Google Meet URLs")
+  func testExtractGoogleMeetURLs() {
+    let testCases = [
+      "https://meet.google.com/abc-defg-hij",
+      "http://meet.google.com/xyz-uvwx-rst",
+      "https://meet.google.com/test-meet-room",
+      "https://meet.google.com/lookup/abc123def456",
+    ]
+
+    for url in testCases {
+      let event = SimpleCalendarEvent(notes: "Join: \(url)")
+      let extracted = MeetingURLExtractor.extract(from: event)
+      #expect(extracted == url, "Should extract Google Meet URL: \(url)")
+    }
+  }
+
+  @Test("Extract Google Meet URLs with platform detection")
+  func testExtractGoogleMeetWithPlatform() {
+    let googleMeetUrl = "https://meet.google.com/abc-defg-hij"
+    let event = SimpleCalendarEvent(virtualConferenceURL: googleMeetUrl)
+
+    let result = MeetingURLExtractor.extractWithPlatform(from: event)
+    #expect(result != nil, "Should extract Google Meet URL with platform")
+    #expect(result?.url == googleMeetUrl, "Should return correct URL")
+    #expect(result?.platform == .googleMeet, "Should detect Google Meet platform")
+  }
+
+  @Test("Mixed platform extraction prioritizes first found")
+  func testMixedPlatformExtraction() {
+    // Test text with both Zoom and Google Meet URLs
+    let mixedText = """
+      Join options:
+      Zoom: https://zoom.us/j/123456789
+      Google Meet: https://meet.google.com/abc-defg-hij
+      """
+
+    let event = SimpleCalendarEvent(notes: mixedText)
+    let result = MeetingURLExtractor.extractWithPlatform(from: event)
+
+    #expect(result != nil, "Should extract meeting URL from mixed content")
+    // Should extract the first valid URL found (Zoom in this case)
+    #expect(result?.url == "https://zoom.us/j/123456789", "Should extract first URL found")
+    #expect(result?.platform == .zoom, "Should detect correct platform for first URL")
+  }
+
+  // MARK: - Integration with MeetingURLPattern Tests
+
+  @Test("Verify integration with all MeetingURLPattern cases")
   func testIntegrationWithZoomURLPattern() {
     // This test ensures ZoomURLExtractor uses the same patterns as ZoomURLPattern
     let testURLs = [
@@ -258,8 +305,8 @@ struct ZoomURLExtractorTests {
     ]
 
     for url in testURLs {
-      // First verify the pattern matches our ZoomURLPattern enum
-      let hasMatchingPattern = ZoomURLPattern.allCases.contains { pattern in
+      // First verify the pattern matches our MeetingURLPattern enum
+      let hasMatchingPattern = MeetingURLPattern.allCases.contains { pattern in
         if let regex = pattern.regex {
           let range = NSRange(location: 0, length: url.utf16.count)
           return regex.firstMatch(in: url, options: [], range: range) != nil
@@ -270,7 +317,7 @@ struct ZoomURLExtractorTests {
 
       // Then test extraction
       let event = SimpleCalendarEvent(notes: url)
-      let extracted = ZoomURLExtractor.extract(from: event)
+      let extracted = MeetingURLExtractor.extract(from: event)
       #expect(
         extracted == url, "ZoomURLExtractor should extract URL that matches ZoomURLPattern: \(url)")
     }

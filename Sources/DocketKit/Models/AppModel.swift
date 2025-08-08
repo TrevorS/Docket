@@ -41,8 +41,11 @@ public final class AppModel: @unchecked Sendable {
 
   // MARK: - User Preferences
 
-  /// Whether to show only meetings with Zoom URLs
-  public var showOnlyZoomMeetings: Bool = true
+  /// Whether to show only meetings with video meeting URLs
+  public var showOnlyVideoMeetings: Bool = true
+
+  /// Set of enabled meeting platforms to display
+  public var enabledPlatforms: Set<MeetingPlatform> = [.zoom, .googleMeet]
 
   /// Minutes before meeting to show notification (5 minute default)
   public var notificationTime: Int = 5
@@ -62,7 +65,28 @@ public final class AppModel: @unchecked Sendable {
   public var lastRefresh: Date?
 
   /// Next upcoming meeting (used for quick access)
-  public var nextMeeting: ZoomMeeting?
+  public var nextMeeting: Meeting?
+
+  // MARK: - Platform Filtering
+
+  /// Check if a meeting platform is enabled for display
+  /// - Parameter platform: The meeting platform to check
+  /// - Returns: True if the platform is enabled
+  public func isPlatformEnabled(_ platform: MeetingPlatform) -> Bool {
+    return enabledPlatforms.contains(platform)
+  }
+
+  /// Check if a meeting should be shown based on platform filtering preferences
+  /// - Parameter meeting: The meeting to check
+  /// - Returns: True if the meeting should be displayed
+  public func shouldShowMeeting(_ meeting: Meeting) -> Bool {
+    // Always show unknown platform meetings to avoid hiding legitimate meetings
+    if meeting.platform == .unknown {
+      return true
+    }
+
+    return isPlatformEnabled(meeting.platform)
+  }
 
   // MARK: - Initialization
 

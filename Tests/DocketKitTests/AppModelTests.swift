@@ -49,7 +49,7 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Test default user preferences
-    #expect(appModel.showOnlyZoomMeetings == true)
+    #expect(appModel.showOnlyVideoMeetings == true)
     #expect(appModel.notificationTime == 5)
     #expect(appModel.selectedCalendars.isEmpty)
     #expect(appModel.windowOpacity == 1.0)
@@ -65,7 +65,7 @@ struct AppModelTests {
 
     // Test that we can observe changes (compile-time check)
     Task { @MainActor in
-      let _ = appModel.showOnlyZoomMeetings
+      let _ = appModel.showOnlyVideoMeetings
       let _ = appModel.notificationTime
       let _ = appModel.windowOpacity
       // If this compiles, @Observable conformance is working
@@ -80,15 +80,15 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Test default value
-    #expect(appModel.showOnlyZoomMeetings == true)
+    #expect(appModel.showOnlyVideoMeetings == true)
 
     // Test changing value
-    appModel.showOnlyZoomMeetings = false
-    #expect(appModel.showOnlyZoomMeetings == false)
+    appModel.showOnlyVideoMeetings = false
+    #expect(appModel.showOnlyVideoMeetings == false)
 
     // Test changing back
-    appModel.showOnlyZoomMeetings = true
-    #expect(appModel.showOnlyZoomMeetings == true)
+    appModel.showOnlyVideoMeetings = true
+    #expect(appModel.showOnlyVideoMeetings == true)
   }
 
   @Test func testNotificationTimeProperty() {
@@ -209,12 +209,13 @@ struct AppModelTests {
     // Create a test meeting
     let startTime = Date()
     let endTime = startTime.addingTimeInterval(1800)  // 30 minutes
-    let meeting = ZoomMeeting(
+    let meeting = Meeting(
       id: UUID(),
       title: "Test Meeting",
       startTime: startTime,
       endTime: endTime,
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: "John Doe",
       organizerEmail: "john@example.com",
       attendeeCount: 5,
@@ -238,7 +239,7 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Change multiple properties
-    appModel.showOnlyZoomMeetings = false
+    appModel.showOnlyVideoMeetings = false
     appModel.notificationTime = 10
     appModel.windowOpacity = 0.9
     appModel.alwaysOnTop = false
@@ -247,7 +248,7 @@ struct AppModelTests {
     appModel.lastRefresh = Date()
 
     // Verify all changes persisted
-    #expect(appModel.showOnlyZoomMeetings == false)
+    #expect(appModel.showOnlyVideoMeetings == false)
     #expect(appModel.notificationTime == 10)
     #expect(appModel.windowOpacity == 0.9)
     #expect(appModel.alwaysOnTop == false)
@@ -261,7 +262,7 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Change all properties from defaults
-    appModel.showOnlyZoomMeetings = false
+    appModel.showOnlyVideoMeetings = false
     appModel.notificationTime = 15
     appModel.selectedCalendars.insert("Test")
     appModel.windowOpacity = 0.5
@@ -272,7 +273,7 @@ struct AppModelTests {
     let defaultModel = AppModel()
 
     // Reset to defaults manually (testing that we can restore state)
-    appModel.showOnlyZoomMeetings = defaultModel.showOnlyZoomMeetings
+    appModel.showOnlyVideoMeetings = defaultModel.showOnlyVideoMeetings
     appModel.notificationTime = defaultModel.notificationTime
     appModel.selectedCalendars = defaultModel.selectedCalendars
     appModel.windowOpacity = defaultModel.windowOpacity
@@ -281,7 +282,7 @@ struct AppModelTests {
     appModel.nextMeeting = defaultModel.nextMeeting
 
     // Verify all back to defaults
-    #expect(appModel.showOnlyZoomMeetings == true)
+    #expect(appModel.showOnlyVideoMeetings == true)
     #expect(appModel.notificationTime == 5)
     #expect(appModel.selectedCalendars.isEmpty)
     #expect(appModel.windowOpacity == 1.0)
@@ -297,14 +298,14 @@ struct AppModelTests {
 
     // Test that we can use AppModel in async context
     await Task { @MainActor in
-      appModel.showOnlyZoomMeetings = false
+      appModel.showOnlyVideoMeetings = false
       appModel.notificationTime = 10
       appModel.lastRefresh = Date()
     }.value
 
     // Verify changes were applied
     await Task { @MainActor in
-      #expect(appModel.showOnlyZoomMeetings == false)
+      #expect(appModel.showOnlyVideoMeetings == false)
       #expect(appModel.notificationTime == 10)
       #expect(appModel.lastRefresh != nil)
     }.value

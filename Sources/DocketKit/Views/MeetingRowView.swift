@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct MeetingRowView: View {
-  let meeting: ZoomMeeting
+  let meeting: Meeting
   @State private var isJoining = false
   @State private var showCopyConfirmation = false
   @State private var isHovered = false
@@ -64,8 +64,11 @@ struct MeetingRowView: View {
 
   private var meetingDetails: some View {
     VStack(alignment: .leading, spacing: 6) {
-      // First row: Organizer and attendee count
+      // First row: Platform indicator, organizer and attendee count
       HStack(spacing: 12) {
+        // Platform indicator
+        platformIndicator
+
         if let organizer = meeting.organizerName, !organizer.isEmpty {
           HStack(spacing: 4) {
             Image(systemName: "person.crop.circle")
@@ -94,6 +97,32 @@ struct MeetingRowView: View {
         Spacer()
       }
 
+    }
+  }
+
+  private var platformIndicator: some View {
+    HStack(spacing: 4) {
+      Image(systemName: meeting.platform.iconName)
+        .font(.caption2)
+        .foregroundStyle(platformColor)
+      Text(meeting.platform.shortName)
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(platformColor)
+    }
+    .padding(.horizontal, 6)
+    .padding(.vertical, 2)
+    .background(platformColor.opacity(0.1))
+    .clipShape(RoundedRectangle(cornerRadius: 4))
+  }
+
+  private var platformColor: Color {
+    switch meeting.platform {
+    case .zoom:
+      return .blue
+    case .googleMeet:
+      return .green
+    case .unknown:
+      return .gray
     }
   }
 

@@ -1,4 +1,4 @@
-// ABOUTME: Comprehensive tests for ZoomMeeting model using Swift Testing framework
+// ABOUTME: Comprehensive tests for Meeting model using Swift Testing framework
 // ABOUTME: Tests time calculations, state properties, and Sendable/Equatable conformance
 
 import Foundation
@@ -6,7 +6,7 @@ import Testing
 
 @testable import DocketKit
 
-struct ZoomMeetingTests {
+struct MeetingTests {
 
   // MARK: - Test Data Helpers
 
@@ -21,13 +21,14 @@ struct ZoomMeetingTests {
     attendeeCount: Int = 5,
     calendarName: String = "Work",
     eventIdentifier: String = "test-event-123"
-  ) -> ZoomMeeting {
-    ZoomMeeting(
+  ) -> Meeting {
+    Meeting(
       id: id,
       title: title,
       startTime: startTime,
       endTime: endTime,
       joinUrl: joinUrl,
+      platform: .zoom,
       organizerName: organizerName,
       organizerEmail: organizerEmail,
       attendeeCount: attendeeCount,

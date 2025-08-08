@@ -1,12 +1,12 @@
-// ABOUTME: Comprehensive tests for ZoomURLPattern enum regex matching
-// ABOUTME: Tests all Zoom URL variations including standard, government, protocol, and vanity URLs
+// ABOUTME: Comprehensive tests for MeetingURLPattern enum regex matching
+// ABOUTME: Tests all meeting URL variations including Zoom and Google Meet patterns
 
 import Foundation
 import Testing
 
 @testable import DocketKit
 
-struct ZoomURLPatternTests {
+struct MeetingURLPatternTests {
 
   // MARK: - Standard Zoom URL Tests
 
@@ -22,7 +22,7 @@ struct ZoomURLPatternTests {
       "http://us04web.zoom.us/j/123456789",
     ]
 
-    let pattern = ZoomURLPattern.standard
+    let pattern = MeetingURLPattern.zoomStandard
     let regex = pattern.regex
 
     #expect(regex != nil, "Standard pattern should create valid regex")
@@ -36,7 +36,7 @@ struct ZoomURLPatternTests {
 
   @Test func testStandardZoomURLsInText() {
     let textWithURL = "Please join the meeting: https://zoom.us/j/123456789 at 2 PM"
-    let pattern = ZoomURLPattern.standard
+    let pattern = MeetingURLPattern.zoomStandard
     let regex = pattern.regex
 
     #expect(regex != nil)
@@ -61,7 +61,7 @@ struct ZoomURLPatternTests {
       "",
     ]
 
-    let pattern = ZoomURLPattern.standard
+    let pattern = MeetingURLPattern.zoomStandard
     let regex = pattern.regex
 
     #expect(regex != nil)
@@ -84,7 +84,7 @@ struct ZoomURLPatternTests {
       "https://zoomgov.com/meeting/register/tJwtdO2hpzIrGNacVtgY",
     ]
 
-    let pattern = ZoomURLPattern.government
+    let pattern = MeetingURLPattern.zoomGovernment
     let regex = pattern.regex
 
     #expect(regex != nil, "Government pattern should create valid regex")
@@ -100,8 +100,8 @@ struct ZoomURLPatternTests {
     let govURL = "https://zoomgov.com/j/123456789"
     let standardURL = "https://zoom.us/j/123456789"
 
-    let govPattern = ZoomURLPattern.government
-    let standardPattern = ZoomURLPattern.standard
+    let govPattern = MeetingURLPattern.zoomGovernment
+    let standardPattern = MeetingURLPattern.zoomStandard
 
     // Gov URL should match gov pattern but not standard
     let govRange = NSRange(location: 0, length: govURL.utf16.count)
@@ -132,7 +132,7 @@ struct ZoomURLPatternTests {
       "zoommtg://zoom.us/join?confno=555666777&uname=TestUser",
     ]
 
-    let pattern = ZoomURLPattern.`protocol`
+    let pattern = MeetingURLPattern.zoomProtocol
     let regex = pattern.regex
 
     #expect(regex != nil, "Protocol pattern should create valid regex")
@@ -146,7 +146,7 @@ struct ZoomURLPatternTests {
 
   @Test func testProtocolURLsInText() {
     let textWithProtocol = "Launch directly with: zoommtg://zoom.us/join?confno=123456789"
-    let pattern = ZoomURLPattern.`protocol`
+    let pattern = MeetingURLPattern.zoomProtocol
     let regex = pattern.regex
 
     let range = NSRange(location: 0, length: textWithProtocol.utf16.count)
@@ -165,7 +165,7 @@ struct ZoomURLPatternTests {
       "https://subdomain.zoom.us/j/123456789?pwd=test",
     ]
 
-    let pattern = ZoomURLPattern.vanity
+    let pattern = MeetingURLPattern.zoomVanity
     let regex = pattern.regex
 
     #expect(regex != nil, "Vanity pattern should create valid regex")
@@ -184,8 +184,8 @@ struct ZoomURLPatternTests {
     // Vanity URL with subdomain should match vanity pattern but also standard pattern
     let vanityURL = "https://company.zoom.us/j/123456789"
 
-    let standardPattern = ZoomURLPattern.standard
-    let vanityPattern = ZoomURLPattern.vanity
+    let standardPattern = MeetingURLPattern.zoomStandard
+    let vanityPattern = MeetingURLPattern.zoomVanity
 
     // Test standard URL
     let standardRange = NSRange(location: 0, length: standardURL.utf16.count)
@@ -214,20 +214,107 @@ struct ZoomURLPatternTests {
   // MARK: - Pattern Enum Tests
 
   @Test func testAllPatternsHaveValidRegex() {
-    for pattern in ZoomURLPattern.allCases {
+    for pattern in MeetingURLPattern.allCases {
       #expect(pattern.regex != nil, "Pattern \(pattern) should have valid regex")
     }
   }
 
   @Test func testPatternRawValues() {
-    #expect(ZoomURLPattern.standard.rawValue == "https?://[\\w.-]*zoom\\.us/[^\\s]+")
-    #expect(ZoomURLPattern.government.rawValue == "https?://[\\w.-]*zoomgov\\.com/[^\\s]+")
-    #expect(ZoomURLPattern.`protocol`.rawValue == "zoommtg://[^\\s]+")
-    #expect(ZoomURLPattern.vanity.rawValue == "https?://[\\w.-]*\\.zoom\\.us/[^\\s]+")
+    #expect(MeetingURLPattern.zoomStandard.rawValue == "https?://[\\w.-]*zoom\\.us/[^\\s]+")
+    #expect(MeetingURLPattern.zoomGovernment.rawValue == "https?://[\\w.-]*zoomgov\\.com/[^\\s]+")
+    #expect(MeetingURLPattern.zoomProtocol.rawValue == "zoommtg://[^\\s]+")
+    #expect(MeetingURLPattern.zoomVanity.rawValue == "https?://[\\w.-]*\\.zoom\\.us/[^\\s]+")
   }
 
   @Test func testAllCasesCount() {
-    #expect(ZoomURLPattern.allCases.count == 4, "Should have exactly 4 URL pattern types")
+    #expect(
+      MeetingURLPattern.allCases.count == 6,
+      "Should have exactly 6 URL pattern types (4 Zoom + 2 Google Meet)")
+  }
+
+  // MARK: - Google Meet URL Tests
+
+  @Test func testGoogleMeetURLs() {
+    let validGoogleMeetURLs = [
+      "https://meet.google.com/abc-defg-hij",
+      "http://meet.google.com/xyz-uvwx-rst",
+      "https://meet.google.com/abc-defg-hij?pwd=password123",
+      "https://meet.google.com/test-meet-room",
+      "https://meet.google.com/lookup/abc123def456",
+    ]
+
+    // Test both Google Meet patterns
+    let patterns = [MeetingURLPattern.googleMeet, MeetingURLPattern.googleMeetLookup]
+
+    for url in validGoogleMeetURLs {
+      var foundMatch = false
+      for pattern in patterns {
+        let regex = pattern.regex
+        #expect(regex != nil, "Pattern \(pattern) should create valid regex")
+
+        let range = NSRange(location: 0, length: url.utf16.count)
+        if let matches = regex?.matches(in: url, options: [], range: range), matches.count > 0 {
+          foundMatch = true
+          break
+        }
+      }
+      #expect(foundMatch, "Should match Google Meet URL: \(url)")
+    }
+  }
+
+  @Test func testGoogleMeetPlatformDetection() {
+    let googleMeetURL = "https://meet.google.com/abc-defg-hij"
+    let zoomURL = "https://zoom.us/j/123456789"
+
+    let googleMeetPattern = MeetingURLPattern.googleMeet
+    let zoomStandardPattern = MeetingURLPattern.zoomStandard
+
+    // Google Meet URL should match Google Meet pattern but not Zoom
+    let googleMeetRange = NSRange(location: 0, length: googleMeetURL.utf16.count)
+    let googleMeetInGoogleMeet = googleMeetPattern.regex!.matches(
+      in: googleMeetURL, options: [], range: googleMeetRange)
+    let googleMeetInZoom = zoomStandardPattern.regex!.matches(
+      in: googleMeetURL, options: [], range: googleMeetRange)
+
+    #expect(googleMeetInGoogleMeet.count > 0, "Google Meet URL should match Google Meet pattern")
+    #expect(googleMeetInZoom.count == 0, "Google Meet URL should NOT match Zoom pattern")
+
+    // Zoom URL should match Zoom pattern but not Google Meet
+    let zoomRange = NSRange(location: 0, length: zoomURL.utf16.count)
+    let zoomInZoom = zoomStandardPattern.regex!.matches(in: zoomURL, options: [], range: zoomRange)
+    let zoomInGoogleMeet = googleMeetPattern.regex!.matches(
+      in: zoomURL, options: [], range: zoomRange)
+
+    #expect(zoomInZoom.count > 0, "Zoom URL should match Zoom pattern")
+    #expect(zoomInGoogleMeet.count == 0, "Zoom URL should NOT match Google Meet pattern")
+  }
+
+  @Test func testMeetingURLPatternPlatformProperty() {
+    // Test that each pattern returns the correct platform
+    #expect(MeetingURLPattern.zoomStandard.platform == .zoom)
+    #expect(MeetingURLPattern.zoomGovernment.platform == .zoom)
+    #expect(MeetingURLPattern.zoomProtocol.platform == .zoom)
+    #expect(MeetingURLPattern.zoomVanity.platform == .zoom)
+    #expect(MeetingURLPattern.googleMeet.platform == .googleMeet)
+    #expect(MeetingURLPattern.googleMeetLookup.platform == .googleMeet)
+  }
+
+  @Test func testPatternsForPlatform() {
+    let zoomPatterns = MeetingURLPattern.patterns(for: .zoom)
+    let googleMeetPatterns = MeetingURLPattern.patterns(for: .googleMeet)
+    let unknownPatterns = MeetingURLPattern.patterns(for: .unknown)
+
+    #expect(zoomPatterns.count == 4, "Should have 4 Zoom patterns")
+    #expect(googleMeetPatterns.count == 2, "Should have 2 Google Meet patterns")
+    #expect(unknownPatterns.count == 0, "Should have 0 unknown patterns")
+
+    #expect(zoomPatterns.contains(.zoomStandard))
+    #expect(zoomPatterns.contains(.zoomGovernment))
+    #expect(zoomPatterns.contains(.zoomProtocol))
+    #expect(zoomPatterns.contains(.zoomVanity))
+
+    #expect(googleMeetPatterns.contains(.googleMeet))
+    #expect(googleMeetPatterns.contains(.googleMeetLookup))
   }
 
   // MARK: - Complex Text Parsing Tests
@@ -243,7 +330,7 @@ struct ZoomURLPatternTests {
 
     var totalMatches = 0
 
-    for pattern in ZoomURLPattern.allCases {
+    for pattern in MeetingURLPattern.allCases {
       let regex = pattern.regex!
       let range = NSRange(location: 0, length: textWithMultipleURLs.utf16.count)
       let matches = regex.matches(in: textWithMultipleURLs, options: [], range: range)
@@ -264,7 +351,7 @@ struct ZoomURLPatternTests {
     for url in urlsWithTracking {
       var foundMatch = false
 
-      for pattern in ZoomURLPattern.allCases {
+      for pattern in MeetingURLPattern.allCases {
         let regex = pattern.regex!
         let range = NSRange(location: 0, length: url.utf16.count)
         let matches = regex.matches(in: url, options: [], range: range)
@@ -291,7 +378,7 @@ struct ZoomURLPatternTests {
     for (url, shouldMatch, description) in edgeCases {
       var foundMatch = false
 
-      for pattern in ZoomURLPattern.allCases {
+      for pattern in MeetingURLPattern.allCases {
         let regex = pattern.regex!
         let range = NSRange(location: 0, length: url.utf16.count)
         let matches = regex.matches(in: url, options: [], range: range)

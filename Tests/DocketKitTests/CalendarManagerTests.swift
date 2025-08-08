@@ -68,7 +68,7 @@ struct CalendarManagerTests {
 
   // MARK: - Event Conversion Tests
 
-  @Test("Mock event with Zoom URL converts to ZoomMeeting correctly")
+  @Test("Mock event with Zoom URL converts to Meeting correctly")
   func testEventWithZoomURLConversion() {
     let startTime = Date()
     let endTime = startTime.addingTimeInterval(3600)  // 1 hour meeting
@@ -324,7 +324,7 @@ struct MockCalendarEvent: MockEventProtocol {
   let location: String?
   let notes: String?
 
-  // Additional properties for creating ZoomMeeting (MockEventProtocol)
+  // Additional properties for creating Meeting (MockEventProtocol)
   let title: String
   let startDate: Date
   let endDate: Date

@@ -1,15 +1,16 @@
-// ABOUTME: Core meeting data model representing a Zoom meeting from calendar events
+// ABOUTME: Core meeting data model representing a video meeting from calendar events
 // ABOUTME: Provides time-based state calculations and meeting information for UI display
 
 import Foundation
 
-/// Core data model representing a Zoom meeting extracted from calendar events
-public struct ZoomMeeting: Identifiable, Sendable, Equatable, Hashable {
+/// Core data model representing a video meeting extracted from calendar events
+public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
   public let id: UUID
   public let title: String
   public let startTime: Date
   public let endTime: Date
   public let joinUrl: String?
+  public let platform: MeetingPlatform
   public let organizerName: String?
   public let organizerEmail: String?
   public let attendeeCount: Int
@@ -22,6 +23,7 @@ public struct ZoomMeeting: Identifiable, Sendable, Equatable, Hashable {
     startTime: Date,
     endTime: Date,
     joinUrl: String? = nil,
+    platform: MeetingPlatform,
     organizerName: String? = nil,
     organizerEmail: String? = nil,
     attendeeCount: Int,
@@ -33,6 +35,7 @@ public struct ZoomMeeting: Identifiable, Sendable, Equatable, Hashable {
     self.startTime = startTime
     self.endTime = endTime
     self.joinUrl = joinUrl
+    self.platform = platform
     self.organizerName = organizerName
     self.organizerEmail = organizerEmail
     self.attendeeCount = attendeeCount
@@ -72,11 +75,11 @@ public struct ZoomMeeting: Identifiable, Sendable, Equatable, Hashable {
 
 // MARK: - Equatable Conformance
 
-extension ZoomMeeting {
-  public static func == (lhs: ZoomMeeting, rhs: ZoomMeeting) -> Bool {
+extension Meeting {
+  public static func == (lhs: Meeting, rhs: Meeting) -> Bool {
     // Use all properties for equality comparison
     return lhs.id == rhs.id && lhs.title == rhs.title && lhs.startTime == rhs.startTime
-      && lhs.endTime == rhs.endTime && lhs.joinUrl == rhs.joinUrl
+      && lhs.endTime == rhs.endTime && lhs.joinUrl == rhs.joinUrl && lhs.platform == rhs.platform
       && lhs.organizerName == rhs.organizerName && lhs.organizerEmail == rhs.organizerEmail
       && lhs.attendeeCount == rhs.attendeeCount && lhs.calendarName == rhs.calendarName
       && lhs.eventIdentifier == rhs.eventIdentifier

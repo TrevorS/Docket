@@ -82,12 +82,13 @@ struct MeetingsListViewTests {
     let now = Date()
 
     // Future meeting (more than 5 minutes away)
-    let futureMeeting = ZoomMeeting(
+    let futureMeeting = Meeting(
       id: UUID(),
       title: "Future Meeting",
       startTime: now.addingTimeInterval(600),  // 10 minutes from now
       endTime: now.addingTimeInterval(1800),
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -96,12 +97,13 @@ struct MeetingsListViewTests {
     )
 
     // Upcoming meeting (within 5 minutes)
-    let upcomingMeeting = ZoomMeeting(
+    let upcomingMeeting = Meeting(
       id: UUID(),
       title: "Upcoming Meeting",
       startTime: now.addingTimeInterval(240),  // 4 minutes from now
       endTime: now.addingTimeInterval(1800),
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -110,12 +112,13 @@ struct MeetingsListViewTests {
     )
 
     // Started meeting
-    let startedMeeting = ZoomMeeting(
+    let startedMeeting = Meeting(
       id: UUID(),
       title: "Started Meeting",
       startTime: now.addingTimeInterval(-600),  // 10 minutes ago
       endTime: now.addingTimeInterval(600),  // 10 minutes from now
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -124,12 +127,13 @@ struct MeetingsListViewTests {
     )
 
     // Ended meeting
-    let endedMeeting = ZoomMeeting(
+    let endedMeeting = Meeting(
       id: UUID(),
       title: "Ended Meeting",
       startTime: now.addingTimeInterval(-1800),  // 30 minutes ago
       endTime: now.addingTimeInterval(-600),  // 10 minutes ago
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -162,12 +166,13 @@ struct MeetingsListViewTests {
     let now = Date()
 
     // Meeting with URL, not ended
-    let activeWithURL = ZoomMeeting(
+    let activeWithURL = Meeting(
       id: UUID(),
       title: "Active Meeting",
       startTime: now.addingTimeInterval(-300),
       endTime: now.addingTimeInterval(900),
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -176,12 +181,13 @@ struct MeetingsListViewTests {
     )
 
     // Meeting without URL
-    let activeWithoutURL = ZoomMeeting(
+    let activeWithoutURL = Meeting(
       id: UUID(),
       title: "Active Meeting No URL",
       startTime: now.addingTimeInterval(-300),
       endTime: now.addingTimeInterval(900),
       joinUrl: "",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -190,12 +196,13 @@ struct MeetingsListViewTests {
     )
 
     // Ended meeting with URL
-    let endedWithURL = ZoomMeeting(
+    let endedWithURL = Meeting(
       id: UUID(),
       title: "Ended Meeting",
       startTime: now.addingTimeInterval(-1800),
       endTime: now.addingTimeInterval(-600),
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -210,7 +217,7 @@ struct MeetingsListViewTests {
   }
 
   // Helper function matching MeetingRowView logic
-  private func shouldShowJoinButton(for meeting: ZoomMeeting) -> Bool {
+  private func shouldShowJoinButton(for meeting: Meeting) -> Bool {
     return !meeting.hasEnded && !(meeting.joinUrl?.isEmpty ?? true)
   }
 
@@ -257,12 +264,13 @@ struct MeetingsListViewTests {
 
   @Test("Meeting row displays all required information")
   func testMeetingRowContent() {
-    let meeting = ZoomMeeting(
+    let meeting = Meeting(
       id: UUID(),
       title: "Test Meeting with Long Title That Should Wrap",
       startTime: Date(),
       endTime: Date().addingTimeInterval(3600),
       joinUrl: "https://zoom.us/j/123456789",
+      platform: .zoom,
       organizerName: "John Doe",
       organizerEmail: "john@example.com",
       attendeeCount: 5,
@@ -286,12 +294,13 @@ struct MeetingsListViewTests {
     let now = Date()
 
     // Create a comprehensive meeting with all fields
-    let comprehensiveMeeting = ZoomMeeting(
+    let comprehensiveMeeting = Meeting(
       id: UUID(),
       title: "Quarterly Business Review - Q4 Planning Session",
       startTime: now.addingTimeInterval(300),  // Starts in 5 minutes (upcoming)
       endTime: now.addingTimeInterval(3900),  // 60 minutes duration
       joinUrl: "https://zoom.us/j/123456789?pwd=abcd1234",
+      platform: .zoom,
       organizerName: "Alice Johnson",
       organizerEmail: "alice@example.com",
       attendeeCount: 12,
@@ -310,12 +319,13 @@ struct MeetingsListViewTests {
     #expect(!comprehensiveMeeting.hasEnded)
 
     // Test minimal meeting (only required fields)
-    let minimalMeeting = ZoomMeeting(
+    let minimalMeeting = Meeting(
       id: UUID(),
       title: "Quick Sync",
       startTime: now.addingTimeInterval(-300),  // Started 5 minutes ago
       endTime: now.addingTimeInterval(600),  // Ends in 10 minutes
       joinUrl: "https://zoom.us/j/987654321",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -338,12 +348,13 @@ struct MeetingsListViewTests {
     let now = Date()
 
     // Meeting with valid join URL - should show copy button
-    let meetingWithUrl = ZoomMeeting(
+    let meetingWithUrl = Meeting(
       id: UUID(),
       title: "Team Standup",
       startTime: now.addingTimeInterval(900),  // 15 minutes from now
       endTime: now.addingTimeInterval(2700),  // 45 minutes duration
       joinUrl: "https://zoom.us/j/555666777?pwd=secretpassword",
+      platform: .zoom,
       organizerName: "Bob Wilson",
       organizerEmail: "bob@company.com",
       attendeeCount: 8,
@@ -354,12 +365,13 @@ struct MeetingsListViewTests {
     #expect(!(meetingWithUrl.joinUrl?.isEmpty ?? true))
 
     // Meeting without join URL - should not show copy button
-    let meetingNoUrl = ZoomMeeting(
+    let meetingNoUrl = Meeting(
       id: UUID(),
       title: "Lunch Break",
       startTime: now.addingTimeInterval(3600),
       endTime: now.addingTimeInterval(5400),
       joinUrl: "",
+      platform: .zoom,
       organizerName: nil,
       organizerEmail: nil,
       attendeeCount: 0,
@@ -370,12 +382,13 @@ struct MeetingsListViewTests {
     #expect(meetingNoUrl.joinUrl?.isEmpty ?? true)
 
     // Meeting with nil join URL - should not show copy button
-    let meetingNilUrl = ZoomMeeting(
+    let meetingNilUrl = Meeting(
       id: UUID(),
       title: "Coffee Chat",
       startTime: now.addingTimeInterval(1800),
       endTime: now.addingTimeInterval(3600),
       joinUrl: nil,
+      platform: .zoom,
       organizerName: "Charlie Brown",
       organizerEmail: nil,
       attendeeCount: 2,
@@ -400,12 +413,13 @@ struct MeetingsListViewTests {
     ]
 
     for (description, joinUrl, shouldShowCopy) in testCases {
-      let meeting = ZoomMeeting(
+      let meeting = Meeting(
         id: UUID(),
         title: description,
         startTime: now.addingTimeInterval(600),
         endTime: now.addingTimeInterval(1800),
         joinUrl: joinUrl,
+        platform: .zoom,
         organizerName: "Test User",
         organizerEmail: nil,
         attendeeCount: 1,
@@ -426,17 +440,18 @@ struct MeetingsListViewTests {
     let now = Date()
 
     // Test empty day - should not be considered for auto-collapse
-    let emptyMeetings: [ZoomMeeting] = []
+    let emptyMeetings: [Meeting] = []
     #expect(!shouldDayAutoCollapse(meetings: emptyMeetings, title: "Today"))
 
     // Test day with active meetings - should not auto-collapse
     let activeMeetings = [
-      ZoomMeeting(
+      Meeting(
         id: UUID(),
         title: "Active Meeting",
         startTime: now.addingTimeInterval(-900),  // Started 15 min ago
         endTime: now.addingTimeInterval(600),  // Ends in 10 min
         joinUrl: "https://zoom.us/j/active123",
+        platform: .zoom,
         organizerName: "Active Organizer",
         organizerEmail: nil,
         attendeeCount: 5,
@@ -448,12 +463,13 @@ struct MeetingsListViewTests {
 
     // Test today's completed meetings - should NOT auto-collapse (manual only)
     let todayCompletedMeetings = [
-      ZoomMeeting(
+      Meeting(
         id: UUID(),
         title: "Completed Meeting Today",
         startTime: now.addingTimeInterval(-7200),  // Started 2 hours ago
         endTime: now.addingTimeInterval(-5400),  // Ended 1.5 hours ago
         joinUrl: "https://zoom.us/j/completed1",
+        platform: .zoom,
         organizerName: "Organizer 1",
         organizerEmail: nil,
         attendeeCount: 3,
@@ -465,12 +481,13 @@ struct MeetingsListViewTests {
 
     // Test yesterday's completed meetings - SHOULD auto-collapse
     let yesterdayCompletedMeetings = [
-      ZoomMeeting(
+      Meeting(
         id: UUID(),
         title: "Yesterday Meeting",
         startTime: now.addingTimeInterval(-86400 - 3600),  // Yesterday, 1 hour duration
         endTime: now.addingTimeInterval(-86400),  // Ended yesterday
         joinUrl: "https://zoom.us/j/yesterday1",
+        platform: .zoom,
         organizerName: "Yesterday Organizer",
         organizerEmail: nil,
         attendeeCount: 4,
@@ -492,12 +509,13 @@ struct MeetingsListViewTests {
 
     // Create completed meetings that should be collapsible
     let completedMeetings = [
-      ZoomMeeting(
+      Meeting(
         id: UUID(),
         title: "Completed Meeting",
         startTime: now.addingTimeInterval(-3600),  // Started 1 hour ago
         endTime: now.addingTimeInterval(-1800),  // Ended 30 min ago
         joinUrl: "https://zoom.us/j/completed123",
+        platform: .zoom,
         organizerName: "Test Organizer",
         organizerEmail: nil,
         attendeeCount: 4,
@@ -521,12 +539,13 @@ struct MeetingsListViewTests {
 
     // Test non-completed meetings cannot be collapsed regardless of day
     let activeMeetings = [
-      ZoomMeeting(
+      Meeting(
         id: UUID(),
         title: "Active Meeting",
         startTime: now.addingTimeInterval(-300),  // Started 5 min ago
         endTime: now.addingTimeInterval(900),  // Ends in 15 min
         joinUrl: "https://zoom.us/j/active123",
+        platform: .zoom,
         organizerName: "Active Organizer",
         organizerEmail: nil,
         attendeeCount: 2,
@@ -544,7 +563,7 @@ struct MeetingsListViewTests {
   }
 
   // Helper function matching DaySectionView smart collapse logic
-  private func shouldDayAutoCollapse(meetings: [ZoomMeeting], title: String) -> Bool {
+  private func shouldDayAutoCollapse(meetings: [Meeting], title: String) -> Bool {
     let allCompleted = !meetings.isEmpty && meetings.allSatisfy { $0.hasEnded }
 
     // Check if this is a past day

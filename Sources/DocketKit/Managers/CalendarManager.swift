@@ -19,8 +19,8 @@ public final class CalendarManager: @unchecked Sendable {
   /// Current calendar authorization state
   public var authState: CalendarAuthState = .notDetermined
 
-  /// List of today's meetings with Zoom URLs, sorted chronologically
-  public var meetings: [ZoomMeeting] = []
+  /// List of today's meetings with video meeting URLs, sorted chronologically
+  public var meetings: [Meeting] = []
 
   /// Timestamp of last successful refresh
   public var lastRefresh: Date?
@@ -42,7 +42,7 @@ public final class CalendarManager: @unchecked Sendable {
   // MARK: - Computed Properties
 
   /// Yesterday's meetings (filtered from main meetings array)
-  public var yesterdayMeetings: [ZoomMeeting] {
+  public var yesterdayMeetings: [Meeting] {
     let calendar = Calendar.current
     let yesterday = calendar.date(byAdding: .day, value: -1, to: Date())!
     return meetings.filter { meeting in
@@ -51,7 +51,7 @@ public final class CalendarManager: @unchecked Sendable {
   }
 
   /// Today's meetings (filtered from main meetings array)
-  public var todayMeetings: [ZoomMeeting] {
+  public var todayMeetings: [Meeting] {
     let calendar = Calendar.current
     let today = Date()
     return meetings.filter { meeting in
@@ -60,7 +60,7 @@ public final class CalendarManager: @unchecked Sendable {
   }
 
   /// Tomorrow's meetings (filtered from main meetings array)
-  public var tomorrowMeetings: [ZoomMeeting] {
+  public var tomorrowMeetings: [Meeting] {
     let calendar = Calendar.current
     let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date())!
     return meetings.filter { meeting in
@@ -114,8 +114,8 @@ public final class CalendarManager: @unchecked Sendable {
 
     do {
       let events = try await fetchThreeDayEvents()
-      let zoomMeetings = convertEventsToMeetings(events)
-      let sortedMeetings = zoomMeetings.sorted { $0.startTime < $1.startTime }
+      let videoMeetings = convertEventsToMeetings(events)
+      let sortedMeetings = videoMeetings.sorted { $0.startTime < $1.startTime }
 
       meetings = sortedMeetings
       lastRefresh = Date()
@@ -288,24 +288,26 @@ public final class CalendarManager: @unchecked Sendable {
     return events
   }
 
-  /// Convert EKEvents to ZoomMeetings, filtering for those with Zoom URLs
+  /// Convert EKEvents to Meetings, filtering for those with video meeting URLs
   /// Made internal for testing purposes
-  internal func convertEventsToMeetings(_ events: [EKEvent]) -> [ZoomMeeting] {
-    let zoomMeetings = events.compactMap { event -> ZoomMeeting? in
-      // Create adapter for ZoomURLExtractor
+  internal func convertEventsToMeetings(_ events: [EKEvent]) -> [Meeting] {
+    let meetings = events.compactMap { event -> Meeting? in
+      // Create adapter for MeetingURLExtractor
       let adapter = EKEventAdapter(event: event)
 
-      // Use ZoomURLExtractor to find Zoom URL
-      guard let zoomUrl = ZoomURLExtractor.extract(from: adapter) else {
-        return nil  // Skip events without Zoom URLs
+      // Use MeetingURLExtractor to find meeting URL with platform detection
+      guard let (meetingUrl, platform) = MeetingURLExtractor.extractWithPlatform(from: adapter)
+      else {
+        return nil  // Skip events without meeting URLs
       }
 
-      return ZoomMeeting(
+      return Meeting(
         id: UUID(),
         title: event.title ?? "Untitled Meeting",
         startTime: event.startDate,
         endTime: event.endDate,
-        joinUrl: zoomUrl,
+        joinUrl: meetingUrl,
+        platform: platform,
         organizerName: event.organizer?.name,
         organizerEmail: nil,  // EKParticipant doesn't expose email directly
         attendeeCount: event.attendees?.count ?? 0,
@@ -314,10 +316,10 @@ public final class CalendarManager: @unchecked Sendable {
       )
     }
 
-    return zoomMeetings
+    return meetings
   }
 
-  /// Convert CalendarEventLike objects with metadata to ZoomMeetings for testing purposes
+  /// Convert CalendarEventLike objects with metadata to Meetings for testing purposes
   /// This method is internal and used for testing with mock events
   internal func convertCalendarEventsToMeetings(
     _ eventData: [(
@@ -325,19 +327,21 @@ public final class CalendarManager: @unchecked Sendable {
       organizerName: String?, organizerEmail: String?, attendeeCount: Int, calendarTitle: String,
       eventIdentifier: String
     )]
-  ) -> [ZoomMeeting] {
-    return eventData.compactMap { data -> ZoomMeeting? in
-      // Use ZoomURLExtractor to find Zoom URL
-      guard let zoomUrl = ZoomURLExtractor.extract(from: data.event) else {
-        return nil  // Skip events without Zoom URLs
+  ) -> [Meeting] {
+    return eventData.compactMap { data -> Meeting? in
+      // Use MeetingURLExtractor to find meeting URL with platform detection
+      guard let (meetingUrl, platform) = MeetingURLExtractor.extractWithPlatform(from: data.event)
+      else {
+        return nil  // Skip events without meeting URLs
       }
 
-      return ZoomMeeting(
+      return Meeting(
         id: UUID(),
         title: data.title,
         startTime: data.startDate,
         endTime: data.endDate,
-        joinUrl: zoomUrl,
+        joinUrl: meetingUrl,
+        platform: platform,
         organizerName: data.organizerName,
         organizerEmail: data.organizerEmail,
         attendeeCount: data.attendeeCount,
