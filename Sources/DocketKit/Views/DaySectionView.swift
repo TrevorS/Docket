@@ -85,7 +85,7 @@ struct DaySectionView: View {
 
             Spacer()
 
-            completedBadge
+            CompletedMeetingsBadge(meetingCount: meetings.count)
 
             chevronIndicator
           }
@@ -117,18 +117,6 @@ struct DaySectionView: View {
   private func toggleExpansion() {
     withAnimation(.easeInOut(duration: 0.3)) {
       isExpanded.toggle()
-    }
-  }
-
-  private var completedBadge: some View {
-    HStack(spacing: 4) {
-      Image(systemName: "checkmark.circle.fill")
-        .font(.caption)
-        .foregroundColor(.green)
-
-      Text("Completed • \(meetings.count) \(meetings.count == 1 ? "meeting" : "meetings")")
-        .font(.caption.weight(.medium))
-        .foregroundColor(.secondary)
     }
   }
 

@@ -37,7 +37,6 @@ public final class CalendarManager: @unchecked Sendable {
   // MARK: - Private State
 
   private var autoRefreshTimer: Timer?
-  private var appLifecycleObservers: [NSObjectProtocol] = []
 
   // MARK: - Computed Properties
 
@@ -72,13 +71,11 @@ public final class CalendarManager: @unchecked Sendable {
 
   public init() {
     updateAuthState()
-    setupAppLifecycleMonitoring()
   }
 
   deinit {
     // Clean up timer directly in deinit (avoid Task that outlives deinit)
     autoRefreshTimer?.invalidate()
-    removeAppLifecycleObservers()
   }
 
   // MARK: - Public API
@@ -202,41 +199,6 @@ public final class CalendarManager: @unchecked Sendable {
         // Don't throw the error - auto-refresh should fail silently
       }
     }.value
-  }
-
-  // MARK: - App Lifecycle Management
-
-  private func setupAppLifecycleMonitoring() {
-    let activeObserver = NotificationCenter.default.addObserver(
-      forName: NSApplication.didBecomeActiveNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self] _ in
-      Task { @MainActor in
-        self?.resumeAutoRefresh()
-      }
-    }
-
-    let inactiveObserver = NotificationCenter.default.addObserver(
-      forName: NSApplication.willResignActiveNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self] _ in
-      Task { @MainActor in
-        self?.pauseAutoRefresh()
-      }
-    }
-
-    appLifecycleObservers = [activeObserver, inactiveObserver]
-    print("📱 App lifecycle monitoring setup complete")
-  }
-
-  private func removeAppLifecycleObservers() {
-    appLifecycleObservers.forEach { observer in
-      NotificationCenter.default.removeObserver(observer)
-    }
-    appLifecycleObservers.removeAll()
-    print("📱 App lifecycle observers removed")
   }
 
   // MARK: - Private Implementation

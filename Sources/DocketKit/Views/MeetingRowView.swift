@@ -8,6 +8,8 @@ struct MeetingRowView: View {
   @State private var isJoining = false
   @State private var showCopyConfirmation = false
   @State private var isHovered = false
+  @State private var isCopyButtonHovered = false
+  @State private var isJoinButtonHovered = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -38,28 +40,12 @@ struct MeetingRowView: View {
     Text(meeting.title)
       .font(.headline)
       .foregroundStyle(meeting.hasEnded ? .secondary : .primary)
-      .lineLimit(2)
+      .lineLimit(1)
+      .truncationMode(.tail)
   }
 
   private var meetingTime: some View {
-    HStack(spacing: 4) {
-      Image(systemName: "clock")
-        .font(.caption)
-        .foregroundStyle(.secondary)
-
-      Text(timeRangeText)
-        .font(.subheadline.monospaced())
-        .foregroundStyle(timeColor)
-
-      if let duration = durationText {
-        Text("•")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-        Text(duration)
-          .font(.subheadline.monospaced())
-          .foregroundStyle(timeColor)
-      }
-    }
+    MeetingTimeView(meeting: meeting)
   }
 
   private var meetingDetails: some View {
@@ -67,7 +53,7 @@ struct MeetingRowView: View {
       // First row: Platform indicator, organizer and attendee count
       HStack(spacing: 12) {
         // Platform indicator
-        platformIndicator
+        PlatformIndicatorView(platform: meeting.platform)
 
         if let organizer = meeting.organizerName, !organizer.isEmpty {
           HStack(spacing: 4) {
@@ -100,44 +86,21 @@ struct MeetingRowView: View {
     }
   }
 
-  private var platformIndicator: some View {
-    HStack(spacing: 4) {
-      Image(systemName: meeting.platform.iconName)
-        .font(.caption2)
-        .foregroundStyle(platformColor)
-      Text(meeting.platform.shortName)
-        .font(.caption2.weight(.medium))
-        .foregroundStyle(platformColor)
-    }
-    .padding(.horizontal, 6)
-    .padding(.vertical, 2)
-    .background(platformColor.opacity(0.1))
-    .clipShape(RoundedRectangle(cornerRadius: 4))
-  }
-
-  private var platformColor: Color {
-    switch meeting.platform {
-    case .zoom:
-      return .blue
-    case .googleMeet:
-      return .green
-    case .unknown:
-      return .gray
-    }
-  }
-
   // MARK: - Action Buttons
 
   private var actionButtons: some View {
     HStack(spacing: 8) {
-      if hasJoinUrl && isHovered {
+      if hasJoinUrl {
         copyLinkButton
+          .opacity(isHovered ? 1.0 : 0.0)
+          .animation(.easeInOut(duration: 0.2), value: isHovered)
       }
 
       if shouldShowJoinButton {
         joinButton
       }
     }
+    .frame(minWidth: 80, alignment: .trailing)  // Reserve consistent space to prevent layout shifts
   }
 
   private var shouldShowJoinButton: Bool {
@@ -148,26 +111,17 @@ struct MeetingRowView: View {
     !(meeting.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
   }
 
-  private var timeColor: Color {
-    if meeting.hasEnded {
-      return .secondary
-    } else if meeting.hasStarted {
-      return .green.opacity(0.8)
-    } else if meeting.isUpcoming {
-      return .orange.opacity(0.8)
-    } else {
-      return .blue.opacity(0.8)
-    }
-  }
-
   private var copyLinkButton: some View {
     Button(action: copyMeetingLink) {
       Image(systemName: "doc.on.clipboard")
         .font(.caption)
-        .foregroundColor(.secondary)
+        .foregroundColor(isCopyButtonHovered ? .primary : .secondary)
+        .scaleEffect(isCopyButtonHovered ? 1.1 : 1.0)
+        .animation(.easeInOut(duration: 0.15), value: isCopyButtonHovered)
     }
     .buttonStyle(.plain)
     .help("Copy meeting link")
+    .onHover { isCopyButtonHovered = $0 }
   }
 
   private var joinButton: some View {
@@ -185,11 +139,15 @@ struct MeetingRowView: View {
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 6)
-      .background(joinButtonColor, in: RoundedRectangle(cornerRadius: 6))
+      .background(joinButtonBackgroundColor, in: RoundedRectangle(cornerRadius: 6))
       .foregroundColor(.white)
+      .scaleEffect(isJoinButtonHovered ? 1.05 : 1.0)
+      .animation(.easeInOut(duration: 0.15), value: isJoinButtonHovered)
     }
     .disabled(isJoining)
     .buttonStyle(.plain)
+    .help(joinButtonTooltip)
+    .onHover { isJoinButtonHovered = $0 }
   }
 
   private var copyConfirmationBanner: some View {
@@ -223,34 +181,24 @@ struct MeetingRowView: View {
     }
   }
 
-  // MARK: - Helper Properties
-
-  private var timeRangeText: String {
-    let formatter = DateFormatter()
-    formatter.timeStyle = .short
-
-    let startTime = formatter.string(from: meeting.startTime)
-    let endTime = formatter.string(from: meeting.endTime)
-
-    return "\(startTime) - \(endTime)"
-  }
-
-  private var durationText: String? {
-    let duration = meeting.endTime.timeIntervalSince(meeting.startTime)
-    let minutes = Int(duration / 60)
-
-    if minutes < 60 {
-      return "\(minutes)m"
+  private var joinButtonBackgroundColor: Color {
+    let baseColor = joinButtonColor
+    if isJoinButtonHovered {
+      return baseColor.opacity(0.9)
     } else {
-      let hours = minutes / 60
-      let remainingMinutes = minutes % 60
-      if remainingMinutes == 0 {
-        return "\(hours)h"
-      } else {
-        return "\(hours)h \(remainingMinutes)m"
-      }
+      return baseColor
     }
   }
+
+  private var joinButtonTooltip: String {
+    if meeting.hasStarted {
+      return "Join active \(meeting.platform.displayName) meeting"
+    } else {
+      return "Join \(meeting.platform.displayName) meeting"
+    }
+  }
+
+  // MARK: - Helper Properties
 
   // MARK: - Actions
 

@@ -36,7 +36,7 @@ public enum MeetingPlatform: String, CaseIterable, Sendable, Hashable {
     case .googleMeet:
       return "Meet"
     case .unknown:
-      return "?"
+      return "Unknown"
     }
   }
 

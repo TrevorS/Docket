@@ -32,6 +32,16 @@ struct MeetingsListView: View {
     }
   }
 
+  // MARK: - Computed Properties
+
+  private var shouldDisableScroll: Bool {
+    // Disable scroll when we have few meetings that likely fit in view
+    let totalMeetings =
+      calendarManager.yesterdayMeetings.count + calendarManager.todayMeetings.count
+      + calendarManager.tomorrowMeetings.count
+    return totalMeetings <= 5  // Approximate threshold for when content fits without scroll
+  }
+
   // MARK: - View Components
 
   private var permissionLoadingView: some View {
@@ -67,6 +77,7 @@ struct MeetingsListView: View {
         DaySectionView(title: "Today", meetings: calendarManager.todayMeetings)
         DaySectionView(title: "Tomorrow", meetings: calendarManager.tomorrowMeetings)
       }
+      .scrollDisabled(shouldDisableScroll)
       .refreshable {
         try? await calendarManager.refreshMeetings()
       }
@@ -86,7 +97,18 @@ struct MeetingsListView: View {
           lastRefresh: calendarManager.lastRefresh,
           isRefreshing: calendarManager.isRefreshing,
           isAutoRefreshEnabled: calendarManager.isAutoRefreshEnabled,
-          isAutoRefreshActive: calendarManager.isAutoRefreshActive
+          isAutoRefreshActive: calendarManager.isAutoRefreshActive,
+          onToggleAutoRefresh: {
+            if calendarManager.isAutoRefreshActive {
+              calendarManager.pauseAutoRefresh()
+            } else {
+              calendarManager.resumeAutoRefresh()
+              // Trigger immediate refresh when resuming from pause
+              Task {
+                try? await calendarManager.refreshMeetings()
+              }
+            }
+          }
         )
         .opacity(isScrolling ? 0.0 : 1.0)
         .animation(.easeInOut(duration: 0.3), value: isScrolling)
@@ -205,7 +227,9 @@ struct MeetingsListView: View {
             isRefreshing: mockCalendarManager.isRefreshing,
             isAutoRefreshEnabled: mockCalendarManager.isAutoRefreshEnabled,
             isAutoRefreshActive: mockCalendarManager.isAutoRefreshActive
-          )
+          ) {
+            print("Toggle auto-refresh (preview)")
+          }
         }
         .navigationTitle("Docket")
       }

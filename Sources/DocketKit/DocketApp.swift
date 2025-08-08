@@ -12,7 +12,7 @@ public struct DocketApp: App {
   public var body: some Scene {
     WindowGroup("Docket - Zoom Meetings") {
       ContentView()
-        .frame(minWidth: 550, minHeight: 450)
+        .frame(minWidth: 550, minHeight: 600)
         .onAppear {
           // Activate the app and bring window to front
           NSApp.activate(ignoringOtherApps: true)
@@ -20,7 +20,7 @@ public struct DocketApp: App {
     }
     .windowStyle(.automatic)
     .windowResizability(.contentSize)
-    .defaultSize(width: 720, height: 780)
+    .defaultSize(width: 720, height: 950)
     .commands {
       CommandGroup(replacing: .newItem) {}
     }

@@ -111,7 +111,7 @@ struct MeetingPlatformTests {
   func testShortNames() {
     #expect(MeetingPlatform.zoom.shortName == "Zoom")
     #expect(MeetingPlatform.googleMeet.shortName == "Meet")
-    #expect(MeetingPlatform.unknown.shortName == "?")
+    #expect(MeetingPlatform.unknown.shortName == "Unknown")
   }
 
   @Test("Icon name properties are valid SF Symbols")
