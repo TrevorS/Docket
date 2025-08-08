@@ -1,6 +1,7 @@
 // ABOUTME: Calendar business logic manager integrating EventKit with ZoomURLExtractor
 // ABOUTME: Handles calendar access, event fetching, and ZoomMeeting conversion as single source of truth
 
+import AppKit
 @preconcurrency import EventKit
 import Foundation
 import Observation
@@ -26,6 +27,17 @@ public final class CalendarManager: @unchecked Sendable {
 
   /// Whether a refresh operation is currently in progress
   public var isRefreshing: Bool = false
+
+  /// Whether auto-refresh is enabled (60-second timer)
+  public var isAutoRefreshEnabled: Bool = true
+
+  /// Whether auto-refresh is currently active (not paused)
+  public var isAutoRefreshActive: Bool = false
+
+  // MARK: - Private State
+
+  private var autoRefreshTimer: Timer?
+  private var appLifecycleObservers: [NSObjectProtocol] = []
 
   // MARK: - Computed Properties
 
@@ -60,6 +72,13 @@ public final class CalendarManager: @unchecked Sendable {
 
   public init() {
     updateAuthState()
+    setupAppLifecycleMonitoring()
+  }
+
+  deinit {
+    // Clean up timer directly in deinit (avoid Task that outlives deinit)
+    autoRefreshTimer?.invalidate()
+    removeAppLifecycleObservers()
   }
 
   // MARK: - Public API
@@ -104,6 +123,120 @@ public final class CalendarManager: @unchecked Sendable {
       print("❌ Meeting refresh failed: \(error)")
       throw CalendarError.fetchFailed(error)
     }
+  }
+
+  // MARK: - Auto-Refresh Management
+
+  /// Start the auto-refresh timer (60-second interval)
+  @MainActor
+  public func startAutoRefresh() {
+    guard isAutoRefreshEnabled else { return }
+
+    stopAutoRefresh()  // Stop any existing timer
+
+    autoRefreshTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) {
+      [weak self] _ in
+      Task { @MainActor in
+        await self?.performAutoRefresh()
+      }
+    }
+
+    isAutoRefreshActive = true
+    print("✅ Auto-refresh timer started (60-second interval)")
+  }
+
+  /// Stop the auto-refresh timer
+  @MainActor
+  public func stopAutoRefresh() {
+    autoRefreshTimer?.invalidate()
+    autoRefreshTimer = nil
+    isAutoRefreshActive = false
+    print("⏹ Auto-refresh timer stopped")
+  }
+
+  /// Resume auto-refresh if enabled (called when app becomes active)
+  @MainActor
+  public func resumeAutoRefresh() {
+    guard isAutoRefreshEnabled && !isAutoRefreshActive else { return }
+    startAutoRefresh()
+    print("▶️ Auto-refresh resumed (app became active)")
+  }
+
+  /// Pause auto-refresh (called when app becomes inactive)
+  @MainActor
+  public func pauseAutoRefresh() {
+    guard isAutoRefreshActive else { return }
+    stopAutoRefresh()
+    print("⏸ Auto-refresh paused (app became inactive)")
+  }
+
+  /// Toggle auto-refresh enabled state
+  @MainActor
+  public func toggleAutoRefresh() {
+    isAutoRefreshEnabled.toggle()
+
+    if isAutoRefreshEnabled {
+      startAutoRefresh()
+    } else {
+      stopAutoRefresh()
+    }
+
+    print("🔄 Auto-refresh \(isAutoRefreshEnabled ? "enabled" : "disabled")")
+  }
+
+  /// Perform auto-refresh (internal method called by timer)
+  @MainActor
+  private func performAutoRefresh() async {
+    // Only auto-refresh if we have permission and not already refreshing
+    guard (authState == .fullAccess || authState == .authorized) && !isRefreshing else {
+      return
+    }
+
+    // Defer the actual refresh to the next run loop to avoid reentrant table view operations
+    await Task { @MainActor in
+      do {
+        try await refreshMeetings()
+        print("🔄 Auto-refresh completed successfully")
+      } catch {
+        print("❌ Auto-refresh failed: \(error)")
+        // Don't throw the error - auto-refresh should fail silently
+      }
+    }.value
+  }
+
+  // MARK: - App Lifecycle Management
+
+  private func setupAppLifecycleMonitoring() {
+    let activeObserver = NotificationCenter.default.addObserver(
+      forName: NSApplication.didBecomeActiveNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        self?.resumeAutoRefresh()
+      }
+    }
+
+    let inactiveObserver = NotificationCenter.default.addObserver(
+      forName: NSApplication.willResignActiveNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        self?.pauseAutoRefresh()
+      }
+    }
+
+    appLifecycleObservers = [activeObserver, inactiveObserver]
+    print("📱 App lifecycle monitoring setup complete")
+  }
+
+  private func removeAppLifecycleObservers() {
+    appLifecycleObservers.forEach { observer in
+      NotificationCenter.default.removeObserver(observer)
+    }
+    appLifecycleObservers.removeAll()
+    print("📱 App lifecycle observers removed")
   }
 
   // MARK: - Private Implementation

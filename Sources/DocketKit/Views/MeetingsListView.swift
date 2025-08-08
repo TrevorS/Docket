@@ -6,6 +6,8 @@ import SwiftUI
 struct MeetingsListView: View {
   @State private var calendarManager = CalendarManager()
   @State private var isRequestingPermission = false
+  @State private var isScrolling = false
+  @State private var scrollFadeTimer: Timer?
 
   init() {
   }
@@ -24,14 +26,6 @@ struct MeetingsListView: View {
         }
       }
       .navigationTitle("Docket")
-      .toolbar {
-        ToolbarItem(placement: .primaryAction) {
-          Button(action: refreshMeetings) {
-            Image(systemName: "arrow.clockwise")
-          }
-          .disabled(calendarManager.isRefreshing || isRequestingPermission)
-        }
-      }
     }
     .task {
       await requestCalendarAccessAndRefresh()
@@ -67,19 +61,36 @@ struct MeetingsListView: View {
   }
 
   private var meetingsList: some View {
-    List {
-      DaySectionView(title: "Yesterday", meetings: calendarManager.yesterdayMeetings)
-      DaySectionView(title: "Today", meetings: calendarManager.todayMeetings)
-      DaySectionView(title: "Tomorrow", meetings: calendarManager.tomorrowMeetings)
-    }
-    .refreshable {
-      try? await calendarManager.refreshMeetings()
-    }
-    .overlay(alignment: .bottom) {
-      RefreshStatusView(
-        lastRefresh: calendarManager.lastRefresh,
-        isRefreshing: calendarManager.isRefreshing
+    ZStack {
+      List {
+        DaySectionView(title: "Yesterday", meetings: calendarManager.yesterdayMeetings)
+        DaySectionView(title: "Today", meetings: calendarManager.todayMeetings)
+        DaySectionView(title: "Tomorrow", meetings: calendarManager.tomorrowMeetings)
+      }
+      .refreshable {
+        try? await calendarManager.refreshMeetings()
+      }
+      .simultaneousGesture(
+        DragGesture()
+          .onChanged { _ in
+            handleScrollStart()
+          }
+          .onEnded { _ in
+            handleScrollEnd()
+          }
       )
+
+      VStack {
+        Spacer()
+        RefreshStatusView(
+          lastRefresh: calendarManager.lastRefresh,
+          isRefreshing: calendarManager.isRefreshing,
+          isAutoRefreshEnabled: calendarManager.isAutoRefreshEnabled,
+          isAutoRefreshActive: calendarManager.isAutoRefreshActive
+        )
+        .opacity(isScrolling ? 0.0 : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: isScrolling)
+      }
     }
   }
 
@@ -95,6 +106,8 @@ struct MeetingsListView: View {
         || calendarManager.authState == .authorized)
     {
       try? await calendarManager.refreshMeetings()
+      // Start auto-refresh after successful permission grant
+      calendarManager.startAutoRefresh()
     }
   }
 
@@ -110,6 +123,8 @@ struct MeetingsListView: View {
       && (calendarManager.authState == .fullAccess || calendarManager.authState == .authorized)
     {
       try? await calendarManager.refreshMeetings()
+      // Start auto-refresh after successful initial refresh
+      calendarManager.startAutoRefresh()
     }
   }
 
@@ -144,6 +159,26 @@ struct MeetingsListView: View {
       NSWorkspace.shared.open(settingsURL)
     }
   }
+
+  private func handleScrollStart() {
+    // User started scrolling - fade out immediately
+    scrollFadeTimer?.invalidate()
+    withAnimation(.easeInOut(duration: 0.2)) {
+      isScrolling = true
+    }
+  }
+
+  private func handleScrollEnd() {
+    // Start timer to fade back in after scroll stops
+    scrollFadeTimer?.invalidate()
+    scrollFadeTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
+      Task { @MainActor in
+        withAnimation(.easeInOut(duration: 0.3)) {
+          isScrolling = false
+        }
+      }
+    }
+  }
 }
 
 #Preview("With Meetings") {
@@ -167,7 +202,9 @@ struct MeetingsListView: View {
         .overlay(alignment: .bottom) {
           RefreshStatusView(
             lastRefresh: mockCalendarManager.lastRefresh,
-            isRefreshing: mockCalendarManager.isRefreshing
+            isRefreshing: mockCalendarManager.isRefreshing,
+            isAutoRefreshEnabled: mockCalendarManager.isAutoRefreshEnabled,
+            isAutoRefreshActive: mockCalendarManager.isAutoRefreshActive
           )
         }
         .navigationTitle("Docket")

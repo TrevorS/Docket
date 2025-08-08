@@ -41,9 +41,9 @@ struct DaySectionView: View {
       } else if allMeetingsCompleted && !isExpanded {
         collapsedDayView
       } else {
-        ForEach(meetings) { meeting in
+        ForEach(Array(meetings.enumerated()), id: \.element.id) { index, meeting in
           MeetingRowView(meeting: meeting)
-            .listRowSeparator(.visible)
+            .listRowSeparator(index == meetings.count - 1 ? .hidden : .visible)
             .buttonStyle(.plain)
         }
       }

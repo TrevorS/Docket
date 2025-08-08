@@ -221,6 +221,8 @@ public enum PreviewData {
     public var meetings: [ZoomMeeting] = PreviewData.allMeetings
     public var lastRefresh: Date? = Date().addingTimeInterval(-300)  // 5 minutes ago
     public var isRefreshing: Bool = false
+    public var isAutoRefreshEnabled: Bool = true
+    public var isAutoRefreshActive: Bool = false
 
     public var yesterdayMeetings: [ZoomMeeting] { PreviewData.yesterdayMeetings }
     public var todayMeetings: [ZoomMeeting] { PreviewData.todayMeetings }
