@@ -21,7 +21,7 @@ This project is now **CLI-driven using Swift Package Manager**. All development 
 ### Core Commands
 - **Build**: `swift build` or `make build`
 - **Run**: `swift run Docket` or `make run`
-- **Test**: `swift test` or `make test` (102 comprehensive tests)
+- **Test**: `swift test` or `make test` (216 comprehensive tests)
 - **Clean**: `swift package clean` or `make clean`
 
 ### App Distribution  
@@ -76,10 +76,31 @@ Sources/
         ├── EmptyMeetingsDayView.swift # No meetings today state
         ├── LoadingStateView.swift # Loading indicator
         ├── RefreshStatusView.swift # Auto-refresh status indicator
-        └── PreviewData.swift   # SwiftUI preview data
+        ├── PreviewData.swift   # SwiftUI preview data
+        └── Components/         # Extracted, reusable components
+            ├── PlatformIndicatorView.swift # Platform type display
+            ├── MeetingTimeView.swift # Time range and duration
+            ├── CompletedMeetingsBadge.swift # Completed meetings badge
+            ├── MeetingCopyButton.swift # Copy meeting URL button
+            ├── CopyConfirmationBanner.swift # Copy confirmation display
+            ├── MeetingDetailsView.swift # Organizer and attendee info
+            ├── RefreshStatusText.swift # Last refresh time display
+            ├── RefreshStatusIcon.swift # Refresh status icon with animations
+            └── MeetingJoinButton.swift # Meeting join button
 
 Tests/
-├── DocketKitTests/             # 102 comprehensive unit tests (Swift Testing)
+├── DocketKitTests/             # 216 comprehensive unit tests (Swift Testing)
+│   ├── Components/             # Component-specific tests
+│   │   ├── PlatformIndicatorTests.swift
+│   │   ├── MeetingTimeTests.swift
+│   │   ├── CompletedMeetingsBadgeTests.swift
+│   │   ├── MeetingCopyButtonTests.swift
+│   │   ├── CopyConfirmationBannerTests.swift
+│   │   ├── MeetingDetailsTests.swift
+│   │   ├── RefreshStatusTextTests.swift
+│   │   ├── RefreshStatusIconTests.swift
+│   │   └── MeetingJoinButtonTests.swift
+│   └── (other test files)
 └── DocketAppTests/             # Integration tests
 ```
 
@@ -162,7 +183,7 @@ Priority-based field searching in `MeetingURLExtractor`:
 - **Swift 6 strict concurrency**: Enabled in all targets with @preconcurrency imports where needed
 - **Async/await**: All EventKit operations use modern concurrency
 - **Protocol-based design**: CalendarEventLike enables clean testing and EventKit integration
-- **TDD approach**: All business logic implemented with tests first (73 tests passing)
+- **TDD approach**: All business logic implemented with tests first (216 tests passing)
 
 ### Testing Strategy (Swift Testing Framework)
 - **Unit tests**: DocketKitTests covers all business logic (models, managers, utilities)
@@ -183,11 +204,12 @@ Priority-based field searching in `MeetingURLExtractor`:
 **All core functionality implemented:**
 1. **Multi-Platform Support**: Zoom and Google Meet with extensible architecture
 2. **Complete UI**: MeetingsListView, MeetingRowView, and supporting components
-3. **Floating Window**: Always-on-top window with auto-refresh every 60 seconds
-4. **EventKit Integration**: Full calendar access with proper permission handling
-5. **Meeting Management**: One-click join functionality via NSWorkspace.open
-6. **State Management**: @Observable pattern with comprehensive error handling
-7. **Testing Coverage**: 102 tests covering all business logic and utilities
+3. **Component-Based Architecture**: 9 extracted components with comprehensive testing
+4. **Floating Window**: Always-on-top window with auto-refresh every 60 seconds
+5. **EventKit Integration**: Full calendar access with proper permission handling
+6. **Meeting Management**: One-click join functionality via NSWorkspace.open
+7. **State Management**: @Observable pattern with comprehensive error handling
+8. **Testing Coverage**: 216 tests covering all business logic, utilities, and components
 
 ### 🎯 Ready for Production Use
 The app is feature-complete with:
@@ -195,8 +217,9 @@ The app is feature-complete with:
 - Real-time meeting status (upcoming, active, ended)
 - Auto-refresh with visual status indicators
 - Comprehensive error handling and loading states
-- Clean, modern SwiftUI interface
-- Robust testing suite
+- Clean, modern SwiftUI interface with modular components
+- Robust testing suite (216 comprehensive tests)
+- Component-based architecture for maintainability
 
 ## Critical Architecture Insights
 
@@ -212,7 +235,7 @@ The app is feature-complete with:
 Uses new Swift Testing framework (not XCTest) with protocol-based mocking:
 - `CalendarEventLike` protocol enables testing without EventKit  
 - `MockCalendarEvent` for comprehensive URL extraction testing
-- All business logic has corresponding tests (102 tests passing)
+- All business logic has corresponding tests (216 tests passing)
 - Multi-platform testing ensures robustness across different meeting providers
 
 ### Multi-Platform Architecture
@@ -225,7 +248,7 @@ The app uses an extensible platform architecture:
 ## Key Development Commands
 ```bash
 # Comprehensive development cycle
-swift test        # Run all 102 tests
+swift test        # Run all 216 tests
 swift build       # Verify compilation  
 swift run Docket  # Launch the floating widget
 make app          # Create .app bundle for distribution
