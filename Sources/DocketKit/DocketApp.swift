@@ -4,6 +4,13 @@
 import AppKit
 import SwiftUI
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+  static let appDidBecomeActive = Notification.Name("appDidBecomeActive")
+  static let appDidResignActive = Notification.Name("appDidResignActive")
+}
+
 public struct DocketApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
@@ -35,10 +42,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.configureFloatingWindows()
       }
     }
+    
+    // Set up app lifecycle notifications for auto-refresh management
+    setupAppLifecycleNotifications()
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
+  }
+  
+  func applicationDidBecomeActive(_ aNotification: Notification) {
+    Task { @MainActor in
+      NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
+    }
+  }
+  
+  func applicationDidResignActive(_ aNotification: Notification) {
+    Task { @MainActor in
+      NotificationCenter.default.post(name: .appDidResignActive, object: nil)
+    }
   }
 
   @MainActor
@@ -61,6 +83,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // Ensure the app activates
     NSApp.activate(ignoringOtherApps: true)
+  }
+
+  @MainActor
+  private func setupAppLifecycleNotifications() {
+    // No additional setup needed - delegate methods handle lifecycle events
+    print("✅ App lifecycle notifications configured")
   }
 
   @MainActor

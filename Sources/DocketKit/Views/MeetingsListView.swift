@@ -30,6 +30,16 @@ struct MeetingsListView: View {
     .task {
       await requestCalendarAccessAndRefresh()
     }
+    .onReceive(NotificationCenter.default.publisher(for: .appDidBecomeActive)) { _ in
+      Task { @MainActor in
+        handleAppBecameActive()
+      }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: .appDidResignActive)) { _ in
+      Task { @MainActor in
+        handleAppResignedActive()
+      }
+    }
   }
 
   // MARK: - Computed Properties
@@ -200,6 +210,16 @@ struct MeetingsListView: View {
         }
       }
     }
+  }
+  
+  private func handleAppBecameActive() {
+    // Resume auto-refresh when app becomes active
+    calendarManager.resumeAutoRefresh()
+  }
+  
+  private func handleAppResignedActive() {
+    // Pause auto-refresh when app becomes inactive to save resources
+    calendarManager.pauseAutoRefresh()  
   }
 }
 
