@@ -53,7 +53,7 @@ struct AppModelTests {
     #expect(appModel.notificationTime == 5)
     #expect(appModel.selectedCalendars.isEmpty)
     #expect(appModel.windowOpacity == 1.0)
-    #expect(appModel.alwaysOnTop == true)
+    #expect(appModel.alwaysOnTop == false)
 
     // Test default runtime state
     #expect(appModel.lastRefresh == nil)
@@ -166,7 +166,7 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Test default value
-    #expect(appModel.alwaysOnTop == true)
+    #expect(appModel.alwaysOnTop == false)
 
     // Test changing value
     appModel.alwaysOnTop = false
@@ -286,7 +286,7 @@ struct AppModelTests {
     #expect(appModel.notificationTime == 5)
     #expect(appModel.selectedCalendars.isEmpty)
     #expect(appModel.windowOpacity == 1.0)
-    #expect(appModel.alwaysOnTop == true)
+    #expect(appModel.alwaysOnTop == false)
     #expect(appModel.lastRefresh == nil)
     #expect(appModel.nextMeeting == nil)
   }

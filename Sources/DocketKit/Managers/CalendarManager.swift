@@ -37,6 +37,7 @@ public final class CalendarManager: @unchecked Sendable {
   // MARK: - Private State
 
   private var autoRefreshTimer: Timer?
+  private var sleepWakeObservers: [NSObjectProtocol] = []
 
   // MARK: - Computed Properties
 
@@ -71,11 +72,13 @@ public final class CalendarManager: @unchecked Sendable {
 
   public init() {
     updateAuthState()
+    setupSleepWakeNotifications()
   }
 
   deinit {
     // Clean up timer directly in deinit (avoid Task that outlives deinit)
     autoRefreshTimer?.invalidate()
+    removeSleepWakeNotifications()
   }
 
   // MARK: - Public API
@@ -133,7 +136,8 @@ public final class CalendarManager: @unchecked Sendable {
 
     autoRefreshTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) {
       [weak self] _ in
-      Task { @MainActor in
+      // Use a detached task to avoid timer callback context
+      Task.detached {
         await self?.performAutoRefresh()
       }
     }
@@ -189,16 +193,26 @@ public final class CalendarManager: @unchecked Sendable {
       return
     }
 
-    // Defer the actual refresh to the next run loop to avoid reentrant table view operations
-    await Task { @MainActor in
-      do {
-        try await refreshMeetings()
-        print("🔄 Auto-refresh completed successfully")
-      } catch {
-        print("❌ Auto-refresh failed: \(error)")
-        // Don't throw the error - auto-refresh should fail silently
+    // Use DispatchQueue to break out of current execution context completely
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+      guard let self = self else { return }
+
+      Task { @MainActor in
+        // Double-check conditions after delay
+        guard (self.authState == .fullAccess || self.authState == .authorized) && !self.isRefreshing
+        else {
+          return
+        }
+
+        do {
+          try await self.refreshMeetings()
+          print("🔄 Auto-refresh completed successfully")
+        } catch {
+          print("❌ Auto-refresh failed: \(error)")
+          // Don't throw the error - auto-refresh should fail silently
+        }
       }
-    }.value
+    }
   }
 
   // MARK: - Private Implementation
@@ -311,6 +325,80 @@ public final class CalendarManager: @unchecked Sendable {
         eventIdentifier: data.eventIdentifier
       )
     }
+  }
+
+  // MARK: - Sleep/Wake Notifications
+
+  /// Set up system sleep/wake notifications to manage auto-refresh
+  private func setupSleepWakeNotifications() {
+    let notificationCenter = NSWorkspace.shared.notificationCenter
+
+    // Computer will sleep - pause auto-refresh
+    let willSleepObserver = notificationCenter.addObserver(
+      forName: NSWorkspace.willSleepNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        self?.handleSystemWillSleep()
+      }
+    }
+
+    // Computer did wake - resume auto-refresh
+    let didWakeObserver = notificationCenter.addObserver(
+      forName: NSWorkspace.didWakeNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        self?.handleSystemDidWake()
+      }
+    }
+
+    sleepWakeObservers = [willSleepObserver, didWakeObserver]
+  }
+
+  /// Remove sleep/wake notification observers
+  private func removeSleepWakeNotifications() {
+    let notificationCenter = NSWorkspace.shared.notificationCenter
+
+    for observer in sleepWakeObservers {
+      notificationCenter.removeObserver(observer)
+    }
+
+    sleepWakeObservers.removeAll()
+  }
+
+  /// Handle system going to sleep - pause auto-refresh to save resources
+  @MainActor
+  private func handleSystemWillSleep() {
+    guard isAutoRefreshActive else { return }
+    pauseAutoRefresh()
+    print("💤 System going to sleep - auto-refresh paused")
+  }
+
+  /// Handle system waking up - resume auto-refresh and perform immediate refresh
+  @MainActor
+  private func handleSystemDidWake() {
+    guard isAutoRefreshEnabled else { return }
+
+    // Resume auto-refresh timer
+    resumeAutoRefresh()
+
+    // Perform an immediate refresh since data might be stale
+    Task {
+      // Small delay to allow system to fully wake up
+      try? await Task.sleep(nanoseconds: 2_000_000_000)  // 2 seconds
+
+      do {
+        try await refreshMeetings()
+        print("🔄 Wake-up refresh completed successfully")
+      } catch {
+        print("❌ Wake-up refresh failed: \(error)")
+      }
+    }
+
+    print("🌅 System woke up - auto-refresh resumed with immediate refresh")
   }
 }
 

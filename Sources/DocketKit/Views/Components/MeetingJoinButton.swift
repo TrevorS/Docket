@@ -45,11 +45,12 @@ struct MeetingJoinButton: View {
   }
 
   private var baseColor: Color {
-    if meeting.hasStarted {
-      return .green
-    } else {
-      return .blue
-    }
+    // Use platform-specific color, but keep the meeting state logic
+    let platformColor = meeting.platform.color
+
+    // For active meetings, we could enhance the color or keep platform branding
+    // For now, maintain platform consistency throughout meeting lifecycle
+    return platformColor
   }
 
   private var backgroundColor: Color {
@@ -100,148 +101,79 @@ struct MeetingJoinButton: View {
   }
 }
 
-#Preview("Upcoming Zoom Meeting") {
+#Preview {
   VStack(spacing: 16) {
-    MeetingJoinButton(
-      meeting: Meeting(
-        id: UUID(),
-        title: "Upcoming Zoom Call",
-        startTime: Date().addingTimeInterval(300),  // 5 minutes from now
-        endTime: Date().addingTimeInterval(3900),  // 65 minutes from now
-        joinUrl: "https://zoom.us/j/123456789",
-        platform: .zoom,
-        organizerName: "John Doe",
-        organizerEmail: nil,
-        attendeeCount: 5,
-        calendarName: "Work",
-        eventIdentifier: "test-upcoming"
-      ),
-      onJoin: { url in
-        print("Joining: \(url)")
-      }
-    )
-    .padding()
-  }
-}
-
-#Preview("Active Google Meet") {
-  VStack(spacing: 16) {
-    MeetingJoinButton(
-      meeting: Meeting(
-        id: UUID(),
-        title: "Active Google Meet",
-        startTime: Date().addingTimeInterval(-300),  // Started 5 minutes ago
-        endTime: Date().addingTimeInterval(3300),  // Ends in 55 minutes
-        joinUrl: "https://meet.google.com/abc-def-ghi",
-        platform: .googleMeet,
-        organizerName: "Jane Smith",
-        organizerEmail: nil,
-        attendeeCount: 12,
-        calendarName: "Work",
-        eventIdentifier: "test-active"
-      ),
-      onJoin: { url in
-        print("Joining active meeting: \(url)")
-      }
-    )
-    .padding()
-  }
-}
-
-#Preview("No URL Available") {
-  VStack(spacing: 16) {
-    MeetingJoinButton(
-      meeting: Meeting(
-        id: UUID(),
-        title: "Meeting Without URL",
-        startTime: Date().addingTimeInterval(600),
-        endTime: Date().addingTimeInterval(4200),
-        joinUrl: nil,
-        platform: .unknown,
-        organizerName: nil,
-        organizerEmail: nil,
-        attendeeCount: 0,
-        calendarName: "Calendar",
-        eventIdentifier: "test-no-url"
-      ),
-      onJoin: { url in
-        print("This should not be called")
-      }
-    )
-    .padding()
-
-    Text("Button above should be disabled (no URL)")
-      .font(.caption)
-      .foregroundStyle(.secondary)
-  }
-}
-
-#Preview("All States") {
-  VStack(spacing: 12) {
-    Text("Different Meeting States")
+    Text("MeetingJoinButton")
       .font(.headline)
 
-    HStack(spacing: 12) {
+    HStack(spacing: 16) {
       VStack {
-        Text("Upcoming")
+        Text("Zoom")
+          .font(.caption)
         MeetingJoinButton(
           meeting: Meeting(
             id: UUID(),
-            title: "Future Meeting",
-            startTime: Date().addingTimeInterval(600),
-            endTime: Date().addingTimeInterval(4200),
-            joinUrl: "https://zoom.us/j/111111111",
+            title: "Team Standup",
+            startTime: Date().addingTimeInterval(300),
+            endTime: Date().addingTimeInterval(3900),
+            joinUrl: "https://zoom.us/j/123456789",
             platform: .zoom,
-            organizerName: nil,
+            organizerName: "John Doe",
             organizerEmail: nil,
-            attendeeCount: 3,
+            attendeeCount: 5,
             calendarName: "Work",
-            eventIdentifier: "test-future"
+            eventIdentifier: "zoom-example"
           ),
           onJoin: { _ in }
         )
       }
 
       VStack {
-        Text("Active")
+        Text("Google Meet")
+          .font(.caption)
         MeetingJoinButton(
           meeting: Meeting(
             id: UUID(),
-            title: "Current Meeting",
-            startTime: Date().addingTimeInterval(-600),
-            endTime: Date().addingTimeInterval(3000),
-            joinUrl: "https://meet.google.com/xyz-abc-def",
+            title: "Design Review",
+            startTime: Date().addingTimeInterval(600),
+            endTime: Date().addingTimeInterval(4200),
+            joinUrl: "https://meet.google.com/abc-def-ghi",
             platform: .googleMeet,
-            organizerName: nil,
+            organizerName: "Jane Smith",
             organizerEmail: nil,
             attendeeCount: 8,
             calendarName: "Work",
-            eventIdentifier: "test-current"
+            eventIdentifier: "meet-example"
           ),
           onJoin: { _ in }
         )
       }
 
       VStack {
-        Text("Disabled")
+        Text("No URL")
+          .font(.caption)
         MeetingJoinButton(
           meeting: Meeting(
             id: UUID(),
-            title: "No URL",
+            title: "In-Person Meeting",
             startTime: Date(),
             endTime: Date().addingTimeInterval(3600),
-            joinUrl: "",
+            joinUrl: nil,
             platform: .unknown,
             organizerName: nil,
             organizerEmail: nil,
             attendeeCount: 0,
-            calendarName: "Work",
-            eventIdentifier: "test-disabled"
+            calendarName: "Calendar",
+            eventIdentifier: "disabled-example"
           ),
           onJoin: { _ in }
         )
       }
     }
     .padding()
+
+    Text("Platform-specific colors: Zoom (blue), Google Meet (green)")
+      .font(.caption)
+      .foregroundStyle(.secondary)
   }
 }

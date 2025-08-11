@@ -57,7 +57,18 @@ public final class AppModel: @unchecked Sendable {
   public var windowOpacity: Double = 1.0
 
   /// Whether window should always stay on top
-  public var alwaysOnTop: Bool = true
+  private var _alwaysOnTop: Bool = false
+  public var alwaysOnTop: Bool {
+    get { _alwaysOnTop }
+    set {
+      _alwaysOnTop = newValue
+      NotificationCenter.default.post(
+        name: Notification.Name("alwaysOnTopDidChange"),
+        object: nil,
+        userInfo: ["alwaysOnTop": newValue]
+      )
+    }
+  }
 
   // MARK: - Runtime State
 

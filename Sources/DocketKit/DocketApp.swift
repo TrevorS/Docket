@@ -9,16 +9,19 @@ import SwiftUI
 extension Notification.Name {
   static let appDidBecomeActive = Notification.Name("appDidBecomeActive")
   static let appDidResignActive = Notification.Name("appDidResignActive")
+  static let alwaysOnTopDidChange = Notification.Name("alwaysOnTopDidChange")
 }
 
 public struct DocketApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+  @State private var appModel = AppModel()
 
   public init() {}
 
   public var body: some Scene {
     WindowGroup("Docket - Zoom Meetings") {
       ContentView()
+        .environment(appModel)
         .frame(minWidth: 550, minHeight: 600)
         .onAppear {
           // Activate the app and bring window to front
@@ -34,6 +37,7 @@ public struct DocketApp: App {
   }
 }
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     // Delay to ensure windows are created in Xcode debugging environment
@@ -42,21 +46,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.configureFloatingWindows()
       }
     }
-    
+
     // Set up app lifecycle notifications for auto-refresh management
     setupAppLifecycleNotifications()
+
+    // Set up always-on-top notification observer
+    setupAlwaysOnTopNotifications()
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
-  
+
   func applicationDidBecomeActive(_ aNotification: Notification) {
     Task { @MainActor in
       NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
     }
   }
-  
+
   func applicationDidResignActive(_ aNotification: Notification) {
     Task { @MainActor in
       NotificationCenter.default.post(name: .appDidResignActive, object: nil)
@@ -64,11 +71,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @MainActor
-  private func configureFloatingWindows() {
-    // Configure all app windows to float above other applications
+  private func configureFloatingWindows(alwaysOnTop: Bool = false) {
+    // Configure all app windows
     for window in NSApp.windows {
-      // Set window level to float above normal windows but below screen savers
-      window.level = .floating
+      // Set window level based on alwaysOnTop setting
+      window.level = alwaysOnTop ? .floating : .normal
 
       // Configure window behavior
       window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
@@ -78,7 +85,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
       // Activate and bring to front
       window.makeKeyAndOrderFront(nil)
-      window.orderFrontRegardless()
+      if alwaysOnTop {
+        window.orderFrontRegardless()
+      }
     }
 
     // Ensure the app activates
@@ -89,6 +98,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private func setupAppLifecycleNotifications() {
     // No additional setup needed - delegate methods handle lifecycle events
     print("✅ App lifecycle notifications configured")
+  }
+
+  private func setupAlwaysOnTopNotifications() {
+    NotificationCenter.default.addObserver(
+      forName: .alwaysOnTopDidChange,
+      object: nil,
+      queue: .main
+    ) { [weak self] notification in
+      if let alwaysOnTop = notification.userInfo?["alwaysOnTop"] as? Bool {
+        Task { @MainActor in
+          self?.configureFloatingWindows(alwaysOnTop: alwaysOnTop)
+        }
+      }
+    }
+    print("✅ Always-on-top notifications configured")
   }
 
   @MainActor

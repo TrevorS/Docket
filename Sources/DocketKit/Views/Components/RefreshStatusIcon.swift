@@ -1,7 +1,25 @@
-// ABOUTME: Complex animated icon component with 5-state color machine and breathing animations
-// ABOUTME: Manages sophisticated animation state transitions, timer lifecycle, and refresh status visualization
+// ABOUTME: Clean state-driven animated icon component for refresh status visualization
+// ABOUTME: Uses enum-based state management with clear state transitions and debugging
 
 import SwiftUI
+
+enum RefreshStatus: CustomStringConvertible {
+  case paused  // Auto-refresh enabled but paused
+  case refreshing  // Currently refreshing
+  case fadingOut  // Just finished refreshing, fading back to normal
+  case active  // Auto-refresh active, waiting for next cycle
+  case disabled  // Auto-refresh disabled
+
+  var description: String {
+    switch self {
+    case .paused: return "paused"
+    case .refreshing: return "refreshing"
+    case .fadingOut: return "fadingOut"
+    case .active: return "active"
+    case .disabled: return "disabled"
+    }
+  }
+}
 
 struct RefreshStatusIcon: View {
   let isRefreshing: Bool
@@ -12,6 +30,29 @@ struct RefreshStatusIcon: View {
   @State private var isPulsing = false
   @State private var isPostRefreshFading = false
   @State private var fadeTimer: Timer?
+
+  // MARK: - Computed Properties
+
+  private var refreshStatus: RefreshStatus {
+    let status: RefreshStatus
+
+    if isAutoRefreshEnabled && !isAutoRefreshActive {
+      status = .paused
+    } else if isRefreshing {
+      status = .refreshing
+    } else if isPostRefreshFading {
+      status = .fadingOut
+    } else if isAutoRefreshEnabled && isAutoRefreshActive {
+      status = .active
+    } else {
+      status = .disabled
+    }
+
+    // Debug logging disabled - orange clock issue resolved
+    // print("🔍 RefreshStatusIcon - Status: \(status), enabled: \(isAutoRefreshEnabled), active: \(isAutoRefreshActive), refreshing: \(isRefreshing), fading: \(isPostRefreshFading)")
+
+    return status
+  }
 
   var body: some View {
     Image(systemName: iconName)
@@ -36,58 +77,68 @@ struct RefreshStatusIcon: View {
   }
 
   private var iconName: String {
-    if isAutoRefreshEnabled && !isAutoRefreshActive {
+    switch refreshStatus {
+    case .paused:
       return "pause.circle.fill"
-    } else {
+    default:
       return "clock"
     }
   }
 
   private var iconColor: Color {
-    if isAutoRefreshEnabled && !isAutoRefreshActive {
-      // Paused state - show static orange pause icon (no breathing)
-      return .orange
-    } else if isRefreshing {
+    let color: Color
+    switch refreshStatus {
+    case .paused:
+      // Paused state - show static blue pause icon (no breathing) - NEVER orange
+      color = .blue.opacity(0.5)
+    // print("🎨 RefreshStatusIcon - Color: PAUSED -> blue.opacity(0.5)")
+    case .refreshing:
       // Breathing effect during active refresh: fade between secondary and blue
-      return isPulsing ? .blue.opacity(0.8) : .secondary
-    } else if isPostRefreshFading {
+      color = isPulsing ? .blue.opacity(0.8) : .secondary
+    // print("🎨 RefreshStatusIcon - Color: REFRESHING -> \(isPulsing ? "blue.opacity(0.8)" : "secondary")")
+    case .fadingOut:
       // Fading from blue back to gray after refresh completes
-      return isPulsing ? .blue.opacity(0.4) : .secondary
-    } else if isAutoRefreshEnabled && isAutoRefreshActive {
+      color = isPulsing ? .blue.opacity(0.4) : .secondary
+    // print("🎨 RefreshStatusIcon - Color: FADING_OUT -> \(isPulsing ? "blue.opacity(0.4)" : "secondary")")
+    case .active:
       // Auto-refresh is enabled and active but not currently refreshing - show blue
-      return .blue.opacity(0.6)
-    } else {
+      color = .blue.opacity(0.6)
+    // print("🎨 RefreshStatusIcon - Color: ACTIVE -> blue.opacity(0.6)")
+    case .disabled:
       // Auto-refresh inactive or disabled - show secondary
-      return .secondary
+      color = .secondary
+    // print("🎨 RefreshStatusIcon - Color: DISABLED -> secondary")
     }
+    return color
   }
 
   private func startPulsingIfNeeded() {
     fadeTimer?.invalidate()
     fadeTimer = nil
 
-    // Never pulse when paused (orange state)
-    if isAutoRefreshEnabled && !isAutoRefreshActive {
+    switch refreshStatus {
+    case .paused:
+      // Never pulse when paused (static blue state)
       isPostRefreshFading = false
       withAnimation(.easeInOut(duration: 0.3)) {
         isPulsing = false
       }
-      return
-    }
 
-    if isRefreshing {
+    case .refreshing:
       // Start the breathing animation during active refresh
       isPostRefreshFading = false
       withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
         isPulsing = true
       }
-    } else if isPostRefreshFading {
+
+    case .fadingOut:
       // Continue gentler pulsing during fade-out
       withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
         isPulsing = true
       }
-    } else {
-      // Stop the breathing animation
+
+    case .active, .disabled:
+      // Stop the breathing animation for normal states
       isPostRefreshFading = false
       withAnimation(.easeInOut(duration: 0.3)) {
         isPulsing = false

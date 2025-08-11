@@ -305,15 +305,15 @@ struct CalendarManagerTests {
   @Test("Auto-refresh timer can be started and stopped")
   @MainActor func testAutoRefreshTimerLifecycle() {
     let manager = CalendarManager()
-    
+
     // Initially auto-refresh should not be active
     #expect(manager.isAutoRefreshActive == false)
     #expect(manager.isAutoRefreshEnabled == true)
-    
+
     // Start auto-refresh
     manager.startAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
-    
+
     // Stop auto-refresh
     manager.stopAutoRefresh()
     #expect(manager.isAutoRefreshActive == false)
@@ -322,15 +322,15 @@ struct CalendarManagerTests {
   @Test("Auto-refresh can be paused and resumed")
   @MainActor func testAutoRefreshPauseResume() {
     let manager = CalendarManager()
-    
+
     // Start auto-refresh
     manager.startAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
-    
+
     // Pause auto-refresh (simulating app going to background)
     manager.pauseAutoRefresh()
     #expect(manager.isAutoRefreshActive == false)
-    
+
     // Resume auto-refresh (simulating app returning to foreground)
     manager.resumeAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
@@ -340,11 +340,11 @@ struct CalendarManagerTests {
   @MainActor func testAutoRefreshToggle() {
     let manager = CalendarManager()
     let initialState = manager.isAutoRefreshEnabled
-    
+
     // Toggle auto-refresh
     manager.toggleAutoRefresh()
     #expect(manager.isAutoRefreshEnabled != initialState)
-    
+
     // Toggle back
     manager.toggleAutoRefresh()
     #expect(manager.isAutoRefreshEnabled == initialState)
@@ -353,14 +353,14 @@ struct CalendarManagerTests {
   @Test("Refresh state is tracked correctly during manual refresh")
   func testRefreshStateTracking() async {
     let manager = CalendarManager()
-    
+
     // Initially should not be refreshing
     #expect(manager.isRefreshing == false)
     #expect(manager.lastRefresh == nil)
-    
+
     // Set up auth state to allow refresh
     manager.authState = .authorized
-    
+
     // Trigger refresh and verify state changes
     // Note: This will fail due to missing EKEventStore access in tests,
     // but we're testing the state management
@@ -369,43 +369,43 @@ struct CalendarManagerTests {
     } catch {
       // Expected to fail in test environment - we're testing state management
     }
-    
+
     // After refresh attempt, should have updated lastRefresh (even on failure)
     // In real usage with proper calendar access, this would be set
-    #expect(manager.isRefreshing == false) // Should return to false after completion
+    #expect(manager.isRefreshing == false)  // Should return to false after completion
   }
 
   @Test("Auto-refresh respects enabled state")
   @MainActor func testAutoRefreshRespectsEnabledState() {
     let manager = CalendarManager()
-    
+
     // Disable auto-refresh
     manager.isAutoRefreshEnabled = false
-    
+
     // Try to start auto-refresh
     manager.startAutoRefresh()
-    #expect(manager.isAutoRefreshActive == false) // Should not start when disabled
-    
+    #expect(manager.isAutoRefreshActive == false)  // Should not start when disabled
+
     // Enable and start
     manager.isAutoRefreshEnabled = true
     manager.startAutoRefresh()
-    #expect(manager.isAutoRefreshActive == true) // Should start when enabled
+    #expect(manager.isAutoRefreshActive == true)  // Should start when enabled
   }
 
   @Test("Resume auto-refresh only works when enabled and not active")
   @MainActor func testResumeAutoRefreshConditionalBehavior() {
     let manager = CalendarManager()
-    
+
     // Test resume when disabled
     manager.isAutoRefreshEnabled = false
     manager.resumeAutoRefresh()
     #expect(manager.isAutoRefreshActive == false)
-    
+
     // Test resume when enabled but already active
     manager.isAutoRefreshEnabled = true
     manager.startAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
-    
+
     // Resume should not change anything when already active
     manager.resumeAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
@@ -414,15 +414,15 @@ struct CalendarManagerTests {
   @Test("Pause auto-refresh only works when active")
   @MainActor func testPauseAutoRefreshConditionalBehavior() {
     let manager = CalendarManager()
-    
+
     // Test pause when not active
     manager.pauseAutoRefresh()
-    #expect(manager.isAutoRefreshActive == false) // Should remain false
-    
+    #expect(manager.isAutoRefreshActive == false)  // Should remain false
+
     // Start auto-refresh then pause
     manager.startAutoRefresh()
     #expect(manager.isAutoRefreshActive == true)
-    
+
     manager.pauseAutoRefresh()
     #expect(manager.isAutoRefreshActive == false)
   }

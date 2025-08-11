@@ -13,14 +13,11 @@ struct MeetingCopyButtonTests {
   @Test("Component creation with valid URL")
   @MainActor
   func componentWithValidURL() {
-    var copiedUrl: String?
     let testUrl = "https://zoom.us/j/123456789"
 
     let button = MeetingCopyButton(
       meetingUrl: testUrl,
-      onCopy: { url in
-        copiedUrl = url
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == testUrl)
@@ -29,13 +26,9 @@ struct MeetingCopyButtonTests {
   @Test("Component creation with nil URL")
   @MainActor
   func componentWithNilURL() {
-    var copyCallbackCalled = false
-
     let button = MeetingCopyButton(
       meetingUrl: nil,
-      onCopy: { url in
-        copyCallbackCalled = true
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == nil)
@@ -44,13 +37,9 @@ struct MeetingCopyButtonTests {
   @Test("Component creation with empty URL")
   @MainActor
   func componentWithEmptyURL() {
-    var copyCallbackCalled = false
-
     let button = MeetingCopyButton(
       meetingUrl: "",
-      onCopy: { url in
-        copyCallbackCalled = true
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == "")
@@ -59,13 +48,9 @@ struct MeetingCopyButtonTests {
   @Test("Component creation with whitespace-only URL")
   @MainActor
   func componentWithWhitespaceURL() {
-    var copyCallbackCalled = false
-
     let button = MeetingCopyButton(
       meetingUrl: "   ",
-      onCopy: { url in
-        copyCallbackCalled = true
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == "   ")
@@ -87,14 +72,12 @@ struct MeetingCopyButtonTests {
   @Test("Copy callback execution with valid URL")
   @MainActor
   func copyCallbackWithValidURL() {
-    var copiedUrl: String?
     var callbackExecuted = false
     let testUrl = "https://zoom.us/j/987654321"
 
     let button = MeetingCopyButton(
       meetingUrl: testUrl,
-      onCopy: { url in
-        copiedUrl = url
+      onCopy: { _ in
         callbackExecuted = true
       }
     )
@@ -142,12 +125,9 @@ struct MeetingCopyButtonTests {
     ]
 
     for testCase in testCases {
-      var callbackData: String?
       let button = MeetingCopyButton(
         meetingUrl: testCase.url,
-        onCopy: { url in
-          callbackData = url
-        }
+        onCopy: { _ in }
       )
 
       #expect(button.meetingUrl == testCase.url)
@@ -185,13 +165,10 @@ struct MeetingCopyButtonTests {
   func longURLHandling() {
     let longUrl =
       "https://zoom.us/j/123456789?pwd=VeryLongPasswordWithLotsOfParametersAndTrackingData123456789012345678901234567890"
-    var copiedUrl: String?
 
     let button = MeetingCopyButton(
       meetingUrl: longUrl,
-      onCopy: { url in
-        copiedUrl = url
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == longUrl)
@@ -201,13 +178,10 @@ struct MeetingCopyButtonTests {
   @MainActor
   func specialCharactersInURL() {
     let urlWithSpecialChars = "https://zoom.us/j/123456789?pwd=Pass@Word#123$%"
-    var copiedUrl: String?
 
     let button = MeetingCopyButton(
       meetingUrl: urlWithSpecialChars,
-      onCopy: { url in
-        copiedUrl = url
-      }
+      onCopy: { _ in }
     )
 
     #expect(button.meetingUrl == urlWithSpecialChars)

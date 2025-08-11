@@ -4,6 +4,7 @@
 import SwiftUI
 
 struct MeetingsListView: View {
+  @Environment(AppModel.self) private var appModel
   @State private var calendarManager = CalendarManager()
   @State private var isRequestingPermission = false
   @State private var isScrolling = false
@@ -17,7 +18,8 @@ struct MeetingsListView: View {
       Group {
         if isRequestingPermission {
           permissionLoadingView
-        } else if calendarManager.isRefreshing && calendarManager.meetings.isEmpty {
+        } else if calendarManager.meetings.isEmpty && calendarManager.lastRefresh == nil {
+          // Only show loading view on initial load (no previous refresh), not during auto-refresh
           loadingView
         } else if calendarManager.meetings.isEmpty {
           emptyStateView
@@ -26,6 +28,15 @@ struct MeetingsListView: View {
         }
       }
       .navigationTitle("Docket")
+      .toolbar {
+        ToolbarItem(placement: .primaryAction) {
+          PinButton(
+            isPinned: Binding(
+              get: { appModel.alwaysOnTop },
+              set: { appModel.alwaysOnTop = $0 }
+            ))
+        }
+      }
     }
     .task {
       await requestCalendarAccessAndRefresh()
@@ -211,20 +222,21 @@ struct MeetingsListView: View {
       }
     }
   }
-  
+
   private func handleAppBecameActive() {
     // Resume auto-refresh when app becomes active
     calendarManager.resumeAutoRefresh()
   }
-  
+
   private func handleAppResignedActive() {
     // Pause auto-refresh when app becomes inactive to save resources
-    calendarManager.pauseAutoRefresh()  
+    calendarManager.pauseAutoRefresh()
   }
 }
 
 #Preview("With Meetings") {
   MeetingsListView()
+    .environment(AppModel())
 }
 
 #Preview("With Mock Data") {

@@ -292,34 +292,30 @@ struct MeetingURLExtractorTests {
     #expect(result?.platform == .zoom, "Should detect correct platform for first URL")
   }
 
-  // MARK: - Integration with MeetingURLPattern Tests
+  // MARK: - Integration with Platform Pattern Tests
 
-  @Test("Verify integration with all MeetingURLPattern cases")
-  func testIntegrationWithZoomURLPattern() {
-    // This test ensures ZoomURLExtractor uses the same patterns as ZoomURLPattern
+  @Test("Verify integration with platform URL patterns")
+  func testIntegrationWithPlatformPatterns() {
+    // This test ensures MeetingURLExtractor uses the same patterns as MeetingPlatform configs
     let testURLs = [
       "https://zoom.us/j/standard",
       "https://zoomgov.com/j/government",
       "zoommtg://protocol.test",
       "https://vanity.zoom.us/j/test",
+      "https://meet.google.com/abc-defg-hij",
     ]
 
     for url in testURLs {
-      // First verify the pattern matches our MeetingURLPattern enum
-      let hasMatchingPattern = MeetingURLPattern.allCases.contains { pattern in
-        if let regex = pattern.regex {
-          let range = NSRange(location: 0, length: url.utf16.count)
-          return regex.firstMatch(in: url, options: [], range: range) != nil
-        }
-        return false
-      }
-      #expect(hasMatchingPattern, "URL should match at least one ZoomURLPattern: \(url)")
+      // First verify the pattern matches a platform
+      let detectedPlatform = MeetingPlatform.detectPlatform(from: url)
+      #expect(detectedPlatform != .unknown, "URL should match at least one platform: \(url)")
 
       // Then test extraction
       let event = SimpleCalendarEvent(notes: url)
       let extracted = MeetingURLExtractor.extract(from: event)
       #expect(
-        extracted == url, "ZoomURLExtractor should extract URL that matches ZoomURLPattern: \(url)")
+        extracted == url,
+        "MeetingURLExtractor should extract URL that matches platform patterns: \(url)")
     }
   }
 }

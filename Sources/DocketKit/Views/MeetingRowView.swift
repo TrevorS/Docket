@@ -5,28 +5,23 @@ import SwiftUI
 
 struct MeetingRowView: View {
   let meeting: Meeting
-  @State private var showCopyConfirmation = false
   @State private var isHovered = false
 
   var body: some View {
-    VStack(spacing: 0) {
-      HStack(spacing: 12) {
-        VStack(alignment: .leading, spacing: 6) {
-          meetingTitle
-          meetingTime
-          meetingDetails
-        }
-
-        Spacer()
-
-        actionButtons
+    HStack(spacing: 12) {
+      VStack(alignment: .leading, spacing: 6) {
+        meetingTitle
+        meetingTime
+        meetingDetails
       }
-      .padding(.vertical, 16)
-      .padding(.horizontal, 8)
-      .onHover { isHovered = $0 }
 
-      CopyConfirmationBanner(isVisible: $showCopyConfirmation)
+      Spacer()
+
+      actionButtons
     }
+    .padding(.vertical, 16)
+    .padding(.horizontal, 8)
+    .onHover { isHovered = $0 }
   }
 
   // MARK: - Meeting Information
@@ -95,9 +90,7 @@ struct MeetingRowView: View {
   // MARK: - Actions
 
   private func handleCopyAction(_ url: String) {
-    withAnimation(.easeInOut(duration: 0.3)) {
-      showCopyConfirmation = true
-    }
+    // Copy action feedback is now handled by the MeetingCopyButton component
   }
 
   private func handleJoinAction(_ url: URL) {

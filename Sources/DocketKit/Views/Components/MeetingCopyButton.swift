@@ -8,14 +8,16 @@ struct MeetingCopyButton: View {
   let onCopy: (String) -> Void
 
   @State private var isHovered = false
+  @State private var showGlow = false
 
   var body: some View {
     Button(action: performCopy) {
       Image(systemName: "doc.on.clipboard")
         .font(.caption)
         .foregroundColor(isHovered ? .primary : .secondary)
-        .scaleEffect(isHovered ? 1.1 : 1.0)
+        .scaleEffect(showGlow ? 1.15 : (isHovered ? 1.1 : 1.0))
         .animation(.easeInOut(duration: 0.15), value: isHovered)
+        .animation(.easeInOut(duration: 0.15), value: showGlow)
     }
     .buttonStyle(.plain)
     .help("Copy meeting link")
@@ -36,6 +38,18 @@ struct MeetingCopyButton: View {
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
     pasteboard.setString(url, forType: .string)
+
+    // Trigger subtle pulse
+    withAnimation(.easeInOut(duration: 0.1)) {
+      showGlow = true
+    }
+
+    // Auto-hide quickly
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+      withAnimation(.easeInOut(duration: 0.1)) {
+        showGlow = false
+      }
+    }
 
     onCopy(url)
   }

@@ -2,6 +2,7 @@
 // ABOUTME: Tests URL pattern matching and platform identification for different meeting providers
 
 import Foundation
+import SwiftUI
 import Testing
 
 @testable import DocketKit
@@ -123,9 +124,15 @@ struct MeetingPlatformTests {
 
   @Test("Color properties are defined")
   func testColors() {
-    #expect(MeetingPlatform.zoom.color == "blue")
-    #expect(MeetingPlatform.googleMeet.color == "green")
-    #expect(MeetingPlatform.unknown.color == "gray")
+    // Test new SwiftUI Color properties
+    #expect(MeetingPlatform.zoom.color == .blue)
+    #expect(MeetingPlatform.googleMeet.color == .green)
+    #expect(MeetingPlatform.unknown.color == .gray)
+
+    // Test legacy string colors for backward compatibility
+    #expect(MeetingPlatform.zoom.colorString == "blue")
+    #expect(MeetingPlatform.googleMeet.colorString == "green")
+    #expect(MeetingPlatform.unknown.colorString == "gray")
   }
 
   // MARK: - Enum Conformance Tests
@@ -149,5 +156,64 @@ struct MeetingPlatformTests {
     #expect(MeetingPlatform.zoom.rawValue == "zoom")
     #expect(MeetingPlatform.googleMeet.rawValue == "googleMeet")
     #expect(MeetingPlatform.unknown.rawValue == "unknown")
+  }
+
+  // MARK: - Centralized Config Tests
+
+  @Test("Platform config contains all required properties")
+  func testPlatformConfigProperties() {
+    // Test Zoom config
+    let zoomConfig = MeetingPlatform.zoom.config
+    #expect(zoomConfig.displayName == "Zoom")
+    #expect(zoomConfig.shortName == "Zoom")
+    #expect(zoomConfig.iconName == "video.fill")
+    #expect(zoomConfig.color == .blue)
+    #expect(!zoomConfig.urlPatterns.isEmpty)
+
+    // Test Google Meet config
+    let meetConfig = MeetingPlatform.googleMeet.config
+    #expect(meetConfig.displayName == "Google Meet")
+    #expect(meetConfig.shortName == "Meet")
+    #expect(meetConfig.iconName == "person.2.fill")
+    #expect(meetConfig.color == .green)
+    #expect(!meetConfig.urlPatterns.isEmpty)
+
+    // Test Unknown config
+    let unknownConfig = MeetingPlatform.unknown.config
+    #expect(unknownConfig.displayName == "Unknown")
+    #expect(unknownConfig.shortName == "Unknown")
+    #expect(unknownConfig.iconName == "questionmark.circle.fill")
+    #expect(unknownConfig.color == .gray)
+    #expect(unknownConfig.urlPatterns.isEmpty)
+  }
+
+  @Test("URL patterns are properly configured")
+  func testURLPatternsInConfig() {
+    // Zoom should have multiple URL patterns for different domains/protocols
+    let zoomPatterns = MeetingPlatform.zoom.urlPatterns
+    #expect(zoomPatterns.count >= 4)
+    #expect(zoomPatterns.contains("https?://[\\w.-]*zoom\\.us/[^\\s]+"))
+    #expect(zoomPatterns.contains("https?://[\\w.-]*zoomgov\\.com/[^\\s]+"))
+    #expect(zoomPatterns.contains("zoommtg://[^\\s]+"))
+
+    // Google Meet should have patterns for standard and lookup URLs
+    let meetPatterns = MeetingPlatform.googleMeet.urlPatterns
+    #expect(meetPatterns.count >= 2)
+    #expect(meetPatterns.contains("https?://meet\\.google\\.com/[^\\s]+"))
+    #expect(meetPatterns.contains("https?://meet\\.google\\.com/lookup/[^\\s]+"))
+
+    // Unknown should have no patterns
+    #expect(MeetingPlatform.unknown.urlPatterns.isEmpty)
+  }
+
+  @Test("Properties still work through config indirection")
+  func testConfigIndirection() {
+    // Verify that properties now go through config but return same values
+    for platform in MeetingPlatform.allCases {
+      #expect(platform.displayName == platform.config.displayName)
+      #expect(platform.shortName == platform.config.shortName)
+      #expect(platform.iconName == platform.config.iconName)
+      #expect(platform.color == platform.config.color)
+    }
   }
 }

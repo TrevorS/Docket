@@ -81,19 +81,21 @@ public enum MeetingURLExtractor {
       return nil
     }
 
-    // Search using all available video meeting URL patterns
-    for pattern in MeetingURLPattern.allCases {
-      guard let regex = pattern.regex else {
-        continue
-      }
+    // Search using all platform patterns (excluding unknown platform)
+    for platform in MeetingPlatform.allCases where platform != .unknown {
+      for patternString in platform.urlPatterns {
+        guard let regex = try? NSRegularExpression(pattern: patternString, options: []) else {
+          continue
+        }
 
-      let range = NSRange(location: 0, length: text.utf16.count)
-      if let match = regex.firstMatch(in: text, options: [], range: range) {
-        let url = String(text[Range(match.range, in: text)!])
+        let range = NSRange(location: 0, length: text.utf16.count)
+        if let match = regex.firstMatch(in: text, options: [], range: range) {
+          let url = String(text[Range(match.range, in: text)!])
 
-        // Additional validation for meaningful URLs
-        if isValidMeetingURL(url, platform: pattern.platform) {
-          return url
+          // Additional validation for meaningful URLs
+          if isValidMeetingURL(url, platform: platform) {
+            return url
+          }
         }
       }
     }
@@ -110,19 +112,21 @@ public enum MeetingURLExtractor {
       return nil
     }
 
-    // Search using all available video meeting URL patterns
-    for pattern in MeetingURLPattern.allCases {
-      guard let regex = pattern.regex else {
-        continue
-      }
+    // Search using all platform patterns (excluding unknown platform)
+    for platform in MeetingPlatform.allCases where platform != .unknown {
+      for patternString in platform.urlPatterns {
+        guard let regex = try? NSRegularExpression(pattern: patternString, options: []) else {
+          continue
+        }
 
-      let range = NSRange(location: 0, length: text.utf16.count)
-      if let match = regex.firstMatch(in: text, options: [], range: range) {
-        let url = String(text[Range(match.range, in: text)!])
+        let range = NSRange(location: 0, length: text.utf16.count)
+        if let match = regex.firstMatch(in: text, options: [], range: range) {
+          let url = String(text[Range(match.range, in: text)!])
 
-        // Additional validation for meaningful URLs
-        if isValidMeetingURL(url, platform: pattern.platform) {
-          return (url, pattern.platform)
+          // Additional validation for meaningful URLs
+          if isValidMeetingURL(url, platform: platform) {
+            return (url, platform)
+          }
         }
       }
     }
