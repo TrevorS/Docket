@@ -38,8 +38,7 @@ struct RefreshStatusView: View {
 
           RefreshStatusText(lastRefresh: lastRefresh)
 
-          // No longer showing separate paused text - pause icon replaces clock
-          // No progress spinner - breathing animation indicates refresh state
+          // Status icon and refresh text display
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -62,7 +61,7 @@ struct RefreshStatusView: View {
       lastRefresh: Date().addingTimeInterval(-300),  // 5 minutes ago
       isRefreshing: false
     ) {
-      print("Toggle auto-refresh (preview)")
+      // Preview action
     }
   }
   .background(Color.gray.opacity(0.1))
@@ -75,7 +74,7 @@ struct RefreshStatusView: View {
       lastRefresh: Date().addingTimeInterval(-600),  // 10 minutes ago
       isRefreshing: true
     ) {
-      print("Toggle auto-refresh (preview)")
+      // Preview action
     }
   }
   .background(Color.gray.opacity(0.1))
@@ -88,7 +87,7 @@ struct RefreshStatusView: View {
       lastRefresh: nil,
       isRefreshing: false
     ) {
-      print("Toggle auto-refresh (preview)")
+      // Preview action
     }
   }
   .background(Color.gray.opacity(0.1))
@@ -103,7 +102,7 @@ struct RefreshStatusView: View {
       isAutoRefreshEnabled: true,
       isAutoRefreshActive: false
     ) {
-      print("Toggle auto-refresh (preview)")
+      // Preview action
     }
   }
   .background(Color.gray.opacity(0.1))

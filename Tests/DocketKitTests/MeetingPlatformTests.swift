@@ -124,15 +124,10 @@ struct MeetingPlatformTests {
 
   @Test("Color properties are defined")
   func testColors() {
-    // Test new SwiftUI Color properties
+    // Test SwiftUI Color properties
     #expect(MeetingPlatform.zoom.color == .blue)
     #expect(MeetingPlatform.googleMeet.color == .green)
     #expect(MeetingPlatform.unknown.color == .gray)
-
-    // Test legacy string colors for backward compatibility
-    #expect(MeetingPlatform.zoom.colorString == "blue")
-    #expect(MeetingPlatform.googleMeet.colorString == "green")
-    #expect(MeetingPlatform.unknown.colorString == "gray")
   }
 
   // MARK: - Enum Conformance Tests

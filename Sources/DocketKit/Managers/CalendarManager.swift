@@ -1,5 +1,5 @@
-// ABOUTME: Calendar business logic manager integrating EventKit with ZoomURLExtractor
-// ABOUTME: Handles calendar access, event fetching, and ZoomMeeting conversion as single source of truth
+// ABOUTME: Calendar business logic manager integrating EventKit with MeetingURLExtractor
+// ABOUTME: Handles calendar access, event fetching, and Meeting conversion as single source of truth
 
 import AppKit
 @preconcurrency import EventKit

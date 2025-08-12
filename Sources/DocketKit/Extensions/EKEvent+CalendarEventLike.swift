@@ -1,10 +1,10 @@
-// ABOUTME: Adapter making EKEvent compatible with CalendarEventLike protocol for ZoomURLExtractor
+// ABOUTME: Adapter making EKEvent compatible with CalendarEventLike protocol for MeetingURLExtractor
 // ABOUTME: Wraps EventKit events to provide the protocol requirements for URL extraction
 
 import EventKit
 import Foundation
 
-/// Adapter that wraps EKEvent to make it compatible with ZoomURLExtractor
+/// Adapter that wraps EKEvent to make it compatible with MeetingURLExtractor
 public struct EKEventAdapter: CalendarEventLike {
   private let event: EKEvent
 

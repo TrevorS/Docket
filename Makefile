@@ -29,6 +29,9 @@ app: ## Create a macOS .app bundle for distribution
 	@if [ -d Sources/DocketApp/Resources/Assets.xcassets ]; then \
 		cp -r Sources/DocketApp/Resources/Assets.xcassets build/Docket.app/Contents/Resources/; \
 	fi
+	@if [ -f Sources/DocketApp/Resources/docket-icon.png ]; then \
+		cp Sources/DocketApp/Resources/docket-icon.png build/Docket.app/Contents/Resources/; \
+	fi
 	@echo "✅ Docket.app created in build/ directory"
 
 install: app ## Install app to /Applications

@@ -229,8 +229,9 @@ struct MeetingsListView: View {
   }
 
   private func handleAppResignedActive() {
-    // Pause auto-refresh when app becomes inactive to save resources
-    calendarManager.pauseAutoRefresh()
+    // Note: We intentionally do NOT pause auto-refresh when app becomes inactive
+    // For a floating meeting widget, users want continuous updates even when working in other apps
+    // Auto-refresh only pauses during system sleep (handled by CalendarManager's sleep/wake observers)
   }
 }
 

@@ -40,7 +40,7 @@ public struct DocketApp: App {
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
-    // Delay to ensure windows are created in Xcode debugging environment
+    // Delay to ensure windows are fully created before configuration
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
       Task { @MainActor in
         self.configureFloatingWindows()

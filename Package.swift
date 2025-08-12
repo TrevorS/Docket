@@ -29,7 +29,8 @@ let package = Package(
                 "Resources/Docket.entitlements"
             ],
             resources: [
-                .process("Resources/Assets.xcassets")
+                .process("Resources/Assets.xcassets"),
+                .copy("Resources/docket-icon.png")
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency")

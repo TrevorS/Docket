@@ -96,18 +96,6 @@ public enum MeetingPlatform: String, CaseIterable, Sendable, Hashable {
     return config.color
   }
 
-  /// Legacy string color for backwards compatibility
-  public var colorString: String {
-    switch self {
-    case .zoom:
-      return "blue"
-    case .googleMeet:
-      return "green"
-    case .unknown:
-      return "gray"
-    }
-  }
-
   // MARK: - Platform Detection
 
   /// Detect the meeting platform from a URL

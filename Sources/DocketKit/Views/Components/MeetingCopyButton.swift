@@ -60,7 +60,7 @@ struct MeetingCopyButton: View {
     MeetingCopyButton(
       meetingUrl: "https://zoom.us/j/123456789",
       onCopy: { url in
-        print("Copied URL: \(url)")
+        // URL copied to clipboard
       }
     )
     .padding()
@@ -72,7 +72,7 @@ struct MeetingCopyButton: View {
     MeetingCopyButton(
       meetingUrl: "https://meet.google.com/abc-def-ghi",
       onCopy: { url in
-        print("Copied URL: \(url)")
+        // URL copied to clipboard
       }
     )
     .padding()
@@ -87,7 +87,7 @@ struct MeetingCopyButton: View {
     MeetingCopyButton(
       meetingUrl: nil,
       onCopy: { url in
-        print("This should not be called")
+        // Preview callback
       }
     )
     .padding()
@@ -95,7 +95,7 @@ struct MeetingCopyButton: View {
     MeetingCopyButton(
       meetingUrl: "   ",
       onCopy: { url in
-        print("This should not be called")
+        // Preview callback
       }
     )
     .padding()
