@@ -15,7 +15,8 @@ struct MeetingDetailsTests {
   func withOrganizerAndAttendees() {
     let view = MeetingDetailsView(
       organizerName: "John Smith",
-      attendeeCount: 5
+      attendeeCount: 5,
+      attendees: []
     )
 
     #expect(view.organizerName == "John Smith")
@@ -27,7 +28,8 @@ struct MeetingDetailsTests {
   func withOrganizerOnly() {
     let view = MeetingDetailsView(
       organizerName: "Sarah Johnson",
-      attendeeCount: 0
+      attendeeCount: 0,
+      attendees: []
     )
 
     #expect(view.organizerName == "Sarah Johnson")
@@ -39,7 +41,8 @@ struct MeetingDetailsTests {
   func withAttendeesOnly() {
     let view = MeetingDetailsView(
       organizerName: nil,
-      attendeeCount: 12
+      attendeeCount: 12,
+      attendees: []
     )
 
     #expect(view.organizerName == nil)
@@ -51,7 +54,8 @@ struct MeetingDetailsTests {
   func withEmptyOrganizerString() {
     let view = MeetingDetailsView(
       organizerName: "",
-      attendeeCount: 3
+      attendeeCount: 3,
+      attendees: []
     )
 
     #expect(view.organizerName == "")
@@ -63,7 +67,8 @@ struct MeetingDetailsTests {
   func minimalInfo() {
     let view = MeetingDetailsView(
       organizerName: nil,
-      attendeeCount: 0
+      attendeeCount: 0,
+      attendees: []
     )
 
     #expect(view.organizerName == nil)
@@ -75,7 +80,8 @@ struct MeetingDetailsTests {
   func singleAttendeeCreation() {
     let view = MeetingDetailsView(
       organizerName: "Test Organizer",
-      attendeeCount: 1
+      attendeeCount: 1,
+      attendees: []
     )
 
     #expect(view.organizerName == "Test Organizer")
@@ -87,7 +93,8 @@ struct MeetingDetailsTests {
   func multipleAttendeesCreation() {
     let view = MeetingDetailsView(
       organizerName: "Test Organizer",
-      attendeeCount: 5
+      attendeeCount: 5,
+      attendees: []
     )
 
     #expect(view.organizerName == "Test Organizer")
@@ -99,7 +106,8 @@ struct MeetingDetailsTests {
   func largeAttendeeCount() {
     let view = MeetingDetailsView(
       organizerName: "Conference Host",
-      attendeeCount: 150
+      attendeeCount: 150,
+      attendees: []
     )
 
     #expect(view.attendeeCount == 150)
@@ -111,7 +119,8 @@ struct MeetingDetailsTests {
   func whitespaceOnlyOrganizer() {
     let view = MeetingDetailsView(
       organizerName: "   ",
-      attendeeCount: 2
+      attendeeCount: 2,
+      attendees: []
     )
 
     #expect(view.organizerName == "   ")
@@ -131,7 +140,8 @@ struct MeetingDetailsTests {
     for testCase in testCases {
       let view = MeetingDetailsView(
         organizerName: testCase.organizerName,
-        attendeeCount: testCase.attendeeCount
+        attendeeCount: testCase.attendeeCount,
+        attendees: []
       )
 
       #expect(view.organizerName == testCase.organizerName)
@@ -144,7 +154,8 @@ struct MeetingDetailsTests {
   func componentInterface() {
     let view = MeetingDetailsView(
       organizerName: "Test User",
-      attendeeCount: 7
+      attendeeCount: 7,
+      attendees: []
     )
 
     // Verify the component has the expected public interface
@@ -157,7 +168,8 @@ struct MeetingDetailsTests {
   func zeroAttendeeCount() {
     let view = MeetingDetailsView(
       organizerName: "Solo Organizer",
-      attendeeCount: 0
+      attendeeCount: 0,
+      attendees: []
     )
 
     #expect(view.attendeeCount == 0)

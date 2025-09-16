@@ -19,6 +19,16 @@ public enum PreviewData {
     organizerName: "Sarah Johnson",
     organizerEmail: "sarah@company.com",
     attendeeCount: 8,
+    attendees: [
+      (name: "John Smith", email: "john@company.com"),
+      (name: "Alice Brown", email: "alice@company.com"),
+      (name: "Bob Wilson", email: nil),
+      (name: "Carol Davis", email: "carol@company.com"),
+      (name: nil, email: "dave@company.com"),
+      (name: "Eve Johnson", email: "eve@company.com"),
+      (name: "Frank Miller", email: "frank@company.com"),
+      (name: "Grace Lee", email: "grace@company.com")
+    ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-active"
   )
@@ -34,6 +44,13 @@ public enum PreviewData {
     organizerName: "Michael Chen",
     organizerEmail: "mike@company.com",
     attendeeCount: 5,
+    attendees: [
+      (name: "Client A", email: "client@external.com"),
+      (name: "Client B", email: "clientb@external.com"),
+      (name: "Project Manager", email: "pm@company.com"),
+      (name: "Designer", email: nil),
+      (name: "Developer", email: "dev@company.com")
+    ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-upcoming"
   )
@@ -49,6 +66,20 @@ public enum PreviewData {
     organizerName: "Emma Thompson",
     organizerEmail: "emma@company.com",
     attendeeCount: 12,
+    attendees: [
+      (name: "Design Lead", email: "design@company.com"),
+      (name: "UX Researcher", email: "research@company.com"),
+      (name: "Frontend Dev", email: "frontend@company.com"),
+      (name: "Product Owner", email: "product@company.com"),
+      (name: "QA Engineer", email: nil),
+      (name: nil, email: "stakeholder@company.com"),
+      (name: "Brand Manager", email: "brand@company.com"),
+      (name: "Marketing", email: "marketing@company.com"),
+      (name: "Engineering Manager", email: "em@company.com"),
+      (name: "Accessibility Expert", email: "a11y@company.com"),
+      (name: "Content Strategist", email: "content@company.com"),
+      (name: "Tech Writer", email: "docs@company.com")
+    ],
     calendarName: "Design Calendar",
     eventIdentifier: "preview-ended"
   )
@@ -64,6 +95,7 @@ public enum PreviewData {
     organizerName: "CEO Office",
     organizerEmail: "ceo@company.com",
     attendeeCount: 150,
+    attendees: [],  // Too many attendees to list individually
     calendarName: "Company Calendar",
     eventIdentifier: "preview-no-url"
   )
@@ -80,6 +112,14 @@ public enum PreviewData {
     organizerName: "Planning Committee",
     organizerEmail: "planning@company.com",
     attendeeCount: 25,
+    attendees: [
+      (name: "Engineering Lead", email: "eng-lead@company.com"),
+      (name: "Product Director", email: "prod-dir@company.com"),
+      (name: "Tech Lead A", email: "tech-a@company.com"),
+      (name: "Tech Lead B", email: nil),
+      (name: "Architect", email: "architect@company.com")
+      // Only showing first 5 of 25 attendees for brevity
+    ],
     calendarName: "Planning Calendar",
     eventIdentifier: "preview-long-title"
   )
@@ -95,6 +135,7 @@ public enum PreviewData {
     organizerName: nil,
     organizerEmail: nil,
     attendeeCount: 0,
+    attendees: [],
     calendarName: "",
     eventIdentifier: "preview-minimal"
   )
@@ -115,6 +156,14 @@ public enum PreviewData {
       organizerName: "Scrum Master",
       organizerEmail: "scrum@company.com",
       attendeeCount: 6,
+      attendees: [
+        (name: "Developer A", email: "dev-a@company.com"),
+        (name: "Developer B", email: "dev-b@company.com"),
+        (name: "QA Engineer", email: nil),
+        (name: "Product Owner", email: "po@company.com"),
+        (name: "Designer", email: "designer@company.com"),
+        (name: "Tech Lead", email: "tl@company.com")
+      ],
       calendarName: "Agile Calendar",
       eventIdentifier: "preview-yesterday-1"
     )
@@ -134,6 +183,12 @@ public enum PreviewData {
       organizerName: "Product Team",
       organizerEmail: "product@company.com",
       attendeeCount: 20,
+      attendees: [
+        (name: "Stakeholder A", email: "stakeholder1@company.com"),
+        (name: "Stakeholder B", email: "stakeholder2@company.com"),
+        (name: "Customer Success", email: "cs@company.com")
+        // Only showing first 3 of 20 attendees
+      ],
       calendarName: "Product Calendar",
       eventIdentifier: "preview-today-3"
     ),
@@ -153,6 +208,7 @@ public enum PreviewData {
       organizerName: "Tech Lead",
       organizerEmail: "tech@company.com",
       attendeeCount: 8,
+      attendees: [],
       calendarName: "Engineering Calendar",
       eventIdentifier: "preview-tomorrow-1"
     ),
@@ -168,6 +224,10 @@ public enum PreviewData {
       organizerName: "Engineering Manager",
       organizerEmail: "manager@company.com",
       attendeeCount: 2,
+      attendees: [
+        (name: "You", email: nil),
+        (name: "Manager", email: "manager@company.com")
+      ],
       calendarName: "Personal Calendar",
       eventIdentifier: "preview-tomorrow-2"
     ),
@@ -185,6 +245,7 @@ public enum PreviewData {
       organizerName: "Scrum Master",
       organizerEmail: "scrum@company.com",
       attendeeCount: 8,
+      attendees: [],
       calendarName: "Agile Calendar",
       eventIdentifier: "preview-completed-1"
     ),
@@ -198,6 +259,7 @@ public enum PreviewData {
       organizerName: "Finance Team",
       organizerEmail: "finance@company.com",
       attendeeCount: 6,
+      attendees: [],
       calendarName: "Finance Calendar",
       eventIdentifier: "preview-completed-2"
     ),
@@ -211,6 +273,7 @@ public enum PreviewData {
       organizerName: "Team Lead",
       organizerEmail: "team@company.com",
       attendeeCount: 12,
+      attendees: [],
       calendarName: "Social Calendar",
       eventIdentifier: "preview-completed-3"
     ),
@@ -227,6 +290,14 @@ public enum PreviewData {
     organizerName: "Team Lead",
     organizerEmail: "teamlead@company.com",
     attendeeCount: 6,
+    attendees: [
+      (name: "Alex Chen", email: "alex@company.com"),
+      (name: "Maria Garcia", email: "maria@company.com"),
+      (name: "James Wilson", email: nil),
+      (name: "Lisa Park", email: "lisa@company.com"),
+      (name: "Ryan Davis", email: "ryan@company.com"),
+      (name: "Sophie Brown", email: "sophie@company.com")
+    ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-google-meet"
   )

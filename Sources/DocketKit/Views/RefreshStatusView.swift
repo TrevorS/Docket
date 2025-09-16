@@ -107,3 +107,59 @@ struct RefreshStatusView: View {
   }
   .background(Color.gray.opacity(0.1))
 }
+
+#Preview("Disabled State") {
+  VStack {
+    Spacer()
+    RefreshStatusView(
+      lastRefresh: Date().addingTimeInterval(-900),  // 15 minutes ago
+      isRefreshing: false,
+      isAutoRefreshEnabled: false,
+      isAutoRefreshActive: false
+    ) {
+      print("Auto-refresh toggle tapped")
+    }
+  }
+  .background(Color.gray.opacity(0.1))
+}
+
+#Preview("All States") {
+  VStack(spacing: 20) {
+    Text("RefreshStatusView - All States")
+      .font(.headline)
+
+    VStack(spacing: 16) {
+      RefreshStatusView(
+        lastRefresh: Date().addingTimeInterval(-120),
+        isRefreshing: false
+      ) { print("Normal state tapped") }
+
+      RefreshStatusView(
+        lastRefresh: Date().addingTimeInterval(-300),
+        isRefreshing: true
+      ) { print("Refreshing state tapped") }
+
+      RefreshStatusView(
+        lastRefresh: Date().addingTimeInterval(-180),
+        isRefreshing: false,
+        isAutoRefreshEnabled: true,
+        isAutoRefreshActive: false
+      ) { print("Paused state tapped") }
+
+      RefreshStatusView(
+        lastRefresh: Date().addingTimeInterval(-600),
+        isRefreshing: false,
+        isAutoRefreshEnabled: false,
+        isAutoRefreshActive: false
+      ) { print("Disabled state tapped") }
+
+      RefreshStatusView(
+        lastRefresh: nil,
+        isRefreshing: false
+      ) { print("No refresh yet tapped") }
+    }
+
+    Spacer()
+  }
+  .background(Color.gray.opacity(0.1))
+}

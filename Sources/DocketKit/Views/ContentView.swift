@@ -13,7 +13,28 @@ public struct ContentView: View {
 
 }
 
-#Preview {
+#Preview("Default State") {
   ContentView()
     .environment(AppModel())
+}
+
+#Preview("With Mock Calendar Manager") {
+  ContentView()
+    .environment(AppModel())
+    .environment(PreviewData.MockCalendarManager())
+}
+
+#Preview("Dark Mode") {
+  ContentView()
+    .environment(AppModel())
+    .environment(PreviewData.MockCalendarManager())
+    .preferredColorScheme(.dark)
+}
+
+#Preview("App Window Size") {
+  ContentView()
+    .environment(AppModel())
+    .environment(PreviewData.MockCalendarManager())
+    .frame(width: 460, height: 520)
+    .background(.regularMaterial)
 }

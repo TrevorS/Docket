@@ -19,6 +19,7 @@ struct MeetingTests {
     organizerName: String? = "John Doe",
     organizerEmail: String? = "john@example.com",
     attendeeCount: Int = 5,
+    attendees: [(name: String?, email: String?)] = [],
     calendarName: String = "Work",
     eventIdentifier: String = "test-event-123"
   ) -> Meeting {
@@ -32,6 +33,7 @@ struct MeetingTests {
       organizerName: organizerName,
       organizerEmail: organizerEmail,
       attendeeCount: attendeeCount,
+      attendees: attendees,
       calendarName: calendarName,
       eventIdentifier: eventIdentifier
     )

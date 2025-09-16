@@ -290,3 +290,88 @@ struct MeetingsListView: View {
     .navigationTitle("Meetings")
   }
 }
+
+#Preview("Calendar Access Denied") {
+  NavigationStack {
+    EmptyStateView(
+      authState: .denied,
+      onRetry: { print("Retry tapped") },
+      onGrantAccess: { print("Grant access tapped") },
+      onOpenSettings: { print("Open settings tapped") }
+    )
+    .navigationTitle("Docket")
+  }
+}
+
+#Preview("Calendar Error State") {
+  NavigationStack {
+    EmptyStateView(
+      authState: .error("Failed to connect to calendar service. Please check your calendar settings."),
+      onRetry: { print("Retry tapped") },
+      onGrantAccess: { print("Grant access tapped") },
+      onOpenSettings: { print("Open settings tapped") }
+    )
+    .navigationTitle("Docket")
+  }
+}
+
+#Preview("Dark Mode with Meetings") {
+  @Previewable @State var mockCalendarManager = PreviewData.MockCalendarManager()
+
+  NavigationStack {
+    List {
+      DaySectionView(title: "Today", meetings: mockCalendarManager.todayMeetings)
+      DaySectionView(title: "Tomorrow", meetings: mockCalendarManager.tomorrowMeetings)
+    }
+    .navigationTitle("Docket")
+    .listStyle(.plain)
+  }
+  .preferredColorScheme(.dark)
+}
+
+#Preview("Interactive Calendar States") {
+  @Previewable @State var selectedState = 0
+  let states = [
+    ("Authorized", CalendarAuthState.authorized),
+    ("Full Access", CalendarAuthState.fullAccess),
+    ("Not Determined", CalendarAuthState.notDetermined),
+    ("Denied", CalendarAuthState.denied),
+    ("Write Only", CalendarAuthState.writeOnly),
+    ("Restricted", CalendarAuthState.restricted),
+    ("Error", CalendarAuthState.error("Connection failed"))
+  ]
+
+  VStack {
+    Picker("Calendar State", selection: $selectedState) {
+      ForEach(0..<states.count, id: \.self) { index in
+        Text(states[index].0).tag(index)
+      }
+    }
+    .pickerStyle(.segmented)
+    .padding()
+
+    Divider()
+
+    Group {
+      if states[selectedState].1 == .fullAccess || states[selectedState].1 == .authorized {
+        // Show meetings list for full access
+        NavigationStack {
+          List {
+            DaySectionView(title: "Today", meetings: PreviewData.todayMeetings)
+          }
+          .navigationTitle("Docket")
+          .listStyle(.plain)
+        }
+      } else {
+        // Show empty state for other auth states
+        EmptyStateView(
+          authState: states[selectedState].1,
+          onRetry: { print("Retry: \(states[selectedState].0)") },
+          onGrantAccess: { print("Grant access: \(states[selectedState].0)") },
+          onOpenSettings: { print("Open settings: \(states[selectedState].0)") }
+        )
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}

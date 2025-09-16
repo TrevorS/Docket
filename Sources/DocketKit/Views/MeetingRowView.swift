@@ -47,7 +47,8 @@ struct MeetingRowView: View {
 
         MeetingDetailsView(
           organizerName: meeting.organizerName,
-          attendeeCount: meeting.attendeeCount
+          attendeeCount: meeting.attendeeCount,
+          attendees: meeting.attendees
         )
       }
 
@@ -138,5 +139,36 @@ struct MeetingRowView: View {
     MeetingRowView(meeting: PreviewData.endedMeeting)
     MeetingRowView(meeting: PreviewData.longTitleMeeting)
     MeetingRowView(meeting: PreviewData.minimalMeeting)
+  }
+}
+
+#Preview("Dark Mode") {
+  List {
+    MeetingRowView(meeting: PreviewData.activeMeeting)
+    MeetingRowView(meeting: PreviewData.upcomingMeeting)
+    MeetingRowView(meeting: PreviewData.endedMeeting)
+    MeetingRowView(meeting: PreviewData.googleMeetMeeting)
+  }
+  .preferredColorScheme(.dark)
+}
+
+#Preview("Google Meet Platform") {
+  List {
+    MeetingRowView(meeting: PreviewData.googleMeetMeeting)
+  }
+}
+
+#Preview("Hover Effects Test") {
+  VStack(spacing: 0) {
+    Text("Hover over meeting rows to see interaction effects")
+      .font(.caption)
+      .foregroundStyle(.secondary)
+      .padding()
+
+    List {
+      MeetingRowView(meeting: PreviewData.upcomingMeeting)
+      MeetingRowView(meeting: PreviewData.activeMeeting)
+      MeetingRowView(meeting: PreviewData.endedMeeting)
+    }
   }
 }

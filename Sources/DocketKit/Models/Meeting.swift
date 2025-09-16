@@ -14,6 +14,7 @@ public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
   public let organizerName: String?
   public let organizerEmail: String?
   public let attendeeCount: Int
+  public let attendees: [(name: String?, email: String?)]
   public let calendarName: String
   public let eventIdentifier: String
 
@@ -27,6 +28,7 @@ public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
     organizerName: String? = nil,
     organizerEmail: String? = nil,
     attendeeCount: Int,
+    attendees: [(name: String?, email: String?)] = [],
     calendarName: String,
     eventIdentifier: String
   ) {
@@ -39,6 +41,7 @@ public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
     self.organizerName = organizerName
     self.organizerEmail = organizerEmail
     self.attendeeCount = attendeeCount
+    self.attendees = attendees
     self.calendarName = calendarName
     self.eventIdentifier = eventIdentifier
   }
@@ -73,7 +76,7 @@ public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
   }
 }
 
-// MARK: - Equatable Conformance
+// MARK: - Equatable & Hashable Conformance
 
 extension Meeting {
   public static func == (lhs: Meeting, rhs: Meeting) -> Bool {
@@ -81,7 +84,16 @@ extension Meeting {
     return lhs.id == rhs.id && lhs.title == rhs.title && lhs.startTime == rhs.startTime
       && lhs.endTime == rhs.endTime && lhs.joinUrl == rhs.joinUrl && lhs.platform == rhs.platform
       && lhs.organizerName == rhs.organizerName && lhs.organizerEmail == rhs.organizerEmail
-      && lhs.attendeeCount == rhs.attendeeCount && lhs.calendarName == rhs.calendarName
-      && lhs.eventIdentifier == rhs.eventIdentifier
+      && lhs.attendeeCount == rhs.attendeeCount && lhs.attendees.count == rhs.attendees.count
+      && lhs.calendarName == rhs.calendarName && lhs.eventIdentifier == rhs.eventIdentifier
+  }
+  
+  public func hash(into hasher: inout Hasher) {
+    // Hash based on unique identifier and core properties
+    hasher.combine(id)
+    hasher.combine(eventIdentifier)
+    hasher.combine(title)
+    hasher.combine(startTime)
+    hasher.combine(attendeeCount)
   }
 }

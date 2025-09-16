@@ -57,3 +57,40 @@ struct PlatformIndicatorView: View {
   }
   .padding()
 }
+
+#Preview("Dark Mode") {
+  VStack(alignment: .leading, spacing: 8) {
+    Text("Platform Indicators - Dark Mode")
+      .font(.headline)
+
+    PlatformIndicatorView(platform: .zoom)
+    PlatformIndicatorView(platform: .googleMeet)
+    PlatformIndicatorView(platform: .unknown)
+  }
+  .padding()
+  .preferredColorScheme(.dark)
+}
+
+#Preview("All Platforms Comparison") {
+  HStack(spacing: 20) {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("Light Mode")
+        .font(.caption.weight(.semibold))
+      PlatformIndicatorView(platform: .zoom)
+      PlatformIndicatorView(platform: .googleMeet)
+      PlatformIndicatorView(platform: .unknown)
+    }
+
+    VStack(alignment: .leading, spacing: 8) {
+      Text("Dark Mode")
+        .font(.caption.weight(.semibold))
+      PlatformIndicatorView(platform: .zoom)
+      PlatformIndicatorView(platform: .googleMeet)
+      PlatformIndicatorView(platform: .unknown)
+    }
+    .preferredColorScheme(.dark)
+    .background(.black)
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+  }
+  .padding()
+}

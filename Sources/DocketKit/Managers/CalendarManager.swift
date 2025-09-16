@@ -217,6 +217,42 @@ public final class CalendarManager: @unchecked Sendable {
 
   // MARK: - Private Implementation
 
+  /// Extract email from EKParticipant using available workarounds
+  /// Due to EventKit API limitations, this tries to extract email from URL components
+  private func extractEmailFromParticipant(_ participant: EKParticipant) -> String? {
+    // Try to get email from URL components
+    // Note: This is unreliable but it's the best we can do with public EventKit API
+    let urlString = participant.url.absoluteString
+    
+    // Check if the URL contains "mailto:" scheme which might have email
+    if urlString.hasPrefix("mailto:") {
+      let email = String(urlString.dropFirst(7)) // Remove "mailto:"
+      if email.contains("@") && email.contains(".") {
+        return email
+      }
+    }
+    
+    // Try to extract from URL path components
+    if let path = participant.url.path.components(separatedBy: "/").last,
+       path.contains("@") && path.contains(".") && !path.contains("principal") {
+      return path
+    }
+    
+    // Try to extract from URL query parameters
+    if let query = participant.url.query, query.contains("@") {
+      let components = URLComponents(url: participant.url, resolvingAgainstBaseURL: false)
+      if let queryItems = components?.queryItems {
+        for item in queryItems {
+          if let value = item.value, value.contains("@") && value.contains(".") {
+            return value
+          }
+        }
+      }
+    }
+    
+    return nil
+  }
+
   /// Update authorization state based on current EventKit status
   public func updateAuthState() {
     let status = EKEventStore.authorizationStatus(for: .event)
@@ -277,6 +313,20 @@ public final class CalendarManager: @unchecked Sendable {
         return nil  // Skip events without meeting URLs
       }
 
+      // Extract attendee details from EKParticipant array
+      let attendeeDetails = (event.attendees ?? []).map { participant -> (name: String?, email: String?) in
+        let name = participant.name
+        let email = extractEmailFromParticipant(participant)
+        
+        // Debug logging
+        print("🧑‍💼 Attendee - Name: '\(name ?? "nil")', Email: '\(email ?? "nil")', URL: '\(participant.url)'")
+        
+        return (name: name, email: email)
+      }
+      
+      // Debug logging for final attendee list
+      print("📝 Meeting '\(event.title ?? "Untitled")' has \(attendeeDetails.count) attendees extracted")
+
       return Meeting(
         id: UUID(),
         title: event.title ?? "Untitled Meeting",
@@ -287,6 +337,7 @@ public final class CalendarManager: @unchecked Sendable {
         organizerName: event.organizer?.name,
         organizerEmail: nil,  // EKParticipant doesn't expose email directly
         attendeeCount: event.attendees?.count ?? 0,
+        attendees: attendeeDetails,
         calendarName: event.calendar.title,
         eventIdentifier: event.eventIdentifier
       )
@@ -321,6 +372,7 @@ public final class CalendarManager: @unchecked Sendable {
         organizerName: data.organizerName,
         organizerEmail: data.organizerEmail,
         attendeeCount: data.attendeeCount,
+        attendees: [],  // Test method doesn't provide attendee details
         calendarName: data.calendarTitle,
         eventIdentifier: data.eventIdentifier
       )

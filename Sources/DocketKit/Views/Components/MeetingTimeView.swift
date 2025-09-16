@@ -84,6 +84,7 @@ struct MeetingTimeView: View {
     organizerName: "John Doe",
     organizerEmail: "john@company.com",
     attendeeCount: 3,
+    attendees: [],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-upcoming-time"
   )
@@ -105,6 +106,7 @@ struct MeetingTimeView: View {
     organizerName: "Jane Smith",
     organizerEmail: "jane@company.com",
     attendeeCount: 5,
+    attendees: [],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-active-time"
   )
@@ -126,6 +128,7 @@ struct MeetingTimeView: View {
     organizerName: nil,
     organizerEmail: nil,
     attendeeCount: 0,
+    attendees: [],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-ended-time"
   )
@@ -147,6 +150,7 @@ struct MeetingTimeView: View {
     organizerName: "Team Lead",
     organizerEmail: "team@company.com",
     attendeeCount: 8,
+    attendees: [],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-short-time"
   )
@@ -168,6 +172,7 @@ struct MeetingTimeView: View {
     organizerName: "CEO",
     organizerEmail: "ceo@company.com",
     attendeeCount: 50,
+    attendees: [],
     calendarName: "Company Calendar",
     eventIdentifier: "preview-long-time"
   )
@@ -190,10 +195,66 @@ struct MeetingTimeView: View {
     organizerName: "Event Team",
     organizerEmail: "events@company.com",
     attendeeCount: 100,
+    attendees: [],
     calendarName: "Company Calendar",
     eventIdentifier: "preview-allday-time"
   )
 
   MeetingTimeView(meeting: meeting)
     .padding()
+}
+
+#Preview("Dark Mode") {
+  VStack(alignment: .leading, spacing: 16) {
+    Text("MeetingTimeView - Dark Mode")
+      .font(.headline)
+
+    VStack(alignment: .leading, spacing: 8) {
+      MeetingTimeView(meeting: PreviewData.upcomingMeeting)
+      MeetingTimeView(meeting: PreviewData.activeMeeting)
+      MeetingTimeView(meeting: PreviewData.endedMeeting)
+    }
+  }
+  .padding()
+  .preferredColorScheme(.dark)
+}
+
+#Preview("All Meeting States") {
+  VStack(alignment: .leading, spacing: 16) {
+    Text("MeetingTimeView - All States")
+      .font(.headline)
+
+    VStack(alignment: .leading, spacing: 12) {
+      // Upcoming
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Upcoming").font(.caption.weight(.semibold))
+        MeetingTimeView(meeting: PreviewData.upcomingMeeting)
+      }
+
+      Divider()
+
+      // Active
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Active").font(.caption.weight(.semibold))
+        MeetingTimeView(meeting: PreviewData.activeMeeting)
+      }
+
+      Divider()
+
+      // Ended
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Ended").font(.caption.weight(.semibold))
+        MeetingTimeView(meeting: PreviewData.endedMeeting)
+      }
+
+      Divider()
+
+      // Long meeting
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Long Duration").font(.caption.weight(.semibold))
+        MeetingTimeView(meeting: PreviewData.longTitleMeeting)
+      }
+    }
+  }
+  .padding()
 }
