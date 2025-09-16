@@ -93,7 +93,7 @@ public final class CalendarManager: @unchecked Sendable {
       return granted
     } catch {
       let errorMsg = "Failed to request calendar access: \(error.localizedDescription)"
-      print("❌ Calendar access request failed: \(errorMsg)")
+      Logger.error("Calendar access request failed: \(errorMsg)")
       authState = .error(errorMsg)
       return false
     }
@@ -120,7 +120,7 @@ public final class CalendarManager: @unchecked Sendable {
       meetings = sortedMeetings
       lastRefresh = Date()
     } catch {
-      print("❌ Meeting refresh failed: \(error)")
+      Logger.error("Meeting refresh failed: \(error)")
       throw CalendarError.fetchFailed(error)
     }
   }
@@ -143,7 +143,7 @@ public final class CalendarManager: @unchecked Sendable {
     }
 
     isAutoRefreshActive = true
-    print("✅ Auto-refresh timer started (60-second interval)")
+    Logger.success("Auto-refresh timer started (60-second interval)")
   }
 
   /// Stop the auto-refresh timer
@@ -152,7 +152,7 @@ public final class CalendarManager: @unchecked Sendable {
     autoRefreshTimer?.invalidate()
     autoRefreshTimer = nil
     isAutoRefreshActive = false
-    print("⏹ Auto-refresh timer stopped")
+    Logger.info("Auto-refresh timer stopped")
   }
 
   /// Resume auto-refresh if enabled (called when app becomes active)
@@ -160,7 +160,7 @@ public final class CalendarManager: @unchecked Sendable {
   public func resumeAutoRefresh() {
     guard isAutoRefreshEnabled && !isAutoRefreshActive else { return }
     startAutoRefresh()
-    print("▶️ Auto-refresh resumed (app became active)")
+    Logger.info("Auto-refresh resumed (app became active)")
   }
 
   /// Pause auto-refresh (called when app becomes inactive)
@@ -168,7 +168,7 @@ public final class CalendarManager: @unchecked Sendable {
   public func pauseAutoRefresh() {
     guard isAutoRefreshActive else { return }
     stopAutoRefresh()
-    print("⏸ Auto-refresh paused (app became inactive)")
+    Logger.info("Auto-refresh paused (app became inactive)")
   }
 
   /// Toggle auto-refresh enabled state
@@ -182,7 +182,7 @@ public final class CalendarManager: @unchecked Sendable {
       stopAutoRefresh()
     }
 
-    print("🔄 Auto-refresh \(isAutoRefreshEnabled ? "enabled" : "disabled")")
+    Logger.info("Auto-refresh \(isAutoRefreshEnabled ? "enabled" : "disabled")")
   }
 
   /// Perform auto-refresh (internal method called by timer)
@@ -206,9 +206,9 @@ public final class CalendarManager: @unchecked Sendable {
 
         do {
           try await self.refreshMeetings()
-          print("🔄 Auto-refresh completed successfully")
+          Logger.success("Auto-refresh completed successfully")
         } catch {
-          print("❌ Auto-refresh failed: \(error)")
+          Logger.error("Auto-refresh failed: \(error)")
           // Don't throw the error - auto-refresh should fail silently
         }
       }
@@ -223,21 +223,22 @@ public final class CalendarManager: @unchecked Sendable {
     // Try to get email from URL components
     // Note: This is unreliable but it's the best we can do with public EventKit API
     let urlString = participant.url.absoluteString
-    
+
     // Check if the URL contains "mailto:" scheme which might have email
     if urlString.hasPrefix("mailto:") {
-      let email = String(urlString.dropFirst(7)) // Remove "mailto:"
+      let email = String(urlString.dropFirst(7))  // Remove "mailto:"
       if email.contains("@") && email.contains(".") {
         return email
       }
     }
-    
+
     // Try to extract from URL path components
     if let path = participant.url.path.components(separatedBy: "/").last,
-       path.contains("@") && path.contains(".") && !path.contains("principal") {
+      path.contains("@") && path.contains(".") && !path.contains("principal")
+    {
       return path
     }
-    
+
     // Try to extract from URL query parameters
     if let query = participant.url.query, query.contains("@") {
       let components = URLComponents(url: participant.url, resolvingAgainstBaseURL: false)
@@ -249,7 +250,7 @@ public final class CalendarManager: @unchecked Sendable {
         }
       }
     }
-    
+
     return nil
   }
 
@@ -314,18 +315,22 @@ public final class CalendarManager: @unchecked Sendable {
       }
 
       // Extract attendee details from EKParticipant array
-      let attendeeDetails = (event.attendees ?? []).map { participant -> (name: String?, email: String?) in
+      let attendeeDetails = (event.attendees ?? []).map {
+        participant -> (name: String?, email: String?) in
         let name = participant.name
         let email = extractEmailFromParticipant(participant)
-        
+
         // Debug logging
-        print("🧑‍💼 Attendee - Name: '\(name ?? "nil")', Email: '\(email ?? "nil")', URL: '\(participant.url)'")
-        
+        Logger.debug(
+          "Attendee - Name: '\(name ?? "nil")', Email: '\(email ?? "nil")', URL: '\(participant.url)'"
+        )
+
         return (name: name, email: email)
       }
-      
+
       // Debug logging for final attendee list
-      print("📝 Meeting '\(event.title ?? "Untitled")' has \(attendeeDetails.count) attendees extracted")
+      Logger.debug(
+        "Meeting '\(event.title ?? "Untitled")' has \(attendeeDetails.count) attendees extracted")
 
       return Meeting(
         id: UUID(),
@@ -426,7 +431,7 @@ public final class CalendarManager: @unchecked Sendable {
   private func handleSystemWillSleep() {
     guard isAutoRefreshActive else { return }
     pauseAutoRefresh()
-    print("💤 System going to sleep - auto-refresh paused")
+    Logger.info("System going to sleep - auto-refresh paused")
   }
 
   /// Handle system waking up - resume auto-refresh and perform immediate refresh
@@ -444,13 +449,13 @@ public final class CalendarManager: @unchecked Sendable {
 
       do {
         try await refreshMeetings()
-        print("🔄 Wake-up refresh completed successfully")
+        Logger.success("Wake-up refresh completed successfully")
       } catch {
-        print("❌ Wake-up refresh failed: \(error)")
+        Logger.error("Wake-up refresh failed: \(error)")
       }
     }
 
-    print("🌅 System woke up - auto-refresh resumed with immediate refresh")
+    Logger.info("System woke up - auto-refresh resumed with immediate refresh")
   }
 }
 

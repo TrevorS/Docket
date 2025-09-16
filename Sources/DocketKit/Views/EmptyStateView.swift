@@ -32,7 +32,7 @@ struct EmptyStateView: View {
           Text("Calendar access is restricted by system policies.")
         }
 
-      case let .error(message):
+      case .error(let message):
         ContentUnavailableView {
           Label("Error Loading Calendar", systemImage: "exclamationmark.triangle")
         } description: {

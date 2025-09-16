@@ -245,11 +245,30 @@ The app uses an extensible platform architecture:
 - Easy to add new platforms by extending the enum and adding URL patterns
 - Platform-specific icons, colors, and display names
 
+## Project Validation Tools
+
+- **Format**: `make format` (swift-format)
+- **Lint**: `make lint` (Swift compiler with strict concurrency)
+- **Test**: `make test` (Swift Testing framework with 275 tests)
+- **Build**: `make build` (Swift Package Manager)
+
+## Project Permissions
+
+- **Project Type**: personal
+- **Direct Commits Allowed**: yes
+- **Last Checked**: 2025-09-16
+
 ## Key Development Commands
 ```bash
+# Validation cycle
+make format       # Format all Swift code
+make lint         # Lint with strict concurrency
+make test         # Run all 275 tests
+make build        # Verify compilation
+
 # Comprehensive development cycle
-swift test        # Run all 216 tests
-swift build       # Verify compilation  
+swift test        # Run all 275 tests
+swift build       # Verify compilation
 swift run Docket  # Launch the floating widget
 make app          # Create .app bundle for distribution
 make install      # Install to /Applications

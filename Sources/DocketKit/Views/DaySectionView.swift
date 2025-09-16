@@ -10,11 +10,11 @@ struct DaySectionView: View {
   let meetings: [Meeting]
   @State private var isExpanded: Bool = true
 
-  private var allMeetingsCompleted: Bool {
+  var allMeetingsCompleted: Bool {
     !meetings.isEmpty && meetings.allSatisfy { $0.hasEnded }
   }
 
-  private var isPastDay: Bool {
+  var isPastDay: Bool {
     // Yesterday and any other past days should auto-collapse
     // Check if this is a past day by looking at the title or meeting dates
     if title.lowercased() == "yesterday" {
@@ -30,7 +30,7 @@ struct DaySectionView: View {
     return false
   }
 
-  private var shouldAutoCollapse: Bool {
+  var shouldAutoCollapse: Bool {
     allMeetingsCompleted && isExpanded && (isPastDay || title.lowercased() == "yesterday")
   }
 

@@ -23,9 +23,9 @@ struct DocketAppTests {
     #expect(Bool(true))
   }
 
-  // TODO: Add integration tests as we implement features
-  // - App launch and window creation
-  // - Calendar permission flow
-  // - Meeting list integration
-  // - Join meeting workflow
+  // Note: Additional integration tests could include:
+  // - App launch and window creation testing
+  // - Calendar permission flow testing
+  // - End-to-end meeting list workflow testing
+  // - Join meeting workflow testing
 }

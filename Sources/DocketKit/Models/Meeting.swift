@@ -87,7 +87,7 @@ extension Meeting {
       && lhs.attendeeCount == rhs.attendeeCount && lhs.attendees.count == rhs.attendees.count
       && lhs.calendarName == rhs.calendarName && lhs.eventIdentifier == rhs.eventIdentifier
   }
-  
+
   public func hash(into hasher: inout Hasher) {
     // Hash based on unique identifier and core properties
     hasher.combine(id)

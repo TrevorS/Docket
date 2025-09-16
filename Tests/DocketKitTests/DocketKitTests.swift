@@ -15,9 +15,9 @@ struct DocketKitTests {
     #expect(Bool(true))
   }
 
-  // TODO: Add more tests as we implement core functionality
-  // - ZoomMeeting model tests
-  // - CalendarManager tests
-  // - ZoomURLExtractor tests
-  // - AppModel state management tests
+  // Note: Core functionality tests are implemented in separate test files:
+  // - Meeting model tests: MeetingTests.swift
+  // - CalendarManager tests: CalendarManagerTests.swift
+  // - MeetingURLExtractor tests: MeetingURLExtractorTests.swift
+  // - AppModel tests: AppModelTests.swift
 }

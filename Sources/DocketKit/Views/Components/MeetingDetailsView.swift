@@ -7,7 +7,7 @@ struct MeetingDetailsView: View {
   let organizerName: String?
   let attendeeCount: Int
   let attendees: [(name: String?, email: String?)]
-  
+
   @State private var showAttendeePopover = false
   @State private var isHovered = false
 
@@ -56,7 +56,7 @@ struct MeetingDetailsView: View {
   private var attendeeText: String {
     "\(attendeeCount) \(attendeeCount == 1 ? "person" : "people")"
   }
-  
+
   private var attendeePopoverContent: some View {
     VStack(alignment: .leading, spacing: 4) {
       if attendees.isEmpty {
@@ -69,20 +69,20 @@ struct MeetingDetailsView: View {
           .font(.caption.weight(.semibold))
           .padding(.horizontal, 8)
           .padding(.top, 8)
-        
+
         ForEach(Array(attendees.enumerated()), id: \.offset) { index, attendee in
           HStack(spacing: 6) {
             Image(systemName: "person.circle")
               .font(.caption)
               .foregroundStyle(.secondary)
-            
+
             VStack(alignment: .leading, spacing: 2) {
               if let name = attendee.name, !name.isEmpty {
                 Text(name)
                   .font(.caption)
                   .lineLimit(1)
               }
-              
+
               if let email = attendee.email, !email.isEmpty {
                 Text(email)
                   .font(.caption2)
@@ -95,7 +95,7 @@ struct MeetingDetailsView: View {
                   .italic()
               }
             }
-            
+
             Spacer()
           }
           .padding(.horizontal, 8)
@@ -105,28 +105,6 @@ struct MeetingDetailsView: View {
       }
     }
     .frame(maxWidth: 250)
-  }
-  
-  private var attendeeTooltip: String {
-    guard !attendees.isEmpty else {
-      let fallback = "No attendee details available"
-      print("💬 Tooltip: \(fallback)")
-      return fallback
-    }
-    
-    let attendeeStrings = attendees.map { attendee in
-      let name = attendee.name ?? "Unknown"
-      
-      if let email = attendee.email, !email.isEmpty {
-        return "\(name) (\(email))"
-      } else {
-        return name
-      }
-    }
-    
-    let tooltip = attendeeStrings.joined(separator: "\n")
-    print("💬 Tooltip for \(attendees.count) attendees: \(tooltip)")
-    return tooltip
   }
 }
 
@@ -140,7 +118,7 @@ struct MeetingDetailsView: View {
         (name: "Bob Wilson", email: "bob@example.com"),
         (name: "Carol Davis", email: nil),
         (name: nil, email: "dave@example.com"),
-        (name: "Eve Brown", email: "eve@example.com")
+        (name: "Eve Brown", email: "eve@example.com"),
       ]
     )
   }
@@ -166,7 +144,7 @@ struct MeetingDetailsView: View {
       attendees: [
         (name: "John Doe", email: "john@company.com"),
         (name: "Jane Smith", email: nil),
-        (name: "Mike Johnson", email: "mike.j@company.com")
+        (name: "Mike Johnson", email: "mike.j@company.com"),
       ]
     )
   }
@@ -199,7 +177,7 @@ struct MeetingDetailsView: View {
         (name: "Emma Brown", email: "emma@partner.com"),
         (name: "Frank Miller", email: nil),
         (name: "Grace Chen", email: "grace@company.com"),
-        (name: "Henry Taylor", email: "henry@external.com")
+        (name: "Henry Taylor", email: "henry@external.com"),
         // Only showing first 10 of 87 attendees
       ]
     )
@@ -212,7 +190,7 @@ struct MeetingDetailsView: View {
     MeetingDetailsView(
       organizerName: "Meeting Host",
       attendeeCount: 5,
-      attendees: [] // No attendee details available
+      attendees: []  // No attendee details available
     )
   }
   .padding()
@@ -231,7 +209,7 @@ struct MeetingDetailsView: View {
         (name: "   ", email: "   "),  // Whitespace only
         (name: "Very Long Name That Should Be Truncated Properly", email: "long@company.com"),
         (name: "Normal User", email: "user@verylongdomainnamethatmightcauselayoutissues.com"),
-        (name: nil, email: nil)  // Completely missing data
+        (name: nil, email: nil),  // Completely missing data
       ]
     )
   }
@@ -248,7 +226,7 @@ struct MeetingDetailsView: View {
         (name: "Bob Wilson", email: "bob@example.com"),
         (name: "Carol Davis", email: nil),
         (name: nil, email: "dave@example.com"),
-        (name: "Eve Brown", email: "eve@example.com")
+        (name: "Eve Brown", email: "eve@example.com"),
       ]
     )
   }
@@ -269,7 +247,7 @@ struct MeetingDetailsView: View {
         attendees: [
           (name: "Alice Johnson", email: "alice@example.com"),
           (name: "Bob Wilson", email: nil),
-          (name: nil, email: "carol@example.com")
+          (name: nil, email: "carol@example.com"),
         ]
       )
 

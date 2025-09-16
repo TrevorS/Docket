@@ -78,11 +78,11 @@ struct MeetingRowView: View {
     .frame(minWidth: 80, alignment: .trailing)  // Reserve consistent space to prevent layout shifts
   }
 
-  private var shouldShowJoinButton: Bool {
+  var shouldShowJoinButton: Bool {
     !meeting.hasEnded && hasJoinUrl
   }
 
-  private var hasJoinUrl: Bool {
+  var hasJoinUrl: Bool {
     !(meeting.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
   }
 
@@ -97,7 +97,7 @@ struct MeetingRowView: View {
   private func handleJoinAction(_ url: URL) {
     let success = NSWorkspace.shared.open(url)
     if !success {
-      print("❌ Failed to open meeting URL: \(url)")
+      Logger.error("Failed to open meeting URL: \(url)")
     }
   }
 }

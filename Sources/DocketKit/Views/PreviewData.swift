@@ -27,7 +27,7 @@ public enum PreviewData {
       (name: nil, email: "dave@company.com"),
       (name: "Eve Johnson", email: "eve@company.com"),
       (name: "Frank Miller", email: "frank@company.com"),
-      (name: "Grace Lee", email: "grace@company.com")
+      (name: "Grace Lee", email: "grace@company.com"),
     ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-active"
@@ -49,7 +49,7 @@ public enum PreviewData {
       (name: "Client B", email: "clientb@external.com"),
       (name: "Project Manager", email: "pm@company.com"),
       (name: "Designer", email: nil),
-      (name: "Developer", email: "dev@company.com")
+      (name: "Developer", email: "dev@company.com"),
     ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-upcoming"
@@ -78,7 +78,7 @@ public enum PreviewData {
       (name: "Engineering Manager", email: "em@company.com"),
       (name: "Accessibility Expert", email: "a11y@company.com"),
       (name: "Content Strategist", email: "content@company.com"),
-      (name: "Tech Writer", email: "docs@company.com")
+      (name: "Tech Writer", email: "docs@company.com"),
     ],
     calendarName: "Design Calendar",
     eventIdentifier: "preview-ended"
@@ -117,7 +117,7 @@ public enum PreviewData {
       (name: "Product Director", email: "prod-dir@company.com"),
       (name: "Tech Lead A", email: "tech-a@company.com"),
       (name: "Tech Lead B", email: nil),
-      (name: "Architect", email: "architect@company.com")
+      (name: "Architect", email: "architect@company.com"),
       // Only showing first 5 of 25 attendees for brevity
     ],
     calendarName: "Planning Calendar",
@@ -162,7 +162,7 @@ public enum PreviewData {
         (name: "QA Engineer", email: nil),
         (name: "Product Owner", email: "po@company.com"),
         (name: "Designer", email: "designer@company.com"),
-        (name: "Tech Lead", email: "tl@company.com")
+        (name: "Tech Lead", email: "tl@company.com"),
       ],
       calendarName: "Agile Calendar",
       eventIdentifier: "preview-yesterday-1"
@@ -186,7 +186,7 @@ public enum PreviewData {
       attendees: [
         (name: "Stakeholder A", email: "stakeholder1@company.com"),
         (name: "Stakeholder B", email: "stakeholder2@company.com"),
-        (name: "Customer Success", email: "cs@company.com")
+        (name: "Customer Success", email: "cs@company.com"),
         // Only showing first 3 of 20 attendees
       ],
       calendarName: "Product Calendar",
@@ -226,7 +226,7 @@ public enum PreviewData {
       attendeeCount: 2,
       attendees: [
         (name: "You", email: nil),
-        (name: "Manager", email: "manager@company.com")
+        (name: "Manager", email: "manager@company.com"),
       ],
       calendarName: "Personal Calendar",
       eventIdentifier: "preview-tomorrow-2"
@@ -296,7 +296,7 @@ public enum PreviewData {
       (name: "James Wilson", email: nil),
       (name: "Lisa Park", email: "lisa@company.com"),
       (name: "Ryan Davis", email: "ryan@company.com"),
-      (name: "Sophie Brown", email: "sophie@company.com")
+      (name: "Sophie Brown", email: "sophie@company.com"),
     ],
     calendarName: "Work Calendar",
     eventIdentifier: "preview-google-meet"

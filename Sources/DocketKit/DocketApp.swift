@@ -97,7 +97,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @MainActor
   private func setupAppLifecycleNotifications() {
     // No additional setup needed - delegate methods handle lifecycle events
-    print("✅ App lifecycle notifications configured")
+    Logger.success("App lifecycle notifications configured")
   }
 
   private func setupAlwaysOnTopNotifications() {
@@ -112,7 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
       }
     }
-    print("✅ Always-on-top notifications configured")
+    Logger.success("Always-on-top notifications configured")
   }
 
   @MainActor

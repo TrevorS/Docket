@@ -180,7 +180,7 @@ struct MeetingsListView: View {
       do {
         try await calendarManager.refreshMeetings()
       } catch {
-        print("❌ Manual refresh failed: \(error)")
+        Logger.error("Manual refresh failed: \(error)")
       }
     }
   }
@@ -306,7 +306,8 @@ struct MeetingsListView: View {
 #Preview("Calendar Error State") {
   NavigationStack {
     EmptyStateView(
-      authState: .error("Failed to connect to calendar service. Please check your calendar settings."),
+      authState: .error(
+        "Failed to connect to calendar service. Please check your calendar settings."),
       onRetry: { print("Retry tapped") },
       onGrantAccess: { print("Grant access tapped") },
       onOpenSettings: { print("Open settings tapped") }
@@ -338,7 +339,7 @@ struct MeetingsListView: View {
     ("Denied", CalendarAuthState.denied),
     ("Write Only", CalendarAuthState.writeOnly),
     ("Restricted", CalendarAuthState.restricted),
-    ("Error", CalendarAuthState.error("Connection failed"))
+    ("Error", CalendarAuthState.error("Connection failed")),
   ]
 
   VStack {
