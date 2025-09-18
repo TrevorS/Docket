@@ -14,11 +14,12 @@ struct PinButton: View {
       Image(systemName: isPinned ? "pin.fill" : "pin")
         .font(.system(size: 14, weight: .medium))
         .foregroundColor(isPinned ? .blue : .secondary)
-        .scaleEffect(isHovered ? 1.1 : 1.0)
+        .opacity(isHovered ? 0.7 : 1.0)
+        .rotationEffect(.degrees(isPinned ? 15 : 0))
         .animation(.easeInOut(duration: 0.15), value: isHovered)
-        .animation(.easeInOut(duration: 0.2), value: isPinned)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPinned)
     }
-    .buttonStyle(.plain)
+    .buttonStyle(.accessoryBarAction)
     .help(
       isPinned
         ? "Unpin window (allow to go behind other windows)"

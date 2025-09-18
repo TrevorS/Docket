@@ -15,9 +15,8 @@ struct MeetingCopyButton: View {
       Image(systemName: "doc.on.clipboard")
         .font(.caption)
         .foregroundColor(isHovered ? .primary : .secondary)
-        .scaleEffect(showGlow ? 1.15 : (isHovered ? 1.1 : 1.0))
+        .symbolEffect(.bounce, options: .speed(2), value: showGlow)
         .animation(.easeInOut(duration: 0.15), value: isHovered)
-        .animation(.easeInOut(duration: 0.15), value: showGlow)
     }
     .buttonStyle(.plain)
     .help("Copy meeting link")

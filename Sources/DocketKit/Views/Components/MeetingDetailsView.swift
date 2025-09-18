@@ -34,9 +34,7 @@ struct MeetingDetailsView: View {
             .font(.caption2.monospaced())
             .foregroundStyle(.secondary)
         }
-        .scaleEffect(isHovered ? 1.05 : 1.0)
-        .brightness(isHovered ? 0.1 : 0)
-        .shadow(color: .accentColor.opacity(isHovered ? 0.3 : 0), radius: 2)
+        .opacity(isHovered ? 0.7 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onHover { hovering in
           isHovered = hovering

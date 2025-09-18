@@ -27,7 +27,6 @@ struct MeetingJoinButton: View {
       .padding(.vertical, 6)
       .background(backgroundColor, in: RoundedRectangle(cornerRadius: 6))
       .foregroundColor(.white)
-      .scaleEffect(isHovered ? 1.05 : 1.0)
       .animation(.easeInOut(duration: 0.15), value: isHovered)
     }
     .disabled(isJoining || shouldDisable)
