@@ -4,7 +4,7 @@
 import AppKit
 
 /// An NSView representing a single meeting row with all details and actions
-class MeetingRowView: NSView {
+class MeetingRowViewImpl: NSView {
   let meeting: Meeting
   let onJoin: (URL) -> Void
   let onCopy: (String) -> Void
@@ -47,7 +47,7 @@ class MeetingRowView: NSView {
     translatesAutoresizingMaskIntoConstraints = false
 
     // Add background visual effect view
-    effectView.material = .regular
+    effectView.material = .hudWindow
     effectView.blendingMode = .behindWindow
     effectView.state = .active
     effectView.translatesAutoresizingMaskIntoConstraints = false
@@ -105,7 +105,7 @@ class MeetingRowView: NSView {
     // Configure actions horizontal stack (copy + join)
     actionsStack.orientation = .horizontal
     actionsStack.spacing = 8
-    actionsStack.alignment = .center
+    actionsStack.alignment = .centerY
     actionsStack.translatesAutoresizingMaskIntoConstraints = false
 
     // Only add copy button if meeting has URL

@@ -7,11 +7,11 @@ import Testing
 
 struct DocketAppTests {
 
-  @Test("App can be initialized")
+  @Test("App delegate can be initialized")
   @MainActor
   func appInitialization() async throws {
-    _ = DocketApp()
-    // DocketApp struct from DocketKit can be initialized
+    _ = AppDelegate()
+    // AppDelegate from DocketKit can be initialized
     #expect(Bool(true))
   }
 

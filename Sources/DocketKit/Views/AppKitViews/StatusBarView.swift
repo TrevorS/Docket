@@ -2,7 +2,7 @@
 // ABOUTME: Bottom-pinned bar with refresh icon, timestamp, and completed meetings filter
 
 import AppKit
-import Combine
+@preconcurrency import Combine
 
 /// An NSView displaying the bottom status bar with refresh status and hide toggle
 class StatusBarView: NSView {
@@ -119,7 +119,7 @@ class StatusBarView: NSView {
   }
 
   private func setupDataBindings() {
-    guard let calendarManager = calendarManager, let appModel = appModel else {
+    guard let calendarManager = calendarManager else {
       return
     }
 
@@ -181,7 +181,8 @@ class StatusBarView: NSView {
     hideButton.state = appModel.hideCompletedMeetingsAfter5Min ? .on : .off
 
     // Update tooltip
-    hideButton.toolTip = appModel.hideCompletedMeetingsAfter5Min
+    hideButton.toolTip =
+      appModel.hideCompletedMeetingsAfter5Min
       ? "Showing completed meetings hidden"
       : "Showing all meetings"
 
@@ -191,7 +192,7 @@ class StatusBarView: NSView {
       systemSymbolName: appModel.hideCompletedMeetingsAfter5Min ? "eye.slash" : "eye",
       accessibilityDescription: nil
     )?
-      .withSymbolConfiguration(eyeConfig)
+    .withSymbolConfiguration(eyeConfig)
     hideButton.image = eyeImage
   }
 

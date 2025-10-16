@@ -2,5 +2,6 @@ import AppKit
 import DocketKit
 
 // Custom main entry point that creates and runs the app delegate
-NSApplication.shared.delegate = AppDelegate()
+let delegate = AppDelegate()
+NSApplication.shared.delegate = delegate
 _ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)

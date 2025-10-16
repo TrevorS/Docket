@@ -42,8 +42,10 @@ class MeetingDetailsView: NSView {
       organizerStack.alignment = .centerY
 
       let organizerIcon = NSImageView()
-      organizerIcon.image = NSImage(systemSymbolName: "person.crop.circle", accessibilityDescription: nil)
-      organizerIcon.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 9, weight: .regular)
+      organizerIcon.image = NSImage(
+        systemSymbolName: "person.crop.circle", accessibilityDescription: nil)
+      organizerIcon.symbolConfiguration = NSImage.SymbolConfiguration(
+        pointSize: 9, weight: .regular)
       organizerIcon.contentTintColor = .secondaryLabelColor
       organizerIcon.translatesAutoresizingMaskIntoConstraints = false
       organizerStack.addArrangedSubview(organizerIcon)

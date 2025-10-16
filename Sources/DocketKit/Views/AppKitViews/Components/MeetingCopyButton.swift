@@ -26,9 +26,8 @@ class MeetingCopyButton: NSButton {
 
     // Use clipboard icon
     let config = NSImage.SymbolConfiguration(pointSize: 11, weight: .regular)
-    let image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: nil)?
+    self.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: nil)?
       .withSymbolConfiguration(config)
-    setImage(image, for: .normal)
 
     contentTintColor = .secondaryLabelColor
     target = self

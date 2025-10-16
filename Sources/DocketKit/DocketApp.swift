@@ -26,7 +26,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
 
   public func applicationDidFinishLaunching(_ notification: Notification) {
     // Create floating panel with default size
-    let panelRect = NSRect(x: 100, y: 100, width: 720, height: 950)
+    let panelRect = NSRect(x: 100, y: 100, width: 460, height: 620)
     let panel = DocketPanel(
       contentRect: panelRect,
       styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
@@ -48,20 +48,10 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     contentVC.calendarManager = calendarManager
 
     // Show the window
-    windowController?.showWindow(nil)
+    panel.makeKeyAndOrderFront(nil)
+    panel.orderFrontRegardless()
 
-    // Verify window is visible
-    if let window = windowController?.panel {
-      Logger.info("Window frame: \(window.frame)")
-      Logger.info("Window visible: \(window.isVisible)")
-      Logger.info("Window level: \(window.level)")
-
-      // Make sure window is key and ordered front
-      window.makeKeyAndOrderFront(nil)
-      window.orderFrontRegardless()
-    }
-
-    // Activate and bring to front
+    // Activate app
     NSApp.activate(ignoringOtherApps: true)
 
     // Start auto-refresh
@@ -95,14 +85,15 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
   // MARK: - Private Methods
 
   private func setupAlwaysOnTopObserver() {
+    guard let windowController = windowController else { return }
     NotificationCenter.default.addObserver(
       forName: .alwaysOnTopDidChange,
       object: nil,
       queue: .main
-    ) { [weak self] notification in
+    ) { [weak windowController] notification in
       if let alwaysOnTop = notification.userInfo?["alwaysOnTop"] as? Bool {
         Task { @MainActor in
-          self?.windowController?.panel.level = alwaysOnTop ? .floating : .normal
+          windowController?.panel.level = alwaysOnTop ? .floating : .normal
         }
       }
     }

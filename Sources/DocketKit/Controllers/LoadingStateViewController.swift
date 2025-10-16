@@ -10,8 +10,6 @@ class LoadingStateViewController: NSViewController {
     view.wantsLayer = true
     view.layer?.backgroundColor = NSColor.clear.cgColor
 
-    Logger.info("LoadingStateViewController viewDidLoad - view frame: \(view.frame)")
-
     // Setup loading spinner
     let spinner = NSProgressIndicator()
     spinner.style = .spinning
@@ -23,7 +21,5 @@ class LoadingStateViewController: NSViewController {
       spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
       spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor),
     ])
-
-    Logger.info("Added spinner to LoadingStateViewController")
   }
 }

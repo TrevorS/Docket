@@ -37,18 +37,10 @@ class ContentViewController: NSViewController {
       effectView.rightAnchor.constraint(equalTo: view.rightAnchor),
     ])
 
-    Logger.info("ContentViewController viewDidLoad - view frame: \(view.frame)")
-
-    // Add initial state view (loading)
-    addChild(loadingStateVC)
-    view.addSubview(loadingStateVC.view)
-    setupConstraints(for: loadingStateVC.view)
-
-    Logger.info("Added loadingStateVC - its view frame: \(loadingStateVC.view.frame)")
-
-    // Setup status bar with models
+    // Setup status bar FIRST with models
     statusBarView.appModel = appModel
     statusBarView.calendarManager = calendarManager
+    statusBarView.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(statusBarView)
 
     // Setup status bar constraints (pin to bottom)
@@ -56,7 +48,13 @@ class ContentViewController: NSViewController {
       statusBarView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
       statusBarView.leftAnchor.constraint(equalTo: view.leftAnchor),
       statusBarView.rightAnchor.constraint(equalTo: view.rightAnchor),
+      statusBarView.heightAnchor.constraint(equalToConstant: 28),
     ])
+
+    // Now add initial state view (loading)
+    addChild(loadingStateVC)
+    view.addSubview(loadingStateVC.view)
+    setupConstraints(for: loadingStateVC.view)
 
     // Setup data bindings
     setupDataBindings()

@@ -47,7 +47,7 @@ class MeetingJoinButton: NSButton {
   }
 
   private var baseColor: NSColor {
-    meeting.platform.color
+    meeting.platform.nsColor
   }
 
   private var tooltipText: String {

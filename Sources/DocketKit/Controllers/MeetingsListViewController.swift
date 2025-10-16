@@ -80,7 +80,9 @@ class MeetingsListViewController: NSViewController {
 
     for (dayTitle, dayMeetings) in sections {
       // Filter out hidden meetings
-      let filteredMeetings = dayMeetings.filter { !$0.shouldBeHidden(hideCompletedAfter5Min: hideCompleted) }
+      let filteredMeetings = dayMeetings.filter {
+        !$0.shouldBeHidden(hideCompletedAfter5Min: hideCompleted)
+      }
 
       // Skip empty sections
       if filteredMeetings.isEmpty {
@@ -95,9 +97,9 @@ class MeetingsListViewController: NSViewController {
 
       // Add meetings for this day
       for meeting in filteredMeetings {
-        let meetingRow = MeetingRowView(
+        let meetingRow = MeetingRowViewImpl(
           meeting: meeting,
-          onJoin: { [weak self] url in
+          onJoin: { url in
             let success = NSWorkspace.shared.open(url)
             if !success {
               Logger.error("Failed to open meeting URL: \(url)")
