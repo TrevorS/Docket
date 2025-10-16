@@ -13,6 +13,7 @@ class ContentViewController: NSViewController {
   private let meetingsListVC = MeetingsListViewController()
   private let emptyStateVC = EmptyStateViewController()
   private let loadingStateVC = LoadingStateViewController()
+  private let statusBarView = StatusBarView()
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -44,6 +45,18 @@ class ContentViewController: NSViewController {
     setupConstraints(for: loadingStateVC.view)
 
     Logger.info("Added loadingStateVC - its view frame: \(loadingStateVC.view.frame)")
+
+    // Setup status bar with models
+    statusBarView.appModel = appModel
+    statusBarView.calendarManager = calendarManager
+    view.addSubview(statusBarView)
+
+    // Setup status bar constraints (pin to bottom)
+    NSLayoutConstraint.activate([
+      statusBarView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      statusBarView.leftAnchor.constraint(equalTo: view.leftAnchor),
+      statusBarView.rightAnchor.constraint(equalTo: view.rightAnchor),
+    ])
 
     // Setup data bindings
     setupDataBindings()
@@ -91,14 +104,22 @@ class ContentViewController: NSViewController {
     addChild(viewController)
     viewController.view.frame = view.bounds
     view.addSubview(viewController.view)
-    setupConstraints(for: viewController.view)
+
+    // Setup constraints - content view takes up space above status bar
+    viewController.view.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+      viewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+      viewController.view.bottomAnchor.constraint(equalTo: statusBarView.topAnchor),
+      viewController.view.leftAnchor.constraint(equalTo: view.leftAnchor),
+      viewController.view.rightAnchor.constraint(equalTo: view.rightAnchor),
+    ])
   }
 
   private func setupConstraints(for subview: NSView) {
     subview.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
       subview.topAnchor.constraint(equalTo: view.topAnchor),
-      subview.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      subview.bottomAnchor.constraint(equalTo: statusBarView.topAnchor),
       subview.leftAnchor.constraint(equalTo: view.leftAnchor),
       subview.rightAnchor.constraint(equalTo: view.rightAnchor),
     ])

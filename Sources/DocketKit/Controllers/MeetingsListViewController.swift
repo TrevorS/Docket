@@ -63,6 +63,74 @@ class MeetingsListViewController: NSViewController {
       view.removeFromSuperview()
     }
 
-    // TODO: Add day sections with meetings
+    guard let calendarManager = calendarManager, let appModel = appModel else {
+      return
+    }
+
+    let hideCompleted = appModel.hideCompletedMeetingsAfter5Min
+
+    // Define day sections: yesterday, today, tomorrow
+    let sections = [
+      ("Yesterday", calendarManager.yesterdayMeetings),
+      ("Today", calendarManager.todayMeetings),
+      ("Tomorrow", calendarManager.tomorrowMeetings),
+    ]
+
+    var hasAnyMeetings = false
+
+    for (dayTitle, dayMeetings) in sections {
+      // Filter out hidden meetings
+      let filteredMeetings = dayMeetings.filter { !$0.shouldBeHidden(hideCompletedAfter5Min: hideCompleted) }
+
+      // Skip empty sections
+      if filteredMeetings.isEmpty {
+        continue
+      }
+
+      hasAnyMeetings = true
+
+      // Add day header
+      let headerView = DaySectionHeaderView(title: dayTitle)
+      stackView.addArrangedSubview(headerView)
+
+      // Add meetings for this day
+      for meeting in filteredMeetings {
+        let meetingRow = MeetingRowView(
+          meeting: meeting,
+          onJoin: { [weak self] url in
+            let success = NSWorkspace.shared.open(url)
+            if !success {
+              Logger.error("Failed to open meeting URL: \(url)")
+            }
+          },
+          onCopy: { url in
+            Logger.info("Meeting URL copied to clipboard: \(url)")
+          }
+        )
+        stackView.addArrangedSubview(meetingRow)
+      }
+
+      // Add spacing between sections (except after last section)
+      if dayTitle != sections.last?.0 {
+        let spacer = NSView()
+        spacer.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        stackView.addArrangedSubview(spacer)
+      }
+    }
+
+    // If no meetings at all, show empty state message
+    if !hasAnyMeetings {
+      let emptyLabel = NSTextField()
+      emptyLabel.stringValue = "No meetings today"
+      emptyLabel.font = NSFont.systemFont(ofSize: 12)
+      emptyLabel.textColor = .secondaryLabelColor
+      emptyLabel.backgroundColor = .clear
+      emptyLabel.isBordered = false
+      emptyLabel.isEditable = false
+      emptyLabel.isSelectable = false
+      emptyLabel.alignment = .center
+      emptyLabel.translatesAutoresizingMaskIntoConstraints = false
+      stackView.addArrangedSubview(emptyLabel)
+    }
   }
 }
