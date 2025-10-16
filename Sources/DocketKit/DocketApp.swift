@@ -37,15 +37,17 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     // Create root content view controller
     let contentVC = ContentViewController()
 
+    // ✅ CRITICAL: Inject models BEFORE creating window controller
+    // This ensures models are available when viewDidLoad() is triggered
+    contentVC.appModel = appModel
+    contentVC.calendarManager = calendarManager
+
     // Setup window controller to manage panel lifecycle
+    // This will trigger viewDidLoad() with valid models
     windowController = DocketWindowController(
       window: panel,
       contentViewController: contentVC
     )
-
-    // Inject models into content view controller
-    contentVC.appModel = appModel
-    contentVC.calendarManager = calendarManager
 
     // Show the window
     panel.makeKeyAndOrderFront(nil)

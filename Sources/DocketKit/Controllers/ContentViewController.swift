@@ -56,23 +56,18 @@ class ContentViewController: NSViewController {
     view.addSubview(loadingStateVC.view)
     setupConstraints(for: loadingStateVC.view)
 
-    // Setup data bindings
+    // Setup data bindings FIRST (so subscribers are ready)
     setupDataBindings()
 
-    // Check current auth state first (in case permission was already granted)
+    // Update auth state to current value (will trigger subscriber to update UI)
+    Logger.info("ContentViewController: Checking calendar auth state")
     calendarManager?.updateAuthState()
-    Logger.info("Initial auth state: \(String(describing: calendarManager?.authState))")
 
-    // Request calendar access if not yet determined
-    Task {
-      let currentState = calendarManager?.authState
-      Logger.info("Current auth state in Task: \(String(describing: currentState))")
-      if currentState == .notDetermined {
-        Logger.info("Requesting calendar access...")
-        let granted = await calendarManager?.requestAccess()
-        Logger.info("Calendar access granted: \(granted ?? false)")
-      } else {
-        Logger.info("Skipping permission request - already has state")
+    // If not yet determined, request access
+    Task { @MainActor in
+      if calendarManager?.authState == .notDetermined {
+        Logger.info("ContentViewController: Requesting calendar access")
+        _ = await calendarManager?.requestAccess()
       }
     }
   }
@@ -87,16 +82,14 @@ class ContentViewController: NSViewController {
   }
 
   private func updateViewState(for authState: CalendarAuthState) {
-    Logger.info("updateViewState - Auth state changed to: \(String(describing: authState))")
+    Logger.info("ContentViewController: Auth state = \(String(describing: authState))")
     switch authState {
     case .notDetermined:
-      Logger.info("updateViewState - Showing loading state")
       showView(loadingStateVC)
     case .authorized, .fullAccess:
-      Logger.info("updateViewState - Showing meetings list")
+      Logger.success("ContentViewController: Showing meetings list")
       showView(meetingsListVC)
     default:
-      Logger.info("updateViewState - Showing empty state")
       showView(emptyStateVC)
     }
   }
