@@ -296,4 +296,140 @@ struct MeetingTests {
     // If this compiles, Sendable conformance is working
     #expect(Bool(true))
   }
+
+  // MARK: - Meeting Hiding Logic Tests
+
+  @Test func testMinutesSinceEndForFutureMeeting() {
+    let now = Date()
+    let futureStart = now.addingTimeInterval(600)  // 10 minutes from now
+    let futureEnd = futureStart.addingTimeInterval(1800)  // 30 minutes later
+
+    let meeting = createMeeting(startTime: futureStart, endTime: futureEnd)
+
+    #expect(meeting.minutesSinceEnd == 0)  // Not ended yet
+  }
+
+  @Test func testMinutesSinceEndForCurrentMeeting() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-600)  // Started 10 minutes ago
+    let futureEnd = now.addingTimeInterval(600)  // Ends in 10 minutes
+
+    let meeting = createMeeting(startTime: pastStart, endTime: futureEnd)
+
+    #expect(meeting.minutesSinceEnd == 0)  // Not ended yet
+  }
+
+  @Test func testMinutesSinceEndForJustEndedMeeting() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let justEnded = now.addingTimeInterval(-30)  // Ended 30 seconds ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: justEnded)
+
+    // Should be close to 0.5 minutes (30 seconds)
+    #expect(meeting.minutesSinceEnd > 0)
+    #expect(meeting.minutesSinceEnd < 1.0)
+  }
+
+  @Test func testMinutesSinceEndForMeetingEnded4MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let pastEnd = now.addingTimeInterval(-240)  // Ended 4 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Should be close to 4 minutes (with tolerance for test execution)
+    #expect(meeting.minutesSinceEnd > 3.9)
+    #expect(meeting.minutesSinceEnd < 4.1)
+  }
+
+  @Test func testMinutesSinceEndForMeetingEnded5MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let pastEnd = now.addingTimeInterval(-300)  // Ended exactly 5 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Should be exactly 5 minutes (with tolerance for test execution)
+    #expect(meeting.minutesSinceEnd > 4.9)
+    #expect(meeting.minutesSinceEnd < 5.1)
+  }
+
+  @Test func testMinutesSinceEndForMeetingEnded10MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-3600)  // Started 1 hour ago
+    let pastEnd = now.addingTimeInterval(-600)  // Ended 10 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Should be close to 10 minutes
+    #expect(meeting.minutesSinceEnd > 9.9)
+    #expect(meeting.minutesSinceEnd < 10.1)
+  }
+
+  @Test func testShouldBeHiddenWhenFeatureDisabled() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-3600)  // Started 1 hour ago
+    let pastEnd = now.addingTimeInterval(-600)  // Ended 10 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Feature disabled - should never hide
+    #expect(!meeting.shouldBeHidden(hideCompletedAfter5Min: false))
+  }
+
+  @Test func testShouldBeHiddenForFutureMeeting() {
+    let now = Date()
+    let futureStart = now.addingTimeInterval(600)  // 10 minutes from now
+    let futureEnd = futureStart.addingTimeInterval(1800)  // 30 minutes later
+
+    let meeting = createMeeting(startTime: futureStart, endTime: futureEnd)
+
+    // Meeting hasn't ended - should not hide
+    #expect(!meeting.shouldBeHidden(hideCompletedAfter5Min: true))
+  }
+
+  @Test func testShouldBeHiddenForMeetingEnded4MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let pastEnd = now.addingTimeInterval(-240)  // Ended 4 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Less than 5 minutes - should not hide
+    #expect(!meeting.shouldBeHidden(hideCompletedAfter5Min: true))
+  }
+
+  @Test func testShouldBeHiddenForMeetingEndedExactly5MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let pastEnd = now.addingTimeInterval(-300)  // Ended exactly 5 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // Exactly 5 minutes or more - should hide
+    #expect(meeting.shouldBeHidden(hideCompletedAfter5Min: true))
+  }
+
+  @Test func testShouldBeHiddenForMeetingEnded10MinutesAgo() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-3600)  // Started 1 hour ago
+    let pastEnd = now.addingTimeInterval(-600)  // Ended 10 minutes ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: pastEnd)
+
+    // More than 5 minutes - should hide
+    #expect(meeting.shouldBeHidden(hideCompletedAfter5Min: true))
+  }
+
+  @Test func testShouldBeHiddenForJustEndedMeeting() {
+    let now = Date()
+    let pastStart = now.addingTimeInterval(-1800)  // Started 30 minutes ago
+    let justEnded = now.addingTimeInterval(-30)  // Ended 30 seconds ago
+
+    let meeting = createMeeting(startTime: pastStart, endTime: justEnded)
+
+    // Just ended (< 1 minute) - should not hide
+    #expect(!meeting.shouldBeHidden(hideCompletedAfter5Min: true))
+  }
 }

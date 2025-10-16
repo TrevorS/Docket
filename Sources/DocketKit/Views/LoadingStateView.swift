@@ -4,16 +4,16 @@
 import SwiftUI
 
 /// Loading state view with animated indicator and contextual message
-struct LoadingStateView: View {
+public struct LoadingStateView: View {
   let message: String
   let systemImage: String
 
-  init(message: String, systemImage: String = "calendar.badge.clock") {
+  public init(message: String, systemImage: String = "calendar.badge.clock") {
     self.message = message
     self.systemImage = systemImage
   }
 
-  var body: some View {
+  public var body: some View {
     ContentUnavailableView {
       Label(message, systemImage: systemImage)
     } description: {

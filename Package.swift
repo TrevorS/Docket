@@ -14,6 +14,10 @@ let package = Package(
         .library(
             name: "DocketKit",
             targets: ["DocketKit"]
+        ),
+        .library(
+            name: "DocketPreviews",
+            targets: ["DocketPreviews"]
         )
     ],
     dependencies: [
@@ -57,7 +61,17 @@ let package = Package(
         
         // Integration tests for the app
         .testTarget(
-            name: "DocketAppTests", 
+            name: "DocketAppTests",
+            dependencies: ["DocketKit"],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
+            ]
+        ),
+
+        // Preview-only library for SwiftUI previews
+        // Keeps previews in a separate framework to avoid executable target constraints
+        .target(
+            name: "DocketPreviews",
             dependencies: ["DocketKit"],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency")

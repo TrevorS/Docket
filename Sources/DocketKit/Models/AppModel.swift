@@ -41,21 +41,6 @@ public final class AppModel: @unchecked Sendable {
 
   // MARK: - User Preferences
 
-  /// Whether to show only meetings with video meeting URLs
-  public var showOnlyVideoMeetings: Bool = true
-
-  /// Set of enabled meeting platforms to display
-  public var enabledPlatforms: Set<MeetingPlatform> = [.zoom, .googleMeet]
-
-  /// Minutes before meeting to show notification (5 minute default)
-  public var notificationTime: Int = 5
-
-  /// Set of selected calendar names to display
-  public var selectedCalendars: Set<String> = []
-
-  /// Window opacity level (0.0 to 1.0)
-  public var windowOpacity: Double = 1.0
-
   /// Whether window should always stay on top
   private var _alwaysOnTop: Bool = false
   public var alwaysOnTop: Bool {
@@ -70,34 +55,8 @@ public final class AppModel: @unchecked Sendable {
     }
   }
 
-  // MARK: - Runtime State
-
-  /// Timestamp of last successful meeting refresh
-  public var lastRefresh: Date?
-
-  /// Next upcoming meeting (used for quick access)
-  public var nextMeeting: Meeting?
-
-  // MARK: - Platform Filtering
-
-  /// Check if a meeting platform is enabled for display
-  /// - Parameter platform: The meeting platform to check
-  /// - Returns: True if the platform is enabled
-  public func isPlatformEnabled(_ platform: MeetingPlatform) -> Bool {
-    return enabledPlatforms.contains(platform)
-  }
-
-  /// Check if a meeting should be shown based on platform filtering preferences
-  /// - Parameter meeting: The meeting to check
-  /// - Returns: True if the meeting should be displayed
-  public func shouldShowMeeting(_ meeting: Meeting) -> Bool {
-    // Always show unknown platform meetings to avoid hiding legitimate meetings
-    if meeting.platform == .unknown {
-      return true
-    }
-
-    return isPlatformEnabled(meeting.platform)
-  }
+  /// Whether to hide completed meetings 5 minutes after they end
+  public var hideCompletedMeetingsAfter5Min: Bool = true
 
   // MARK: - Initialization
 

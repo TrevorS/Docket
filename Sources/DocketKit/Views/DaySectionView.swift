@@ -1,128 +1,44 @@
 // ABOUTME: Reusable day section component displaying meetings for a specific day
 // ABOUTME: Shows either a list of meetings or an empty state message with consistent styling
-// ABOUTME: Supports collapsing when all meetings are completed for better UX
+// ABOUTME: Simplified header design - collapse/expand removed (now using status bar eye button)
 
 import SwiftUI
 
 /// A reusable section component for displaying a day's meetings
-struct DaySectionView: View {
+public struct DaySectionView: View {
   let title: String
   let meetings: [Meeting]
-  @State private var isExpanded: Bool = true
 
-  var allMeetingsCompleted: Bool {
-    !meetings.isEmpty && meetings.allSatisfy { $0.hasEnded }
+  public init(title: String, meetings: [Meeting]) {
+    self.title = title
+    self.meetings = meetings
   }
 
-  var isPastDay: Bool {
-    // Yesterday and any other past days should auto-collapse
-    // Check if this is a past day by looking at the title or meeting dates
-    if title.lowercased() == "yesterday" {
-      return true
-    }
-
-    // Also check if all meetings are from a past day (more than 12 hours old)
-    if !meetings.isEmpty {
-      let twelveHoursAgo = Date().addingTimeInterval(-43200)  // 12 hours
-      return meetings.allSatisfy { $0.endTime < twelveHoursAgo }
-    }
-
-    return false
-  }
-
-  var shouldAutoCollapse: Bool {
-    allMeetingsCompleted && isExpanded && (isPastDay || title.lowercased() == "yesterday")
-  }
-
-  var body: some View {
+  public var body: some View {
     Section {
       if meetings.isEmpty {
         EmptyMeetingsDayView()
-      } else if allMeetingsCompleted && !isExpanded {
-        collapsedDayView
       } else {
-        ForEach(Array(meetings.enumerated()), id: \.element.id) { index, meeting in
+        ForEach(meetings, id: \.id) { meeting in
           MeetingRowView(meeting: meeting)
-            .listRowSeparator(index == meetings.count - 1 ? .hidden : .visible)
+            .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
             .buttonStyle(.plain)
         }
       }
     } header: {
       sectionHeader
     }
-    .onAppear {
-      if shouldAutoCollapse {
-        // Auto-collapse past days on app launch
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-          withAnimation(.easeInOut(duration: 0.5)) {
-            isExpanded = false
-          }
-        }
-      }
-    }
-    .onChange(of: allMeetingsCompleted) { _, completed in
-      if completed && isExpanded && isPastDay {
-        // Auto-collapse past days after a short delay when all meetings are done
-        // Today's completed meetings require manual collapse for user awareness
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-          withAnimation(.easeInOut(duration: 0.5)) {
-            isExpanded = false
-          }
-        }
-      }
-    }
+    .listSectionSeparator(.hidden)
   }
 
   private var sectionHeader: some View {
-    Group {
-      if allMeetingsCompleted {
-        // Clickable header for completed days
-        Button(action: toggleExpansion) {
-          HStack {
-            Text(title)
-              .font(.headline.weight(.semibold))
-              .foregroundColor(.primary)
-
-            Spacer()
-
-            CompletedMeetingsBadge(meetingCount: meetings.count)
-
-            chevronIndicator
-          }
-          .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help(isExpanded ? "Collapse completed meetings" : "Expand completed meetings")
-      } else {
-        // Non-clickable header for active days
-        HStack {
-          Text(title)
-            .font(.headline.weight(.semibold))
-            .foregroundColor(.primary)
-
-          Spacer()
-        }
-      }
-    }
-  }
-
-  private var chevronIndicator: some View {
-    Image(systemName: "chevron.down")
-      .font(.caption.weight(.semibold))
-      .foregroundColor(.secondary)
-      .rotationEffect(.degrees(isExpanded ? 180 : 0))
-      .animation(.easeInOut(duration: 0.2), value: isExpanded)
-  }
-
-  private func toggleExpansion() {
-    withAnimation(.easeInOut(duration: 0.3)) {
-      isExpanded.toggle()
-    }
-  }
-
-  private var collapsedDayView: some View {
-    // Empty collapsed view since meeting count is now in header
-    EmptyView()
+    Text(title)
+      .font(.headline.weight(.semibold))
+      .foregroundColor(.primary)
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .padding(.leading, 12)
   }
 }
 

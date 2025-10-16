@@ -4,13 +4,23 @@
 import SwiftUI
 
 /// Empty state view that handles different authorization states and provides appropriate actions
-struct EmptyStateView: View {
+public struct EmptyStateView: View {
   let authState: CalendarAuthState
   let onRetry: () -> Void
   let onGrantAccess: () async -> Void
   let onOpenSettings: () -> Void
 
-  var body: some View {
+  public init(
+    authState: CalendarAuthState, onRetry: @escaping () -> Void,
+    onGrantAccess: @escaping () async -> Void, onOpenSettings: @escaping () -> Void
+  ) {
+    self.authState = authState
+    self.onRetry = onRetry
+    self.onGrantAccess = onGrantAccess
+    self.onOpenSettings = onOpenSettings
+  }
+
+  public var body: some View {
     Group {
       switch authState {
       case .denied:

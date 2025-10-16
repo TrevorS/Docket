@@ -1,6 +1,7 @@
 // ABOUTME: Enum representing different video meeting platforms supported by Docket
 // ABOUTME: Provides platform identification, display names, and URL pattern matching for meetings
 
+import AppKit
 import Foundation
 import SwiftUI
 
@@ -94,6 +95,18 @@ public enum MeetingPlatform: String, CaseIterable, Sendable, Hashable {
   /// SwiftUI Color associated with the platform
   public var color: Color {
     return config.color
+  }
+
+  /// NSColor associated with the platform for AppKit
+  public var nsColor: NSColor {
+    switch self {
+    case .zoom:
+      return NSColor.systemBlue
+    case .googleMeet:
+      return NSColor.systemGreen
+    case .unknown:
+      return NSColor.gray
+    }
   }
 
   // MARK: - Platform Detection
