@@ -40,7 +40,8 @@ class HideCompletedButton: NSButton {
     action = #selector(handleToggle)
 
     // Size
-    let frameSize: CGSize = size == .compact
+    let frameSize: CGSize =
+      size == .compact
       ? CGSize(width: 24, height: 24)
       : CGSize(width: 28, height: 28)
     setFrameSize(frameSize)
@@ -61,7 +62,8 @@ class HideCompletedButton: NSButton {
   // MARK: - Appearance
   private func updateAppearance() {
     let imageName = isHiding ? "eye.slash" : "eye"
-    let image = NSImage(systemSymbolName: imageName, accessibilityDescription: isHiding ? "Hidden" : "Visible")
+    let image = NSImage(
+      systemSymbolName: imageName, accessibilityDescription: isHiding ? "Hidden" : "Visible")
     image?.isTemplate = true
     self.image = image
 
@@ -69,7 +71,8 @@ class HideCompletedButton: NSButton {
     contentTintColor = isHiding ? .secondaryLabelColor : .systemBlue
 
     // Tooltip
-    self.toolTip = isHiding
+    self.toolTip =
+      isHiding
       ? "Show all completed meetings (currently hiding meetings 5 minutes after completion)"
       : "Hide meetings 5 minutes after completion"
   }

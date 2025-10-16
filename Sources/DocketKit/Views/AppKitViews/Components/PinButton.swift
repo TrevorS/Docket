@@ -51,7 +51,8 @@ class PinButton: NSButton {
   // MARK: - Appearance
   private func updateAppearance() {
     let imageName = isPinned ? "pin.fill" : "pin"
-    let image = NSImage(systemSymbolName: imageName, accessibilityDescription: isPinned ? "Pinned" : "Not pinned")
+    let image = NSImage(
+      systemSymbolName: imageName, accessibilityDescription: isPinned ? "Pinned" : "Not pinned")
     image?.isTemplate = true
     self.image = image
 
@@ -59,7 +60,8 @@ class PinButton: NSButton {
     contentTintColor = isPinned ? .systemBlue : .secondaryLabelColor
 
     // Tooltip
-    self.toolTip = isPinned
+    self.toolTip =
+      isPinned
       ? "Unpin window (allow to go behind other windows)"
       : "Pin window (keep on top of other windows)"
   }

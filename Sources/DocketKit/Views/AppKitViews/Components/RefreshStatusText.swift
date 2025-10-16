@@ -48,7 +48,9 @@ class RefreshStatusText: NSTextField {
 
   // MARK: - Sizing
   override var intrinsicContentSize: NSSize {
-    let calculatedSize = self.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: 200, height: 20)) ?? NSSize(width: 100, height: 14)
+    let calculatedSize =
+      self.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: 200, height: 20))
+      ?? NSSize(width: 100, height: 14)
     return calculatedSize
   }
 }

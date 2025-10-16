@@ -59,9 +59,21 @@ class ContentViewController: NSViewController {
     // Setup data bindings
     setupDataBindings()
 
-    // Request calendar access
+    // Check current auth state first (in case permission was already granted)
+    calendarManager?.updateAuthState()
+    Logger.info("Initial auth state: \(String(describing: calendarManager?.authState))")
+
+    // Request calendar access if not yet determined
     Task {
-      _ = await calendarManager?.requestAccess()
+      let currentState = calendarManager?.authState
+      Logger.info("Current auth state in Task: \(String(describing: currentState))")
+      if currentState == .notDetermined {
+        Logger.info("Requesting calendar access...")
+        let granted = await calendarManager?.requestAccess()
+        Logger.info("Calendar access granted: \(granted ?? false)")
+      } else {
+        Logger.info("Skipping permission request - already has state")
+      }
     }
   }
 
@@ -75,12 +87,16 @@ class ContentViewController: NSViewController {
   }
 
   private func updateViewState(for authState: CalendarAuthState) {
+    Logger.info("updateViewState - Auth state changed to: \(String(describing: authState))")
     switch authState {
     case .notDetermined:
+      Logger.info("updateViewState - Showing loading state")
       showView(loadingStateVC)
     case .authorized, .fullAccess:
+      Logger.info("updateViewState - Showing meetings list")
       showView(meetingsListVC)
     default:
+      Logger.info("updateViewState - Showing empty state")
       showView(emptyStateVC)
     }
   }
