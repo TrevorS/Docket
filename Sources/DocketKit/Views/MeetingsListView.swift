@@ -13,46 +13,12 @@ public struct MeetingsListView: View {
   }
 
   public var body: some View {
-    NavigationStack {
-      Group {
-        if isRequestingPermission {
-          permissionLoadingView
-        } else if calendarManager.meetings.isEmpty && calendarManager.lastRefresh == nil {
-          // Only show loading view on initial load (no previous refresh), not during auto-refresh
-          loadingView
-        } else if calendarManager.meetings.isEmpty {
-          emptyStateView
-        } else {
-          meetingsList
-        }
+    // DEPRECATED: This view is no longer used. The app now uses AppKit via MeetingsListViewController.
+    // Kept as reference for SwiftUI patterns. Replaced by AppKit components in Week 3 migration.
+    Text("MeetingsListView deprecated - using AppKit")
+      .task {
+        await requestCalendarAccessAndRefresh()
       }
-      .navigationTitle("Docket")
-      .toolbar {
-        ToolbarItem(placement: .primaryAction) {
-          PinButton(
-            isPinned: Binding(
-              get: { appModel.alwaysOnTop },
-              set: { appModel.alwaysOnTop = $0 }
-            ))
-        }
-      }
-    }
-    .task {
-      await requestCalendarAccessAndRefresh()
-    }
-    .onChange(of: appModel.alwaysOnTop) { _, _ in
-      // Force view update when pin state changes
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .appDidBecomeActive)) { _ in
-      Task { @MainActor in
-        handleAppBecameActive()
-      }
-    }
-    .onReceive(NotificationCenter.default.publisher(for: .appDidResignActive)) { _ in
-      Task { @MainActor in
-        handleAppResignedActive()
-      }
-    }
   }
 
   // MARK: - Computed Properties
@@ -128,27 +94,8 @@ public struct MeetingsListView: View {
         try? await calendarManager.refreshMeetings()
       }
 
-      StatusBar(
-        lastRefresh: calendarManager.lastRefresh,
-        isRefreshing: calendarManager.isRefreshing,
-        isAutoRefreshEnabled: calendarManager.isAutoRefreshEnabled,
-        isAutoRefreshActive: calendarManager.isAutoRefreshActive,
-        isHidingCompleted: Binding(
-          get: { appModel.hideCompletedMeetingsAfter5Min },
-          set: { appModel.hideCompletedMeetingsAfter5Min = $0 }
-        ),
-        onToggleAutoRefresh: {
-          if calendarManager.isAutoRefreshActive {
-            calendarManager.pauseAutoRefresh()
-          } else {
-            calendarManager.resumeAutoRefresh()
-            // Trigger immediate refresh when resuming from pause
-            Task {
-              try? await calendarManager.refreshMeetings()
-            }
-          }
-        }
-      )
+      // StatusBar removed - now using AppKit StatusBarViewImpl in MeetingsListViewController
+      // This SwiftUI view is deprecated and kept only for reference
     }
   }
 
