@@ -1,9 +1,9 @@
-// ABOUTME: Main SwiftUI application structure for Docket
-// ABOUTME: Defines the app entry point and floating window configuration
-// ABOUTME: Uses .containerBackground(.ultraThinMaterial) for Liquid Glass effect
+// ABOUTME: AppKit NSApplicationDelegate for Docket
+// ABOUTME: Main app entry point managing window lifecycle and singletons
+// ABOUTME: Replaces previous SwiftUI App structure for native macOS 26 integration
 
 import AppKit
-import SwiftUI
+import Combine
 
 // MARK: - Notification Names
 
@@ -13,96 +13,88 @@ extension Notification.Name {
   static let alwaysOnTopDidChange = Notification.Name("alwaysOnTopDidChange")
 }
 
-public struct DocketApp: App {
-  @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-  @State private var appModel = AppModel()
+// MARK: - App Entry Point
 
-  public init() {}
+public class AppDelegate: NSObject, NSApplicationDelegate {
+  // MARK: - Singletons
 
-  public var body: some Scene {
-    WindowGroup("Docket - Zoom Meetings") {
-      MeetingsListView()
-        .environment(appModel)
-        .frame(minWidth: 550, minHeight: 600)
-        .containerBackground(.ultraThinMaterial, for: .window)
-        .onAppear {
-          // Activate the app and bring window to front
-          NSApp.activate(ignoringOtherApps: true)
-        }
+  var appModel = AppModel()
+  var calendarManager = CalendarManager()
+  var windowController: DocketWindowController?
+
+  // MARK: - App Lifecycle
+
+  public func applicationDidFinishLaunching(_ notification: Notification) {
+    // Create floating panel with default size
+    let panelRect = NSRect(x: 100, y: 100, width: 720, height: 950)
+    let panel = DocketPanel(
+      contentRect: panelRect,
+      styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+      backing: .buffered,
+      defer: false
+    )
+
+    // Create root content view controller
+    let contentVC = ContentViewController()
+
+    // Setup window controller to manage panel lifecycle
+    windowController = DocketWindowController(
+      window: panel,
+      contentViewController: contentVC
+    )
+
+    // Inject models into content view controller
+    contentVC.appModel = appModel
+    contentVC.calendarManager = calendarManager
+
+    // Show the window
+    windowController?.showWindow(nil)
+
+    // Verify window is visible
+    if let window = windowController?.panel {
+      Logger.info("Window frame: \(window.frame)")
+      Logger.info("Window visible: \(window.isVisible)")
+      Logger.info("Window level: \(window.level)")
+
+      // Make sure window is key and ordered front
+      window.makeKeyAndOrderFront(nil)
+      window.orderFrontRegardless()
     }
-    .windowStyle(.automatic)
-    .windowResizability(.contentSize)
-    .defaultSize(width: 720, height: 950)
-    .commands {
-      CommandGroup(replacing: .newItem) {}
-    }
+
+    // Activate and bring to front
+    NSApp.activate(ignoringOtherApps: true)
+
+    // Start auto-refresh
+    calendarManager.startAutoRefresh()
+
+    // Setup always-on-top observer
+    setupAlwaysOnTopObserver()
+
+    Logger.success("App launched successfully")
   }
-}
 
-@MainActor
-class AppDelegate: NSObject, NSApplicationDelegate {
-  func applicationDidFinishLaunching(_ aNotification: Notification) {
-    // Delay to ensure windows are fully created and rendered before configuration
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-      Task { @MainActor in
-        self.configureFloatingWindows()
-      }
-    }
-
-    // Set up app lifecycle notifications for auto-refresh management
-    setupAppLifecycleNotifications()
-
-    // Set up always-on-top notification observer
-    setupAlwaysOnTopNotifications()
-  }
-
-  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+  public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
 
-  func applicationDidBecomeActive(_ aNotification: Notification) {
+  public func applicationDidBecomeActive(_ notification: Notification) {
+    // Resume auto-refresh when app becomes active
     Task { @MainActor in
+      calendarManager.resumeAutoRefresh()
+      // Post notification for SwiftUI views
       NotificationCenter.default.post(name: .appDidBecomeActive, object: nil)
     }
   }
 
-  func applicationDidResignActive(_ aNotification: Notification) {
-    Task { @MainActor in
-      NotificationCenter.default.post(name: .appDidResignActive, object: nil)
-    }
+  public func applicationDidResignActive(_ notification: Notification) {
+    // Don't pause auto-refresh - users want widget visible when app is in background
+    // Post notification for SwiftUI views
+    NotificationCenter.default.post(name: .appDidResignActive, object: nil)
   }
 
-  @MainActor
-  private func configureFloatingWindows(alwaysOnTop: Bool = false) {
-    // Configure all app windows
-    for window in NSApp.windows {
-      // Set window level based on alwaysOnTop setting
-      window.level = alwaysOnTop ? .floating : .normal
+  // MARK: - Private Methods
 
-      // Configure window behavior
-      window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-
-      // Restore window position from user defaults
-      restoreWindowPosition(window)
-
-      // Activate and bring to front
-      window.makeKeyAndOrderFront(nil)
-      if alwaysOnTop {
-        window.orderFrontRegardless()
-      }
-    }
-
-    // Ensure the app activates
-    NSApp.activate(ignoringOtherApps: true)
-  }
-
-  @MainActor
-  private func setupAppLifecycleNotifications() {
-    // No additional setup needed - delegate methods handle lifecycle events
-    Logger.success("App lifecycle notifications configured")
-  }
-
-  private func setupAlwaysOnTopNotifications() {
+  private func setupAlwaysOnTopObserver() {
     NotificationCenter.default.addObserver(
       forName: .alwaysOnTopDidChange,
       object: nil,
@@ -110,42 +102,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ) { [weak self] notification in
       if let alwaysOnTop = notification.userInfo?["alwaysOnTop"] as? Bool {
         Task { @MainActor in
-          self?.configureFloatingWindows(alwaysOnTop: alwaysOnTop)
+          self?.windowController?.panel.level = alwaysOnTop ? .floating : .normal
         }
-      }
-    }
-    Logger.success("Always-on-top notifications configured")
-  }
-
-  @MainActor
-  private func restoreWindowPosition(_ window: NSWindow) {
-    let defaults = UserDefaults.standard
-
-    // Check if we have saved position
-    if let positionData = defaults.data(forKey: "DocketWindowPosition") {
-      if let position = try? NSKeyedUnarchiver.unarchivedObject(
-        ofClass: NSValue.self, from: positionData)?.pointValue
-      {
-        // Validate that the position is still on screen
-        let screenFrame = NSScreen.main?.visibleFrame ?? .zero
-        if screenFrame.contains(NSRect(origin: position, size: window.frame.size)) {
-          window.setFrameOrigin(position)
-        }
-      }
-    }
-
-    // Save position when window moves
-    NotificationCenter.default.addObserver(
-      forName: NSWindow.didMoveNotification,
-      object: window,
-      queue: .main
-    ) { [weak window] _ in
-      guard let window = window else { return }
-      Task { @MainActor in
-        let positionValue = NSValue(point: window.frame.origin)
-        let positionData = try? NSKeyedArchiver.archivedData(
-          withRootObject: positionValue, requiringSecureCoding: true)
-        UserDefaults.standard.set(positionData, forKey: "DocketWindowPosition")
       }
     }
   }
