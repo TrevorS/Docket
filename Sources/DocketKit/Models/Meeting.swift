@@ -74,6 +74,19 @@ public struct Meeting: Identifiable, Sendable, Equatable, Hashable {
   public var hasEnded: Bool {
     Date() >= endTime
   }
+
+  /// Minutes elapsed since the meeting ended (returns 0 if meeting hasn't ended)
+  public var minutesSinceEnd: Double {
+    guard hasEnded else { return 0 }
+    return Date().timeIntervalSince(endTime) / 60.0
+  }
+
+  /// Whether this meeting should be hidden based on completion status
+  /// - Parameter hideCompletedAfter5Min: If true, meetings are hidden 5 minutes after completion
+  /// - Returns: True if the meeting should be hidden from the list
+  public func shouldBeHidden(hideCompletedAfter5Min: Bool) -> Bool {
+    return hideCompletedAfter5Min && hasEnded && minutesSinceEnd >= 5.0
+  }
 }
 
 // MARK: - Equatable & Hashable Conformance

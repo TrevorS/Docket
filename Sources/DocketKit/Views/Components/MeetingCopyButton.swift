@@ -1,5 +1,5 @@
-// ABOUTME: Interactive copy button for meeting URLs with hover effects and clipboard functionality
-// ABOUTME: Provides visual feedback on hover and triggers copy action via callback pattern
+// ABOUTME: Simple copy button for meeting URLs with clipboard functionality
+// ABOUTME: Copies URL to clipboard without animation complexity
 
 import SwiftUI
 
@@ -7,20 +7,15 @@ struct MeetingCopyButton: View {
   let meetingUrl: String?
   let onCopy: (String) -> Void
 
-  @State private var isHovered = false
-  @State private var showGlow = false
-
   var body: some View {
     Button(action: performCopy) {
       Image(systemName: "doc.on.clipboard")
         .font(.caption)
-        .foregroundColor(isHovered ? .primary : .secondary)
-        .symbolEffect(.bounce, options: .speed(2), value: showGlow)
-        .animation(.easeInOut(duration: 0.15), value: isHovered)
+        .foregroundStyle(Color.secondary)
     }
     .buttonStyle(.plain)
+    .background(.clear)
     .help("Copy meeting link")
-    .onHover { isHovered = $0 }
     .disabled(!canCopy)
   }
 
@@ -38,18 +33,6 @@ struct MeetingCopyButton: View {
     pasteboard.clearContents()
     pasteboard.setString(url, forType: .string)
 
-    // Trigger subtle pulse
-    withAnimation(.easeInOut(duration: 0.1)) {
-      showGlow = true
-    }
-
-    // Auto-hide quickly
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-      withAnimation(.easeInOut(duration: 0.1)) {
-        showGlow = false
-      }
-    }
-
     onCopy(url)
   }
 }
@@ -63,21 +46,6 @@ struct MeetingCopyButton: View {
       }
     )
     .padding()
-  }
-}
-
-#Preview("Hovered State") {
-  VStack(spacing: 16) {
-    MeetingCopyButton(
-      meetingUrl: "https://meet.google.com/abc-def-ghi",
-      onCopy: { url in
-        // URL copied to clipboard
-      }
-    )
-    .padding()
-    Text("Hover over the copy button to see the effect")
-      .font(.caption)
-      .foregroundStyle(.secondary)
   }
 }
 

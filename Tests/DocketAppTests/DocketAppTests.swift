@@ -15,11 +15,11 @@ struct DocketAppTests {
     #expect(Bool(true))
   }
 
-  @Test("ContentView can be created")
+  @Test("MeetingsListView can be created")
   @MainActor
-  func contentViewCreation() async throws {
-    _ = ContentView()
-    // ContentView can be initialized without errors
+  func meetingsListViewCreation() async throws {
+    _ = MeetingsListView()
+    // MeetingsListView can be initialized without errors
     #expect(Bool(true))
   }
 

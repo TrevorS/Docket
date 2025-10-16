@@ -5,7 +5,6 @@ import SwiftUI
 
 struct MeetingRowView: View {
   let meeting: Meeting
-  @State private var isHovered = false
 
   var body: some View {
     HStack(spacing: 12) {
@@ -19,9 +18,9 @@ struct MeetingRowView: View {
 
       actionButtons
     }
-    .padding(.vertical, 16)
-    .padding(.horizontal, 8)
-    .onHover { isHovered = $0 }
+    .padding(.vertical, 12)
+    .padding(.horizontal, 12)
+    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
   }
 
   // MARK: - Meeting Information
@@ -64,8 +63,6 @@ struct MeetingRowView: View {
           meetingUrl: meeting.joinUrl,
           onCopy: handleCopyAction
         )
-        .opacity(isHovered ? 1.0 : 0.0)
-        .animation(.easeInOut(duration: 0.2), value: isHovered)
       }
 
       if shouldShowJoinButton {
@@ -75,7 +72,7 @@ struct MeetingRowView: View {
         )
       }
     }
-    .frame(minWidth: 80, alignment: .trailing)  // Reserve consistent space to prevent layout shifts
+    .frame(minWidth: 80, alignment: .trailing)
   }
 
   var shouldShowJoinButton: Bool {
@@ -155,20 +152,5 @@ struct MeetingRowView: View {
 #Preview("Google Meet Platform") {
   List {
     MeetingRowView(meeting: PreviewData.googleMeetMeeting)
-  }
-}
-
-#Preview("Hover Effects Test") {
-  VStack(spacing: 0) {
-    Text("Hover over meeting rows to see interaction effects")
-      .font(.caption)
-      .foregroundStyle(.secondary)
-      .padding()
-
-    List {
-      MeetingRowView(meeting: PreviewData.upcomingMeeting)
-      MeetingRowView(meeting: PreviewData.activeMeeting)
-      MeetingRowView(meeting: PreviewData.endedMeeting)
-    }
   }
 }

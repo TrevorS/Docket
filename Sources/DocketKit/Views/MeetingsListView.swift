@@ -1,19 +1,18 @@
 // ABOUTME: Main meetings list view using modern SwiftUI component architecture
 // ABOUTME: Orchestrates day sections, loading states, and calendar permission handling
+// ABOUTME: Content layer uses standard materials (List) below Liquid Glass functional layer (StatusBar, Toolbar)
 
 import SwiftUI
 
-struct MeetingsListView: View {
+public struct MeetingsListView: View {
   @Environment(AppModel.self) private var appModel
   @State private var calendarManager = CalendarManager()
   @State private var isRequestingPermission = false
-  @State private var isScrolling = false
-  @State private var scrollFadeTimer: Timer?
 
-  init() {
+  public init() {
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Group {
         if isRequestingPermission {
@@ -41,6 +40,9 @@ struct MeetingsListView: View {
     .task {
       await requestCalendarAccessAndRefresh()
     }
+    .onChange(of: appModel.alwaysOnTop) { _, _ in
+      // Force view update when pin state changes
+    }
     .onReceive(NotificationCenter.default.publisher(for: .appDidBecomeActive)) { _ in
       Task { @MainActor in
         handleAppBecameActive()
@@ -55,11 +57,29 @@ struct MeetingsListView: View {
 
   // MARK: - Computed Properties
 
+  private var filteredYesterdayMeetings: [Meeting] {
+    calendarManager.yesterdayMeetings.filter {
+      !$0.shouldBeHidden(hideCompletedAfter5Min: appModel.hideCompletedMeetingsAfter5Min)
+    }
+  }
+
+  private var filteredTodayMeetings: [Meeting] {
+    calendarManager.todayMeetings.filter {
+      !$0.shouldBeHidden(hideCompletedAfter5Min: appModel.hideCompletedMeetingsAfter5Min)
+    }
+  }
+
+  private var filteredTomorrowMeetings: [Meeting] {
+    calendarManager.tomorrowMeetings.filter {
+      !$0.shouldBeHidden(hideCompletedAfter5Min: appModel.hideCompletedMeetingsAfter5Min)
+    }
+  }
+
   private var shouldDisableScroll: Bool {
     // Disable scroll when we have few meetings that likely fit in view
     let totalMeetings =
-      calendarManager.yesterdayMeetings.count + calendarManager.todayMeetings.count
-      + calendarManager.tomorrowMeetings.count
+      filteredYesterdayMeetings.count + filteredTodayMeetings.count
+      + filteredTomorrowMeetings.count
     return totalMeetings <= 5  // Approximate threshold for when content fits without scroll
   }
 
@@ -92,48 +112,43 @@ struct MeetingsListView: View {
   }
 
   private var meetingsList: some View {
-    ZStack {
+    VStack(spacing: 0) {
       List {
-        DaySectionView(title: "Yesterday", meetings: calendarManager.yesterdayMeetings)
-        DaySectionView(title: "Today", meetings: calendarManager.todayMeetings)
-        DaySectionView(title: "Tomorrow", meetings: calendarManager.tomorrowMeetings)
+        if !filteredYesterdayMeetings.isEmpty {
+          DaySectionView(title: "Yesterday", meetings: filteredYesterdayMeetings)
+        }
+        DaySectionView(title: "Today", meetings: filteredTodayMeetings)
+        if !filteredTomorrowMeetings.isEmpty {
+          DaySectionView(title: "Tomorrow", meetings: filteredTomorrowMeetings)
+        }
       }
+      .scrollContentBackground(.hidden)
       .scrollDisabled(shouldDisableScroll)
       .refreshable {
         try? await calendarManager.refreshMeetings()
       }
-      .simultaneousGesture(
-        DragGesture()
-          .onChanged { _ in
-            handleScrollStart()
-          }
-          .onEnded { _ in
-            handleScrollEnd()
-          }
-      )
 
-      VStack {
-        Spacer()
-        RefreshStatusView(
-          lastRefresh: calendarManager.lastRefresh,
-          isRefreshing: calendarManager.isRefreshing,
-          isAutoRefreshEnabled: calendarManager.isAutoRefreshEnabled,
-          isAutoRefreshActive: calendarManager.isAutoRefreshActive,
-          onToggleAutoRefresh: {
-            if calendarManager.isAutoRefreshActive {
-              calendarManager.pauseAutoRefresh()
-            } else {
-              calendarManager.resumeAutoRefresh()
-              // Trigger immediate refresh when resuming from pause
-              Task {
-                try? await calendarManager.refreshMeetings()
-              }
+      StatusBar(
+        lastRefresh: calendarManager.lastRefresh,
+        isRefreshing: calendarManager.isRefreshing,
+        isAutoRefreshEnabled: calendarManager.isAutoRefreshEnabled,
+        isAutoRefreshActive: calendarManager.isAutoRefreshActive,
+        isHidingCompleted: Binding(
+          get: { appModel.hideCompletedMeetingsAfter5Min },
+          set: { appModel.hideCompletedMeetingsAfter5Min = $0 }
+        ),
+        onToggleAutoRefresh: {
+          if calendarManager.isAutoRefreshActive {
+            calendarManager.pauseAutoRefresh()
+          } else {
+            calendarManager.resumeAutoRefresh()
+            // Trigger immediate refresh when resuming from pause
+            Task {
+              try? await calendarManager.refreshMeetings()
             }
           }
-        )
-        .opacity(isScrolling ? 0.0 : 1.0)
-        .animation(.easeInOut(duration: 0.3), value: isScrolling)
-      }
+        }
+      )
     }
   }
 
@@ -203,26 +218,6 @@ struct MeetingsListView: View {
     }
   }
 
-  private func handleScrollStart() {
-    // User started scrolling - fade out immediately
-    scrollFadeTimer?.invalidate()
-    withAnimation(.easeInOut(duration: 0.2)) {
-      isScrolling = true
-    }
-  }
-
-  private func handleScrollEnd() {
-    // Start timer to fade back in after scroll stops
-    scrollFadeTimer?.invalidate()
-    scrollFadeTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { _ in
-      Task { @MainActor in
-        withAnimation(.easeInOut(duration: 0.3)) {
-          isScrolling = false
-        }
-      }
-    }
-  }
-
   private func handleAppBecameActive() {
     // Resume auto-refresh when app becomes active
     calendarManager.resumeAutoRefresh()
@@ -232,147 +227,5 @@ struct MeetingsListView: View {
     // Note: We intentionally do NOT pause auto-refresh when app becomes inactive
     // For a floating meeting widget, users want continuous updates even when working in other apps
     // Auto-refresh only pauses during system sleep (handled by CalendarManager's sleep/wake observers)
-  }
-}
-
-#Preview("With Meetings") {
-  MeetingsListView()
-    .environment(AppModel())
-}
-
-#Preview("With Mock Data") {
-  struct MockMeetingsListView: View {
-    @State private var mockCalendarManager = PreviewData.MockCalendarManager()
-
-    var body: some View {
-      NavigationStack {
-        List {
-          DaySectionView(title: "Yesterday", meetings: mockCalendarManager.yesterdayMeetings)
-          DaySectionView(title: "Today", meetings: mockCalendarManager.todayMeetings)
-          DaySectionView(title: "Tomorrow", meetings: mockCalendarManager.tomorrowMeetings)
-        }
-        .refreshable {
-          // Mock implementation
-        }
-        .overlay(alignment: .bottom) {
-          RefreshStatusView(
-            lastRefresh: mockCalendarManager.lastRefresh,
-            isRefreshing: mockCalendarManager.isRefreshing,
-            isAutoRefreshEnabled: mockCalendarManager.isAutoRefreshEnabled,
-            isAutoRefreshActive: mockCalendarManager.isAutoRefreshActive
-          ) {
-            print("Toggle auto-refresh (preview)")
-          }
-        }
-        .navigationTitle("Docket")
-      }
-    }
-  }
-
-  return MockMeetingsListView()
-}
-
-#Preview("Loading State") {
-  NavigationStack {
-    LoadingStateView(message: "Loading Meetings")
-      .navigationTitle("Docket")
-  }
-}
-
-#Preview("Empty State - No Access") {
-  NavigationStack {
-    EmptyStateView(
-      authState: .notDetermined,
-      onRetry: {},
-      onGrantAccess: {},
-      onOpenSettings: {}
-    )
-    .navigationTitle("Meetings")
-  }
-}
-
-#Preview("Calendar Access Denied") {
-  NavigationStack {
-    EmptyStateView(
-      authState: .denied,
-      onRetry: { print("Retry tapped") },
-      onGrantAccess: { print("Grant access tapped") },
-      onOpenSettings: { print("Open settings tapped") }
-    )
-    .navigationTitle("Docket")
-  }
-}
-
-#Preview("Calendar Error State") {
-  NavigationStack {
-    EmptyStateView(
-      authState: .error(
-        "Failed to connect to calendar service. Please check your calendar settings."),
-      onRetry: { print("Retry tapped") },
-      onGrantAccess: { print("Grant access tapped") },
-      onOpenSettings: { print("Open settings tapped") }
-    )
-    .navigationTitle("Docket")
-  }
-}
-
-#Preview("Dark Mode with Meetings") {
-  @Previewable @State var mockCalendarManager = PreviewData.MockCalendarManager()
-
-  NavigationStack {
-    List {
-      DaySectionView(title: "Today", meetings: mockCalendarManager.todayMeetings)
-      DaySectionView(title: "Tomorrow", meetings: mockCalendarManager.tomorrowMeetings)
-    }
-    .navigationTitle("Docket")
-    .listStyle(.plain)
-  }
-  .preferredColorScheme(.dark)
-}
-
-#Preview("Interactive Calendar States") {
-  @Previewable @State var selectedState = 0
-  let states = [
-    ("Authorized", CalendarAuthState.authorized),
-    ("Full Access", CalendarAuthState.fullAccess),
-    ("Not Determined", CalendarAuthState.notDetermined),
-    ("Denied", CalendarAuthState.denied),
-    ("Write Only", CalendarAuthState.writeOnly),
-    ("Restricted", CalendarAuthState.restricted),
-    ("Error", CalendarAuthState.error("Connection failed")),
-  ]
-
-  VStack {
-    Picker("Calendar State", selection: $selectedState) {
-      ForEach(0..<states.count, id: \.self) { index in
-        Text(states[index].0).tag(index)
-      }
-    }
-    .pickerStyle(.segmented)
-    .padding()
-
-    Divider()
-
-    Group {
-      if states[selectedState].1 == .fullAccess || states[selectedState].1 == .authorized {
-        // Show meetings list for full access
-        NavigationStack {
-          List {
-            DaySectionView(title: "Today", meetings: PreviewData.todayMeetings)
-          }
-          .navigationTitle("Docket")
-          .listStyle(.plain)
-        }
-      } else {
-        // Show empty state for other auth states
-        EmptyStateView(
-          authState: states[selectedState].1,
-          onRetry: { print("Retry: \(states[selectedState].0)") },
-          onGrantAccess: { print("Grant access: \(states[selectedState].0)") },
-          onOpenSettings: { print("Open settings: \(states[selectedState].0)") }
-        )
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }

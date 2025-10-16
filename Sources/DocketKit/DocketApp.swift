@@ -1,5 +1,6 @@
 // ABOUTME: Main SwiftUI application structure for Docket
 // ABOUTME: Defines the app entry point and floating window configuration
+// ABOUTME: Uses .containerBackground(.ultraThinMaterial) for Liquid Glass effect
 
 import AppKit
 import SwiftUI
@@ -20,9 +21,10 @@ public struct DocketApp: App {
 
   public var body: some Scene {
     WindowGroup("Docket - Zoom Meetings") {
-      ContentView()
+      MeetingsListView()
         .environment(appModel)
         .frame(minWidth: 550, minHeight: 600)
+        .containerBackground(.ultraThinMaterial, for: .window)
         .onAppear {
           // Activate the app and bring window to front
           NSApp.activate(ignoringOtherApps: true)
@@ -40,8 +42,8 @@ public struct DocketApp: App {
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
-    // Delay to ensure windows are fully created before configuration
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+    // Delay to ensure windows are fully created and rendered before configuration
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
       Task { @MainActor in
         self.configureFloatingWindows()
       }

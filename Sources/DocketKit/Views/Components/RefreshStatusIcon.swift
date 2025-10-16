@@ -26,14 +26,7 @@ struct RefreshStatusIcon: View {
   var body: some View {
     Image(systemName: iconName)
       .foregroundStyle(iconColor)
-      .scaleEffect(shouldAnimate ? 1.2 : 1.0)
-      .opacity(shouldAnimate ? 0.6 : 1.0)
-      .animation(
-        shouldAnimate
-          ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true)
-          : .easeInOut(duration: 0.3),
-        value: shouldAnimate
-      )
+      .animation(.easeInOut(duration: 0.3), value: iconName)
   }
 
   // MARK: - Visual Properties

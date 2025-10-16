@@ -1,5 +1,5 @@
 // ABOUTME: Meeting organizer and attendee information display component
-// ABOUTME: Shows organizer name and attendee count with consistent formatting and icons
+// ABOUTME: Shows organizer name and attendee count in simple static format
 
 import SwiftUI
 
@@ -7,9 +7,6 @@ struct MeetingDetailsView: View {
   let organizerName: String?
   let attendeeCount: Int
   let attendees: [(name: String?, email: String?)]
-
-  @State private var showAttendeePopover = false
-  @State private var isHovered = false
 
   var body: some View {
     HStack(spacing: 12) {
@@ -34,17 +31,6 @@ struct MeetingDetailsView: View {
             .font(.caption2.monospaced())
             .foregroundStyle(.secondary)
         }
-        .opacity(isHovered ? 0.7 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: isHovered)
-        .onHover { hovering in
-          isHovered = hovering
-        }
-        .onTapGesture {
-          showAttendeePopover = true
-        }
-        .popover(isPresented: $showAttendeePopover) {
-          attendeePopoverContent
-        }
       }
 
       Spacer()
@@ -53,56 +39,6 @@ struct MeetingDetailsView: View {
 
   private var attendeeText: String {
     "\(attendeeCount) \(attendeeCount == 1 ? "person" : "people")"
-  }
-
-  private var attendeePopoverContent: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      if attendees.isEmpty {
-        Text("No attendee details available")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-          .padding(8)
-      } else {
-        Text("Attendees (\(attendees.count))")
-          .font(.caption.weight(.semibold))
-          .padding(.horizontal, 8)
-          .padding(.top, 8)
-
-        ForEach(Array(attendees.enumerated()), id: \.offset) { index, attendee in
-          HStack(spacing: 6) {
-            Image(systemName: "person.circle")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 2) {
-              if let name = attendee.name, !name.isEmpty {
-                Text(name)
-                  .font(.caption)
-                  .lineLimit(1)
-              }
-
-              if let email = attendee.email, !email.isEmpty {
-                Text(email)
-                  .font(.caption2)
-                  .foregroundStyle(.secondary)
-                  .lineLimit(1)
-              } else if attendee.name?.isEmpty != false {
-                Text("Unknown attendee")
-                  .font(.caption2)
-                  .foregroundStyle(.secondary)
-                  .italic()
-              }
-            }
-
-            Spacer()
-          }
-          .padding(.horizontal, 8)
-          .padding(.vertical, 2)
-        }
-        .padding(.bottom, 4)
-      }
-    }
-    .frame(maxWidth: 250)
   }
 }
 

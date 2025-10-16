@@ -171,20 +171,6 @@ public final class CalendarManager: @unchecked Sendable {
     Logger.info("Auto-refresh paused (app became inactive)")
   }
 
-  /// Toggle auto-refresh enabled state
-  @MainActor
-  public func toggleAutoRefresh() {
-    isAutoRefreshEnabled.toggle()
-
-    if isAutoRefreshEnabled {
-      startAutoRefresh()
-    } else {
-      stopAutoRefresh()
-    }
-
-    Logger.info("Auto-refresh \(isAutoRefreshEnabled ? "enabled" : "disabled")")
-  }
-
   /// Perform auto-refresh (internal method called by timer)
   @MainActor
   private func performAutoRefresh() async {

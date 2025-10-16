@@ -1,5 +1,5 @@
-// ABOUTME: Complex interactive join button with multi-state logic and platform-specific styling
-// ABOUTME: Handles meeting states (upcoming/active/ended), hover effects, loading states, and async join operations
+// ABOUTME: Join button with platform-specific styling and loading state
+// ABOUTME: Handles meeting state logic and async join operations
 
 import SwiftUI
 
@@ -8,7 +8,6 @@ struct MeetingJoinButton: View {
   let onJoin: (URL) -> Void
 
   @State private var isJoining = false
-  @State private var isHovered = false
 
   var body: some View {
     Button(action: performJoin) {
@@ -25,14 +24,12 @@ struct MeetingJoinButton: View {
       }
       .padding(.horizontal, 12)
       .padding(.vertical, 6)
-      .background(backgroundColor, in: RoundedRectangle(cornerRadius: 6))
+      .background(baseColor, in: RoundedRectangle(cornerRadius: 6))
       .foregroundColor(.white)
-      .animation(.easeInOut(duration: 0.15), value: isHovered)
     }
     .disabled(isJoining || shouldDisable)
     .buttonStyle(.plain)
     .help(tooltipText)
-    .onHover { isHovered = $0 }
   }
 
   private var buttonText: String {
@@ -44,21 +41,7 @@ struct MeetingJoinButton: View {
   }
 
   private var baseColor: Color {
-    // Use platform-specific color, but keep the meeting state logic
-    let platformColor = meeting.platform.color
-
-    // For active meetings, we could enhance the color or keep platform branding
-    // For now, maintain platform consistency throughout meeting lifecycle
-    return platformColor
-  }
-
-  private var backgroundColor: Color {
-    let color = baseColor
-    if isHovered {
-      return color.opacity(0.9)
-    } else {
-      return color
-    }
+    meeting.platform.color
   }
 
   private var tooltipText: String {
