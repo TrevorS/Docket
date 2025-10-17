@@ -95,7 +95,8 @@ class ContentViewController: NSViewController {
   }
 
   private func showView(_ viewController: NSViewController) {
-    // Setup view controller with models
+    // ✅ CRITICAL: Inject models BEFORE adding as child
+    // This ensures viewDidLoad() has access to models
     if let vc = viewController as? MeetingsListViewController {
       vc.appModel = appModel
       vc.calendarManager = calendarManager
@@ -107,7 +108,7 @@ class ContentViewController: NSViewController {
       $0.view.removeFromSuperview()
     }
 
-    // Add new view controller
+    // Add new view controller (now viewDidLoad() has valid models)
     addChild(viewController)
     viewController.view.frame = view.bounds
     view.addSubview(viewController.view)
