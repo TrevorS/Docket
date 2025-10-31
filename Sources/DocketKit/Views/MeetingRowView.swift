@@ -1,174 +1,69 @@
-// ABOUTME: Individual meeting row component with time, status, and quick join functionality
-// ABOUTME: Displays meeting information with visual status indicators and context-appropriate actions
+// ABOUTME: SwiftUI wrapper around AppKit MeetingRowView component
+// ABOUTME: Bridges SwiftUI views to AppKit implementation during migration
 
+import AppKit
 import SwiftUI
 
-struct MeetingRowView: View {
+/// SwiftUI view that wraps the AppKit MeetingRowView
+public struct MeetingRowView: View {
   let meeting: Meeting
-  @State private var isHovered = false
+  let onJoin: ((URL) -> Void)?
+  let onCopy: ((String) -> Void)?
 
-  var body: some View {
-    HStack(spacing: 12) {
-      VStack(alignment: .leading, spacing: 6) {
-        meetingTitle
-        meetingTime
-        meetingDetails
-      }
-
-      Spacer()
-
-      actionButtons
-    }
-    .padding(.vertical, 16)
-    .padding(.horizontal, 8)
-    .onHover { isHovered = $0 }
+  public init(meeting: Meeting, onJoin: ((URL) -> Void)? = nil, onCopy: ((String) -> Void)? = nil) {
+    self.meeting = meeting
+    self.onJoin = onJoin
+    self.onCopy = onCopy
   }
 
-  // MARK: - Meeting Information
-
-  private var meetingTitle: some View {
-    Text(meeting.title)
-      .font(.headline)
-      .foregroundStyle(meeting.hasEnded ? .secondary : .primary)
-      .lineLimit(1)
-      .truncationMode(.tail)
+  public var body: some View {
+    MeetingRowViewRepresentable(
+      meeting: meeting,
+      onJoin: onJoin,
+      onCopy: onCopy
+    )
   }
 
-  private var meetingTime: some View {
-    MeetingTimeView(meeting: meeting)
-  }
-
-  private var meetingDetails: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      // First row: Platform indicator, organizer and attendee count
-      HStack(spacing: 12) {
-        // Platform indicator
-        PlatformIndicatorView(platform: meeting.platform)
-
-        MeetingDetailsView(
-          organizerName: meeting.organizerName,
-          attendeeCount: meeting.attendeeCount,
-          attendees: meeting.attendees
-        )
-      }
-
-    }
-  }
-
-  // MARK: - Action Buttons
-
-  private var actionButtons: some View {
-    HStack(spacing: 8) {
-      if hasJoinUrl {
-        MeetingCopyButton(
-          meetingUrl: meeting.joinUrl,
-          onCopy: handleCopyAction
-        )
-        .opacity(isHovered ? 1.0 : 0.0)
-        .animation(.easeInOut(duration: 0.2), value: isHovered)
-      }
-
-      if shouldShowJoinButton {
-        MeetingJoinButton(
-          meeting: meeting,
-          onJoin: handleJoinAction
-        )
-      }
-    }
-    .frame(minWidth: 80, alignment: .trailing)  // Reserve consistent space to prevent layout shifts
-  }
-
-  var shouldShowJoinButton: Bool {
-    !meeting.hasEnded && hasJoinUrl
-  }
-
-  var hasJoinUrl: Bool {
+  /// Check if the meeting has a valid join URL
+  public var hasJoinUrl: Bool {
     !(meeting.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
   }
 
-  // MARK: - Helper Properties
-
-  // MARK: - Actions
-
-  private func handleCopyAction(_ url: String) {
-    // Copy action feedback is now handled by the MeetingCopyButton component
-  }
-
-  private func handleJoinAction(_ url: URL) {
-    let success = NSWorkspace.shared.open(url)
-    if !success {
-      Logger.error("Failed to open meeting URL: \(url)")
-    }
+  /// Check if the join button should be displayed
+  public var shouldShowJoinButton: Bool {
+    !meeting.hasEnded && hasJoinUrl
   }
 }
 
-#Preview("Active Meeting") {
-  List {
-    MeetingRowView(meeting: PreviewData.activeMeeting)
+/// NSViewRepresentable that bridges to the AppKit MeetingRowView
+private struct MeetingRowViewRepresentable: NSViewRepresentable {
+  let meeting: Meeting
+  let onJoin: ((URL) -> Void)?
+  let onCopy: ((String) -> Void)?
+
+  func makeNSView(context: Context) -> MeetingRowViewImpl {
+    let rowView = MeetingRowViewImpl(
+      meeting: meeting,
+      onJoin: { url in
+        if let onJoin = self.onJoin {
+          onJoin(url)
+        } else {
+          _ = NSWorkspace.shared.open(url)
+        }
+      },
+      onCopy: { text in
+        self.onCopy?(text)
+      }
+    )
+    return rowView
+  }
+
+  func updateNSView(_ nsView: MeetingRowViewImpl, context: Context) {
+    // Update as needed
   }
 }
 
-#Preview("Upcoming Meeting") {
-  List {
-    MeetingRowView(meeting: PreviewData.upcomingMeeting)
-  }
-}
-
-#Preview("Ended Meeting") {
-  List {
-    MeetingRowView(meeting: PreviewData.endedMeeting)
-  }
-}
-
-#Preview("Meeting Without URL") {
-  List {
-    MeetingRowView(meeting: PreviewData.meetingWithoutUrl)
-  }
-}
-
-#Preview("Long Title Meeting") {
-  List {
-    MeetingRowView(meeting: PreviewData.longTitleMeeting)
-  }
-}
-
-#Preview("Multiple States") {
-  List {
-    MeetingRowView(meeting: PreviewData.upcomingMeeting)
-    MeetingRowView(meeting: PreviewData.activeMeeting)
-    MeetingRowView(meeting: PreviewData.endedMeeting)
-    MeetingRowView(meeting: PreviewData.longTitleMeeting)
-    MeetingRowView(meeting: PreviewData.minimalMeeting)
-  }
-}
-
-#Preview("Dark Mode") {
-  List {
-    MeetingRowView(meeting: PreviewData.activeMeeting)
-    MeetingRowView(meeting: PreviewData.upcomingMeeting)
-    MeetingRowView(meeting: PreviewData.endedMeeting)
-    MeetingRowView(meeting: PreviewData.googleMeetMeeting)
-  }
-  .preferredColorScheme(.dark)
-}
-
-#Preview("Google Meet Platform") {
-  List {
-    MeetingRowView(meeting: PreviewData.googleMeetMeeting)
-  }
-}
-
-#Preview("Hover Effects Test") {
-  VStack(spacing: 0) {
-    Text("Hover over meeting rows to see interaction effects")
-      .font(.caption)
-      .foregroundStyle(.secondary)
-      .padding()
-
-    List {
-      MeetingRowView(meeting: PreviewData.upcomingMeeting)
-      MeetingRowView(meeting: PreviewData.activeMeeting)
-      MeetingRowView(meeting: PreviewData.endedMeeting)
-    }
-  }
+#Preview {
+  MeetingRowView(meeting: PreviewData.todayMeetings[0])
+    .frame(height: 160)
 }

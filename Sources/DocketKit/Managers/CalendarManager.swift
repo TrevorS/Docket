@@ -26,7 +26,11 @@ public final class CalendarManager: @unchecked Sendable {
   public var lastRefresh: Date?
 
   /// Whether a refresh operation is currently in progress
-  public var isRefreshing: Bool = false
+  public var isRefreshing: Bool = false {
+    didSet {
+      notifyRefreshingChanged()
+    }
+  }
 
   /// Whether auto-refresh is enabled (60-second timer)
   public var isAutoRefreshEnabled: Bool = true
@@ -95,6 +99,7 @@ public final class CalendarManager: @unchecked Sendable {
       let errorMsg = "Failed to request calendar access: \(error.localizedDescription)"
       Logger.error("Calendar access request failed: \(errorMsg)")
       authState = .error(errorMsg)
+      notifyAuthStateChanged()
       return false
     }
   }
@@ -119,6 +124,7 @@ public final class CalendarManager: @unchecked Sendable {
 
       meetings = sortedMeetings
       lastRefresh = Date()
+      notifyMeetingsChanged()
     } catch {
       Logger.error("Meeting refresh failed: \(error)")
       throw CalendarError.fetchFailed(error)
@@ -169,20 +175,6 @@ public final class CalendarManager: @unchecked Sendable {
     guard isAutoRefreshActive else { return }
     stopAutoRefresh()
     Logger.info("Auto-refresh paused (app became inactive)")
-  }
-
-  /// Toggle auto-refresh enabled state
-  @MainActor
-  public func toggleAutoRefresh() {
-    isAutoRefreshEnabled.toggle()
-
-    if isAutoRefreshEnabled {
-      startAutoRefresh()
-    } else {
-      stopAutoRefresh()
-    }
-
-    Logger.info("Auto-refresh \(isAutoRefreshEnabled ? "enabled" : "disabled")")
   }
 
   /// Perform auto-refresh (internal method called by timer)
@@ -258,6 +250,7 @@ public final class CalendarManager: @unchecked Sendable {
   public func updateAuthState() {
     let status = EKEventStore.authorizationStatus(for: .event)
     authState = mapAuthorizationStatus(status)
+    notifyAuthStateChanged()
   }
 
   /// Map EKAuthorizationStatus to CalendarAuthState

@@ -1,5 +1,5 @@
-// ABOUTME: Comprehensive tests for AppModel @Observable class and CalendarAuthState enum
-// ABOUTME: Tests state management, preferences, and calendar authorization states
+// ABOUTME: Tests for AppModel @Observable class and CalendarAuthState enum
+// ABOUTME: Tests state management for user preferences and calendar authorization states
 
 import Foundation
 import Testing
@@ -49,118 +49,11 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Test default user preferences
-    #expect(appModel.showOnlyVideoMeetings == true)
-    #expect(appModel.notificationTime == 5)
-    #expect(appModel.selectedCalendars.isEmpty)
-    #expect(appModel.windowOpacity == 1.0)
     #expect(appModel.alwaysOnTop == false)
-
-    // Test default runtime state
-    #expect(appModel.lastRefresh == nil)
-    #expect(appModel.nextMeeting == nil)
-  }
-
-  @Test func testAppModelObservableConformance() {
-    let appModel = AppModel()
-
-    // Test that we can observe changes (compile-time check)
-    Task { @MainActor in
-      let _ = appModel.showOnlyVideoMeetings
-      let _ = appModel.notificationTime
-      let _ = appModel.windowOpacity
-      // If this compiles, @Observable conformance is working
-    }
-
-    #expect(Bool(true), "@Observable conformance should work")
+    #expect(appModel.hideCompletedMeetingsAfter5Min == true)
   }
 
   // MARK: - User Preferences Tests
-
-  @Test func testShowOnlyZoomMeetingsProperty() {
-    let appModel = AppModel()
-
-    // Test default value
-    #expect(appModel.showOnlyVideoMeetings == true)
-
-    // Test changing value
-    appModel.showOnlyVideoMeetings = false
-    #expect(appModel.showOnlyVideoMeetings == false)
-
-    // Test changing back
-    appModel.showOnlyVideoMeetings = true
-    #expect(appModel.showOnlyVideoMeetings == true)
-  }
-
-  @Test func testNotificationTimeProperty() {
-    let appModel = AppModel()
-
-    // Test default value
-    #expect(appModel.notificationTime == 5)
-
-    // Test changing to different valid values
-    appModel.notificationTime = 10
-    #expect(appModel.notificationTime == 10)
-
-    appModel.notificationTime = 0
-    #expect(appModel.notificationTime == 0)
-
-    appModel.notificationTime = 15
-    #expect(appModel.notificationTime == 15)
-
-    // Test negative values (edge case)
-    appModel.notificationTime = -1
-    #expect(appModel.notificationTime == -1)
-  }
-
-  @Test func testSelectedCalendarsProperty() {
-    let appModel = AppModel()
-
-    // Test default empty set
-    #expect(appModel.selectedCalendars.isEmpty)
-
-    // Test adding calendars
-    appModel.selectedCalendars.insert("Work")
-    #expect(appModel.selectedCalendars.contains("Work"))
-    #expect(appModel.selectedCalendars.count == 1)
-
-    appModel.selectedCalendars.insert("Personal")
-    #expect(appModel.selectedCalendars.contains("Personal"))
-    #expect(appModel.selectedCalendars.count == 2)
-
-    // Test removing calendars
-    appModel.selectedCalendars.remove("Work")
-    #expect(!appModel.selectedCalendars.contains("Work"))
-    #expect(appModel.selectedCalendars.contains("Personal"))
-    #expect(appModel.selectedCalendars.count == 1)
-
-    // Test clearing
-    appModel.selectedCalendars.removeAll()
-    #expect(appModel.selectedCalendars.isEmpty)
-  }
-
-  @Test func testWindowOpacityProperty() {
-    let appModel = AppModel()
-
-    // Test default value
-    #expect(appModel.windowOpacity == 1.0)
-
-    // Test valid opacity values
-    appModel.windowOpacity = 0.8
-    #expect(appModel.windowOpacity == 0.8)
-
-    appModel.windowOpacity = 0.5
-    #expect(appModel.windowOpacity == 0.5)
-
-    appModel.windowOpacity = 0.95
-    #expect(appModel.windowOpacity == 0.95)
-
-    // Test edge case values (the model shouldn't validate, just store)
-    appModel.windowOpacity = 0.0
-    #expect(appModel.windowOpacity == 0.0)
-
-    appModel.windowOpacity = 1.5  // Invalid but should be stored
-    #expect(appModel.windowOpacity == 1.5)
-  }
 
   @Test func testAlwaysOnTopProperty() {
     let appModel = AppModel()
@@ -169,68 +62,27 @@ struct AppModelTests {
     #expect(appModel.alwaysOnTop == false)
 
     // Test changing value
-    appModel.alwaysOnTop = false
-    #expect(appModel.alwaysOnTop == false)
-
-    // Test changing back
     appModel.alwaysOnTop = true
     #expect(appModel.alwaysOnTop == true)
+
+    // Test changing back
+    appModel.alwaysOnTop = false
+    #expect(appModel.alwaysOnTop == false)
   }
 
-  // MARK: - Runtime State Tests
-
-  @Test func testLastRefreshProperty() {
+  @Test func testHideCompletedMeetingsProperty() {
     let appModel = AppModel()
 
-    // Test default nil value
-    #expect(appModel.lastRefresh == nil)
+    // Test default value
+    #expect(appModel.hideCompletedMeetingsAfter5Min == true)
 
-    // Test setting refresh time
-    let now = Date()
-    appModel.lastRefresh = now
-    #expect(appModel.lastRefresh == now)
+    // Test changing value
+    appModel.hideCompletedMeetingsAfter5Min = false
+    #expect(appModel.hideCompletedMeetingsAfter5Min == false)
 
-    // Test changing refresh time
-    let later = now.addingTimeInterval(300)  // 5 minutes later
-    appModel.lastRefresh = later
-    #expect(appModel.lastRefresh == later)
-
-    // Test setting back to nil
-    appModel.lastRefresh = nil
-    #expect(appModel.lastRefresh == nil)
-  }
-
-  @Test func testNextMeetingProperty() {
-    let appModel = AppModel()
-
-    // Test default nil value
-    #expect(appModel.nextMeeting == nil)
-
-    // Create a test meeting
-    let startTime = Date()
-    let endTime = startTime.addingTimeInterval(1800)  // 30 minutes
-    let meeting = Meeting(
-      id: UUID(),
-      title: "Test Meeting",
-      startTime: startTime,
-      endTime: endTime,
-      joinUrl: "https://zoom.us/j/123456789",
-      platform: .zoom,
-      organizerName: "John Doe",
-      organizerEmail: "john@example.com",
-      attendeeCount: 5,
-      calendarName: "Work",
-      eventIdentifier: "test-123"
-    )
-
-    // Test setting next meeting
-    appModel.nextMeeting = meeting
-    #expect(appModel.nextMeeting?.title == "Test Meeting")
-    #expect(appModel.nextMeeting?.joinUrl == "https://zoom.us/j/123456789")
-
-    // Test setting back to nil
-    appModel.nextMeeting = nil
-    #expect(appModel.nextMeeting == nil)
+    // Test changing back
+    appModel.hideCompletedMeetingsAfter5Min = true
+    #expect(appModel.hideCompletedMeetingsAfter5Min == true)
   }
 
   // MARK: - Complex State Management Tests
@@ -239,56 +91,12 @@ struct AppModelTests {
     let appModel = AppModel()
 
     // Change multiple properties
-    appModel.showOnlyVideoMeetings = false
-    appModel.notificationTime = 10
-    appModel.windowOpacity = 0.9
-    appModel.alwaysOnTop = false
-    appModel.selectedCalendars.insert("Work")
-    appModel.selectedCalendars.insert("Personal")
-    appModel.lastRefresh = Date()
+    appModel.alwaysOnTop = true
+    appModel.hideCompletedMeetingsAfter5Min = false
 
     // Verify all changes persisted
-    #expect(appModel.showOnlyVideoMeetings == false)
-    #expect(appModel.notificationTime == 10)
-    #expect(appModel.windowOpacity == 0.9)
-    #expect(appModel.alwaysOnTop == false)
-    #expect(appModel.selectedCalendars.count == 2)
-    #expect(appModel.selectedCalendars.contains("Work"))
-    #expect(appModel.selectedCalendars.contains("Personal"))
-    #expect(appModel.lastRefresh != nil)
-  }
-
-  @Test func testAppModelStateReset() {
-    let appModel = AppModel()
-
-    // Change all properties from defaults
-    appModel.showOnlyVideoMeetings = false
-    appModel.notificationTime = 15
-    appModel.selectedCalendars.insert("Test")
-    appModel.windowOpacity = 0.5
-    appModel.alwaysOnTop = false
-    appModel.lastRefresh = Date()
-
-    // Create a fresh model to compare defaults
-    let defaultModel = AppModel()
-
-    // Reset to defaults manually (testing that we can restore state)
-    appModel.showOnlyVideoMeetings = defaultModel.showOnlyVideoMeetings
-    appModel.notificationTime = defaultModel.notificationTime
-    appModel.selectedCalendars = defaultModel.selectedCalendars
-    appModel.windowOpacity = defaultModel.windowOpacity
-    appModel.alwaysOnTop = defaultModel.alwaysOnTop
-    appModel.lastRefresh = defaultModel.lastRefresh
-    appModel.nextMeeting = defaultModel.nextMeeting
-
-    // Verify all back to defaults
-    #expect(appModel.showOnlyVideoMeetings == true)
-    #expect(appModel.notificationTime == 5)
-    #expect(appModel.selectedCalendars.isEmpty)
-    #expect(appModel.windowOpacity == 1.0)
-    #expect(appModel.alwaysOnTop == false)
-    #expect(appModel.lastRefresh == nil)
-    #expect(appModel.nextMeeting == nil)
+    #expect(appModel.alwaysOnTop == true)
+    #expect(appModel.hideCompletedMeetingsAfter5Min == false)
   }
 
   // MARK: - Thread Safety Tests (Sendable Context)
@@ -298,16 +106,14 @@ struct AppModelTests {
 
     // Test that we can use AppModel in async context
     await Task { @MainActor in
-      appModel.showOnlyVideoMeetings = false
-      appModel.notificationTime = 10
-      appModel.lastRefresh = Date()
+      appModel.alwaysOnTop = true
+      appModel.hideCompletedMeetingsAfter5Min = false
     }.value
 
     // Verify changes were applied
     await Task { @MainActor in
-      #expect(appModel.showOnlyVideoMeetings == false)
-      #expect(appModel.notificationTime == 10)
-      #expect(appModel.lastRefresh != nil)
+      #expect(appModel.alwaysOnTop == true)
+      #expect(appModel.hideCompletedMeetingsAfter5Min == false)
     }.value
   }
 }

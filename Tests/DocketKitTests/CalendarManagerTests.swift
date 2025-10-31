@@ -336,20 +336,6 @@ struct CalendarManagerTests {
     #expect(manager.isAutoRefreshActive == true)
   }
 
-  @Test("Auto-refresh can be toggled on and off")
-  @MainActor func testAutoRefreshToggle() {
-    let manager = CalendarManager()
-    let initialState = manager.isAutoRefreshEnabled
-
-    // Toggle auto-refresh
-    manager.toggleAutoRefresh()
-    #expect(manager.isAutoRefreshEnabled != initialState)
-
-    // Toggle back
-    manager.toggleAutoRefresh()
-    #expect(manager.isAutoRefreshEnabled == initialState)
-  }
-
   @Test("Refresh state is tracked correctly during manual refresh")
   func testRefreshStateTracking() async {
     let manager = CalendarManager()

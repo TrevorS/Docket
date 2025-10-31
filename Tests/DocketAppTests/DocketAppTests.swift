@@ -7,19 +7,19 @@ import Testing
 
 struct DocketAppTests {
 
-  @Test("App can be initialized")
+  @Test("App delegate can be initialized")
   @MainActor
   func appInitialization() async throws {
-    _ = DocketApp()
-    // DocketApp struct from DocketKit can be initialized
+    _ = AppDelegate()
+    // AppDelegate from DocketKit can be initialized
     #expect(Bool(true))
   }
 
-  @Test("ContentView can be created")
+  @Test("MeetingsListView can be created")
   @MainActor
-  func contentViewCreation() async throws {
-    _ = ContentView()
-    // ContentView can be initialized without errors
+  func meetingsListViewCreation() async throws {
+    _ = MeetingsListView()
+    // MeetingsListView can be initialized without errors
     #expect(Bool(true))
   }
 
